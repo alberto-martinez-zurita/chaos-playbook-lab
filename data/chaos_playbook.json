@@ -1,0 +1,317 @@
+{
+  "procedures": [
+    {
+      "id": "PROC-001",
+      "failure_type": "timeout",
+      "api": "inventory",
+      "recovery_strategy": "Retry with 0.5s backoff",
+      "success_rate": 0.95,
+      "created_at": "2025-11-23T15:03:00.000000Z",
+      "metadata": {
+        "agent": "OrderOrchestratorAgent",
+        "rationale": "V5 Ultra: 0.5s << max_delay=2s for ultra-fast recovery",
+        "chaos_config": "max_delay=2s, aggressive 0.5s backoff"
+      }
+    },
+    {
+      "id": "PROC-002",
+      "failure_type": "service_unavailable",
+      "api": "inventory",
+      "recovery_strategy": "Wait 1.5s then retry",
+      "success_rate": 0.9,
+      "created_at": "2025-11-23T15:03:10.000000Z",
+      "metadata": {
+        "agent": "OrderOrchestratorAgent",
+        "rationale": "V5 Ultra: 1.5s minimal wait for service restart"
+      }
+    },
+    {
+      "id": "PROC-003",
+      "failure_type": "timeout",
+      "api": "payments",
+      "recovery_strategy": "Retry with 0.5s backoff",
+      "success_rate": 0.95,
+      "created_at": "2025-11-23T15:03:20.000000Z",
+      "metadata": {
+        "agent": "OrderOrchestratorAgent",
+        "rationale": "V5 Ultra: Payment timeout, 0.5s aggressive backoff"
+      }
+    },
+    {
+      "id": "PROC-004",
+      "failure_type": "service_unavailable",
+      "api": "payments",
+      "recovery_strategy": "Wait 1.8s then retry",
+      "success_rate": 0.92,
+      "created_at": "2025-11-23T15:03:30.000000Z",
+      "metadata": {
+        "agent": "OrderOrchestratorAgent",
+        "rationale": "V5 Ultra: Payment service critical, 1.8s minimal safe wait"
+      }
+    },
+    {
+      "id": "PROC-005",
+      "failure_type": "timeout",
+      "api": "erp",
+      "recovery_strategy": "Retry with 0.5s backoff",
+      "success_rate": 0.93,
+      "created_at": "2025-11-23T15:03:40.000000Z",
+      "metadata": {
+        "agent": "OrderOrchestratorAgent",
+        "rationale": "V5 Ultra: ERP timeout, 0.5s fast recovery"
+      }
+    },
+    {
+      "id": "PROC-006",
+      "failure_type": "service_unavailable",
+      "api": "erp",
+      "recovery_strategy": "Wait 2s then retry",
+      "success_rate": 0.88,
+      "created_at": "2025-11-23T15:03:50.000000Z",
+      "metadata": {
+        "agent": "OrderOrchestratorAgent",
+        "rationale": "V5 Ultra: ERP restart, 2s balanced minimum"
+      }
+    },
+    {
+      "id": "PROC-007",
+      "failure_type": "timeout",
+      "api": "shipping",
+      "recovery_strategy": "Retry with 0.5s backoff",
+      "success_rate": 0.94,
+      "created_at": "2025-11-23T15:04:00.000000Z",
+      "metadata": {
+        "agent": "OrderOrchestratorAgent",
+        "rationale": "V5 Ultra: Shipping timeout, 0.5s optimal speed"
+      }
+    },
+    {
+      "id": "PROC-008",
+      "failure_type": "service_unavailable",
+      "api": "shipping",
+      "recovery_strategy": "Wait 1.5s then retry",
+      "success_rate": 0.91,
+      "created_at": "2025-11-23T15:04:10.000000Z",
+      "metadata": {
+        "agent": "OrderOrchestratorAgent",
+        "rationale": "V5 Ultra: Shipping restart, 1.5s minimal safe"
+      }
+    },
+    {
+      "id": "PROC-009",
+      "failure_type": "timeout",
+      "api": "inventory",
+      "recovery_strategy": "Retry 3x with 2s backoff",
+      "success_rate": 0.95,
+      "created_at": "2025-11-23T15:27:41.525644Z",
+      "metadata": {
+        "agent": "OrderOrchestratorAgent",
+        "saved_at": "2025-11-23T15:27:41.525644Z"
+      }
+    },
+    {
+      "id": "PROC-010",
+      "failure_type": "timeout",
+      "api": "inventory",
+      "recovery_strategy": "Retry 3x with 2s backoff",
+      "success_rate": 0.95,
+      "created_at": "2025-11-23T15:36:13.559784Z",
+      "metadata": {
+        "agent": "OrderOrchestratorAgent",
+        "saved_at": "2025-11-23T15:36:13.559784Z"
+      }
+    },
+    {
+      "id": "PROC-011",
+      "failure_type": "timeout",
+      "api": "inventory",
+      "recovery_strategy": "Retry 3x with exponential backoff (2s, 4s, 8s)",
+      "success_rate": 1.0,
+      "created_at": "2025-11-23T15:37:14.487441Z",
+      "metadata": {
+        "agent": "OrderOrchestratorAgent",
+        "saved_at": "2025-11-23T15:37:14.487441Z"
+      }
+    },
+    {
+      "id": "PROC-012",
+      "failure_type": "service_unavailable",
+      "api": "payments",
+      "recovery_strategy": "Wait 4s then retry",
+      "success_rate": 0.95,
+      "created_at": "2025-11-23T15:37:15.804654Z",
+      "metadata": {
+        "agent": "OrderOrchestratorAgent",
+        "saved_at": "2025-11-23T15:37:15.804654Z"
+      }
+    },
+    {
+      "id": "PROC-013",
+      "failure_type": "timeout",
+      "api": "inventory",
+      "recovery_strategy": "Cascading timeout: retry both inventory and payments",
+      "success_rate": 0.95,
+      "created_at": "2025-11-23T15:37:20.580255Z",
+      "metadata": {
+        "agent": "OrderOrchestratorAgent",
+        "saved_at": "2025-11-23T15:37:20.580255Z"
+      }
+    },
+    {
+      "id": "PROC-014",
+      "failure_type": "timeout",
+      "api": "inventory",
+      "recovery_strategy": "Retry 3x with 2s backoff",
+      "success_rate": 0.95,
+      "created_at": "2025-11-23T16:03:11.472841Z",
+      "metadata": {
+        "agent": "OrderOrchestratorAgent",
+        "saved_at": "2025-11-23T16:03:11.472841Z"
+      }
+    },
+    {
+      "id": "PROC-015",
+      "failure_type": "timeout",
+      "api": "inventory",
+      "recovery_strategy": "Retry 3x with 2s backoff",
+      "success_rate": 0.95,
+      "created_at": "2025-11-23T16:08:03.487197Z",
+      "metadata": {
+        "agent": "OrderOrchestratorAgent",
+        "saved_at": "2025-11-23T16:08:03.487197Z"
+      }
+    },
+    {
+      "id": "PROC-016",
+      "failure_type": "timeout",
+      "api": "inventory",
+      "recovery_strategy": "Retry 3x with exponential backoff (2s, 4s, 8s)",
+      "success_rate": 1.0,
+      "created_at": "2025-11-23T16:09:04.286730Z",
+      "metadata": {
+        "agent": "OrderOrchestratorAgent",
+        "saved_at": "2025-11-23T16:09:04.286730Z"
+      }
+    },
+    {
+      "id": "PROC-017",
+      "failure_type": "service_unavailable",
+      "api": "payments",
+      "recovery_strategy": "Wait 4s then retry",
+      "success_rate": 0.95,
+      "created_at": "2025-11-23T16:09:05.748269Z",
+      "metadata": {
+        "agent": "OrderOrchestratorAgent",
+        "saved_at": "2025-11-23T16:09:05.748269Z"
+      }
+    },
+    {
+      "id": "PROC-018",
+      "failure_type": "timeout",
+      "api": "inventory",
+      "recovery_strategy": "Cascading timeout: retry both inventory and payments",
+      "success_rate": 0.95,
+      "created_at": "2025-11-23T16:09:10.541858Z",
+      "metadata": {
+        "agent": "OrderOrchestratorAgent",
+        "saved_at": "2025-11-23T16:09:10.541858Z"
+      }
+    },
+    {
+      "id": "PROC-019",
+      "failure_type": "timeout",
+      "api": "inventory",
+      "recovery_strategy": "Retry 3x with exponential backoff (2s, 4s, 8s)",
+      "success_rate": 1.0,
+      "created_at": "2025-11-23T16:19:44.417533Z",
+      "metadata": {
+        "agent": "OrderOrchestratorAgent",
+        "saved_at": "2025-11-23T16:19:44.417533Z"
+      }
+    },
+    {
+      "id": "PROC-020",
+      "failure_type": "timeout",
+      "api": "inventory",
+      "recovery_strategy": "Retry 3x with 2s backoff",
+      "success_rate": 0.95,
+      "created_at": "2025-11-23T16:22:06.791972Z",
+      "metadata": {
+        "agent": "OrderOrchestratorAgent",
+        "saved_at": "2025-11-23T16:22:06.791972Z"
+      }
+    },
+    {
+      "id": "PROC-021",
+      "failure_type": "timeout",
+      "api": "inventory",
+      "recovery_strategy": "Retry 3x with exponential backoff (2s, 4s, 8s)",
+      "success_rate": 1.0,
+      "created_at": "2025-11-23T16:23:07.522759Z",
+      "metadata": {
+        "agent": "OrderOrchestratorAgent",
+        "saved_at": "2025-11-23T16:23:07.522759Z"
+      }
+    },
+    {
+      "id": "PROC-022",
+      "failure_type": "service_unavailable",
+      "api": "payments",
+      "recovery_strategy": "Wait 4s then retry",
+      "success_rate": 0.95,
+      "created_at": "2025-11-23T16:23:08.860077Z",
+      "metadata": {
+        "agent": "OrderOrchestratorAgent",
+        "saved_at": "2025-11-23T16:23:08.860077Z"
+      }
+    },
+    {
+      "id": "PROC-023",
+      "failure_type": "timeout",
+      "api": "inventory",
+      "recovery_strategy": "Cascading timeout: retry both inventory and payments",
+      "success_rate": 0.95,
+      "created_at": "2025-11-23T16:23:13.645090Z",
+      "metadata": {
+        "agent": "OrderOrchestratorAgent",
+        "saved_at": "2025-11-23T16:23:13.645090Z"
+      }
+    },
+    {
+      "id": "PROC-024",
+      "failure_type": "timeout",
+      "api": "inventory",
+      "recovery_strategy": "Retry 3x with exponential backoff (2s, 4s, 8s)",
+      "success_rate": 1.0,
+      "created_at": "2025-11-23T23:32:12.861167Z",
+      "metadata": {
+        "agent": "OrderOrchestratorAgent",
+        "saved_at": "2025-11-23T23:32:12.861167Z"
+      }
+    },
+    {
+      "id": "PROC-025",
+      "failure_type": "service_unavailable",
+      "api": "payments",
+      "recovery_strategy": "Wait 4s then retry",
+      "success_rate": 0.95,
+      "created_at": "2025-11-23T23:32:14.190606Z",
+      "metadata": {
+        "agent": "OrderOrchestratorAgent",
+        "saved_at": "2025-11-23T23:32:14.190606Z"
+      }
+    },
+    {
+      "id": "PROC-026",
+      "failure_type": "timeout",
+      "api": "inventory",
+      "recovery_strategy": "Cascading timeout: retry both inventory and payments",
+      "success_rate": 0.95,
+      "created_at": "2025-11-23T23:32:19.000236Z",
+      "metadata": {
+        "agent": "OrderOrchestratorAgent",
+        "saved_at": "2025-11-23T23:32:19.000236Z"
+      }
+    }
+  ]
+}
