@@ -1,3 +1,0 @@
-experiment_id,agent_type,outcome,duration_s,inconsistencies_count,strategies_used,seed,failure_rate
-BASE-42,baseline,failure,4.83,0,none,42,0.3
-PLAY-42,playbook,success,14.42,0,none,42,0.3

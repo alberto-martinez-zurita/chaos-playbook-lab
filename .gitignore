@@ -19,5 +19,7 @@ htmlcov/
 *.log
 .DS_Store
 Thumbs.db
-/results.bck
 .ruff_cache
+docs
+parametric_experiments
+standard_experiments

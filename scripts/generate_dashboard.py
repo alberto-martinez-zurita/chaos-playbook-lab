@@ -659,7 +659,7 @@ def generate_summary_tables(metrics: Dict) -> str:
     consistency_html += "            </tr>\n"
     consistency_html += "        </table>\n    </div>\n"
     
-    return f'<div class="summary-tables">\n{success_html}\n{latency_html}\n{consistency_html}\n</div>'
+    return f'<div class="summary-tables_2">\n{success_html}\n{latency_html}\n{consistency_html}\n</div>'
 
 
 def generate_detailed_tables(metrics: Dict) -> str:
