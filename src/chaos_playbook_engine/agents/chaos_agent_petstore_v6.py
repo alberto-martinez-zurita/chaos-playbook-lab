@@ -1,0 +1,493 @@
+"""
+chaos_agent_petstore.py - ChaosAgent for Petstore API with Chaos Injection
+
+FIXED: Clean OpenAPI spec to remove invalid parameters (empty keys)
+
+PURPOSE:
+    Transparent chaos injection proxy for Petstore API.
+    - Wraps OpenAPI endpoints with controlled failure injection
+    - Uses Google ADK with Gemini 2.0 Flash Lite
+    - Deterministic chaos based on failure_rate and seed
+
+USAGE:
+    # Test ChaosAgent
+    poetry run python src/chaos_playbook_engine/agents/chaos_agent_petstore.py
+    
+    # Use in code
+    from chaos_playbook_engine.agents.chaos_agent_petstore import call_chaos_proxy
+    
+    result = await call_chaos_proxy(
+        tool_name="findPetsByStatus",
+        params={"status": "available"},
+        failure_rate=0.2,
+        seed=42
+    )
+
+AUTHOR: chaos-playbook-engine Phase 3 (ADK API v3 Fix)
+DATE: 2025-11-26
+"""
+
+import os
+import random
+import asyncio
+import json
+import requests
+from typing import Dict, Any, Optional
+from pathlib import Path
+
+# ADK imports
+from google.adk.agents import LlmAgent
+from google.adk.runners import InMemoryRunner
+from google.adk.tools.openapi_tool.openapi_spec_parser.openapi_toolset import OpenAPIToolset
+
+
+# ============================================================================
+# CONFIGURATION
+# ============================================================================
+
+PETSTORE_OPENAPI_URL = "https://petstore3.swagger.io/api/v3/openapi.json"
+PETSTORE_OPENAPI_LOCAL = "apis/petstore3_swagger.json"
+GEMINI_MODEL = "gemini-2.5-flash-lite"
+
+
+# ============================================================================
+# SWAGGER/OPENAPI LOADER & CLEANER
+# ============================================================================
+
+def _clean_openapi_spec(spec_dict: Dict[str, Any]) -> Dict[str, Any]:
+    """
+    Clean OpenAPI spec to remove invalid parameters.
+    
+    Gemini API rejects specs with:
+    - Empty parameter names
+    - Invalid schema structures
+    
+    Args:
+        spec_dict: Parsed OpenAPI spec
+    
+    Returns:
+        dict: Cleaned OpenAPI spec
+    """
+    cleaned = spec_dict.copy()
+    
+    # Clean paths
+    if 'paths' in cleaned:
+        for path, methods in cleaned['paths'].items():
+            for method, operation in methods.items():
+                if method not in ['get', 'post', 'put', 'delete', 'patch', 'head', 'options']:
+                    continue
+                
+                # Clean parameters
+                if 'parameters' in operation:
+                    valid_params = []
+                    for param in operation['parameters']:
+                        # Skip parameters with empty names
+                        if not param.get('name') or param.get('name') == '':
+                            print(f"   ⚠️  Removed parameter with empty name in {method.upper()} {path}")
+                            continue
+                        
+                        # Clean parameter schema
+                        if 'schema' in param and isinstance(param['schema'], dict):
+                            schema = param['schema']
+                            
+                            # Remove properties with empty keys
+                            if 'properties' in schema and isinstance(schema['properties'], dict):
+                                cleaned_props = {
+                                    k: v for k, v in schema['properties'].items()
+                                    if k and k.strip()
+                                }
+                                if len(cleaned_props) != len(schema['properties']):
+                                    print(f"   ⚠️  Removed {len(schema['properties']) - len(cleaned_props)} properties with empty keys")
+                                schema['properties'] = cleaned_props
+                        
+                        valid_params.append(param)
+                    
+                    operation['parameters'] = valid_params
+                
+                # Clean requestBody
+                if 'requestBody' in operation:
+                    request_body = operation['requestBody']
+                    if 'content' in request_body:
+                        for content_type, content_schema in request_body['content'].items():
+                            if 'schema' in content_schema and isinstance(content_schema['schema'], dict):
+                                schema = content_schema['schema']
+                                
+                                # Remove properties with empty keys
+                                if 'properties' in schema and isinstance(schema['properties'], dict):
+                                    cleaned_props = {
+                                        k: v for k, v in schema['properties'].items()
+                                        if k and k.strip()
+                                    }
+                                    if len(cleaned_props) != len(schema['properties']):
+                                        print(f"   ⚠️  Cleaned requestBody properties in {method.upper()} {path}")
+                                    schema['properties'] = cleaned_props
+    
+    # Clean components/schemas
+    if 'components' in cleaned and 'schemas' in cleaned['components']:
+        for schema_name, schema in cleaned['components']['schemas'].items():
+            if isinstance(schema, dict) and 'properties' in schema:
+                if isinstance(schema['properties'], dict):
+                    cleaned_props = {
+                        k: v for k, v in schema['properties'].items()
+                        if k and k.strip()
+                    }
+                    if len(cleaned_props) != len(schema['properties']):
+                        print(f"   ⚠️  Cleaned schema '{schema_name}' properties")
+                    schema['properties'] = cleaned_props
+    
+    return cleaned
+
+
+def _download_and_cache_swagger(url: str, local_path: str) -> str:
+    """
+    Download Swagger JSON from URL and cache locally.
+    
+    Args:
+        url: Swagger JSON URL
+        local_path: Local file path to cache
+    
+    Returns:
+        str: Swagger JSON as string (cleaned)
+    """
+    local_file = Path(local_path)
+    
+    # Check if cached version exists
+    if local_file.exists():
+        print(f"   📂 Loading cached OpenAPI from: {local_path}")
+        with open(local_file, 'r', encoding='utf-8') as f:
+            swagger_json = f.read()
+    else:
+        # Download from URL
+        print(f"   📥 Downloading Swagger from: {url}")
+        try:
+            response = requests.get(url, timeout=10)
+            response.raise_for_status()
+            
+            swagger_json = response.text
+            
+            # Cache to local file
+            local_file.parent.mkdir(parents=True, exist_ok=True)
+            with open(local_file, 'w', encoding='utf-8') as f:
+                f.write(swagger_json)
+            
+            print(f"   ✅ Cached Swagger to: {local_path}")
+        
+        except requests.RequestException as e:
+            print(f"   ❌ Failed to download Swagger: {e}")
+            raise
+    
+    # Parse and clean the spec
+    try:
+        spec_dict = json.loads(swagger_json)
+        print(f"   🧹 Cleaning OpenAPI spec...")
+        cleaned_spec = _clean_openapi_spec(spec_dict)
+        cleaned_json = json.dumps(cleaned_spec, indent=2)
+        print(f"   ✅ Cleaned OpenAPI spec")
+        return cleaned_json
+    except json.JSONDecodeError as e:
+        print(f"   ❌ Failed to parse Swagger JSON: {e}")
+        raise
+
+
+# ============================================================================
+# CHAOS AGENT SINGLETON
+# ============================================================================
+
+_chaos_agent_instance: Optional[LlmAgent] = None
+_chaos_runner_instance: Optional[InMemoryRunner] = None
+
+
+def _initialize_chaos_agent() -> tuple[LlmAgent, InMemoryRunner]:
+    """
+    Initialize ChaosAgent (singleton pattern).
+    
+    Returns:
+        tuple: (LlmAgent, InMemoryRunner)
+    """
+    global _chaos_agent_instance, _chaos_runner_instance
+    
+    if _chaos_agent_instance is not None and _chaos_runner_instance is not None:
+        return _chaos_agent_instance, _chaos_runner_instance
+    
+    # Validate API key
+    api_key = os.getenv("GEMINI_API_KEY")
+    if not api_key:
+        raise ValueError(
+            "GEMINI_API_KEY environment variable not set. "
+            "Set it with: export GEMINI_API_KEY='your_key_here'"
+        )
+    
+    print(f"🔧 Initializing ChaosAgent...")
+    print(f"   Model: {GEMINI_MODEL}")
+    print(f"   Swagger: {PETSTORE_OPENAPI_URL}")
+    
+    # Download/load OpenAPI spec (cleaned)
+    try:
+        openapi_json_str = _download_and_cache_swagger(
+            PETSTORE_OPENAPI_URL,
+            PETSTORE_OPENAPI_LOCAL
+        )
+    except Exception as e:
+        print(f"   ❌ Failed to load OpenAPI: {e}")
+        raise
+    
+    # Create OpenAPIToolset from cleaned OpenAPI 3.0 JSON STRING
+    try:
+        petstore_toolset = OpenAPIToolset(
+            spec_str=openapi_json_str,  # ← STRING, OpenAPI 3.0 JSON (cleaned)
+            spec_str_type='json'         # ← 'json'
+        )
+        print(f"   ✅ OpenAPIToolset loaded ({len(openapi_json_str)} bytes)")
+    except Exception as e:
+        print(f"   ❌ Failed to create OpenAPIToolset: {e}")
+        print(f"   💡 Try deleting apis/petstore3_openapi.json and re-running")
+        raise
+    
+    # Create ChaosAgent with ADK
+    _chaos_agent_instance = LlmAgent(
+        name="ChaosAgent",
+        model=GEMINI_MODEL,
+        tools=[petstore_toolset],
+        instruction="""You are a transparent chaos injection proxy for Petstore API.
+
+**YOUR ROLE**:
+You receive tool calls with chaos parameters and either:
+1. Pass params unchanged (no chaos) → Call Petstore API → Return success
+2. Modify params to trigger errors (chaos) → Call Petstore API → Return error
+
+**CHAOS INJECTION RULES**:
+- Use the `inject_chaos` flag to decide: if True, inject chaos; if False, pass through
+- When injecting chaos, modify parameters to trigger realistic errors
+
+**CRITICAL RULES**:
+1. NO natural language responses - return raw API results
+2. NO interpreting business logic - you're a dumb proxy
+3. NO deciding which tool to call - caller specifies tool name
+4. ALWAYS respect inject_chaos flag (deterministic behavior)
+5. Return structured response with status_code and body
+
+**OUTPUT FORMAT**:
+Always respond with tool results. Let the API response speak for itself.
+"""
+    )
+    
+    # Create InMemoryRunner with ADK
+    _chaos_runner_instance = InMemoryRunner(
+        agent=_chaos_agent_instance
+    )
+    
+    print(f"   ✅ ChaosAgent initialized (ADK)")
+    print(f"   ✅ InMemoryRunner created")
+    
+    return _chaos_agent_instance, _chaos_runner_instance
+
+
+# ============================================================================
+# CHAOS DECISION LOGIC
+# ============================================================================
+
+def should_inject_chaos(failure_rate: float, seed: int) -> bool:
+    """
+    Deterministically decide whether to inject chaos.
+    
+    Args:
+        failure_rate: Probability of failure (0.0 to 1.0)
+        seed: Random seed for reproducibility
+    
+    Returns:
+        bool: True if chaos should be injected, False otherwise
+    """
+    if failure_rate <= 0.0:
+        return False
+    if failure_rate >= 1.0:
+        return True
+    
+    rng = random.Random(seed)
+    return rng.random() < failure_rate
+
+
+# ============================================================================
+# CHAOS PROXY API
+# ============================================================================
+
+async def call_chaos_proxy(
+    tool_name: str,
+    params: Dict[str, Any],
+    failure_rate: float = 0.0,
+    seed: int = 42
+) -> Dict[str, Any]:
+    """
+    Call Petstore API through ChaosAgent with optional chaos injection.
+    
+    Args:
+        tool_name: Petstore API operation (e.g., "findPetsByStatus")
+        params: Parameters for the API call
+        failure_rate: Probability of injecting chaos (0.0 to 1.0)
+        seed: Random seed for reproducibility
+    
+    Returns:
+        dict: API response
+    """
+    # Initialize agent (singleton)
+    agent, runner = _initialize_chaos_agent()
+    
+    # Decide: inject chaos or not?
+    inject_chaos = should_inject_chaos(failure_rate, seed)
+    
+    # Build user query for ChaosAgent
+    query = f"""Call tool '{tool_name}' with these parameters: {json.dumps(params)}
+
+inject_chaos: {inject_chaos}
+
+If inject_chaos is True, modify parameters to trigger an error.
+If inject_chaos is False, use parameters exactly as provided.
+
+Call the tool now."""
+    
+    print(f"   🔧 ChaosProxy: {tool_name}(chaos={inject_chaos})")
+    
+    # Execute agent with ADK InMemoryRunner
+    try:
+        # run_debug() es el método correcto para InMemoryRunner
+        response = await runner.run_debug(query)
+        
+        # Parse response for tool calls and results
+        tool_called = None
+        tool_result = None
+        
+        # Check if response contains tool call information
+        if hasattr(response, 'candidates') and response.candidates:
+            candidate = response.candidates[0]
+            if hasattr(candidate, 'content') and candidate.content:
+                for part in candidate.content.parts:
+                    # Check for function call
+                    if hasattr(part, 'function_call') and part.function_call:
+                        tool_called = part.function_call.name
+                        print(f"      → Agent called: {tool_called}")
+                    
+                    # Check for function response
+                    if hasattr(part, 'function_response') and part.function_response:
+                        tool_result = part.function_response.response
+        
+        # Parse result from tool response
+        if tool_result:
+            print(f"tool_result: {tool_result}")
+            result = _parse_tool_result(tool_result, tool_name, inject_chaos)
+            return result
+        else:
+            # If no explicit tool result, parse the text response
+            return {
+                "status_code": 200,
+                "body": {"response": str(response)},
+                "error": None,
+                "tool_name": tool_name,
+                "chaos_injected": inject_chaos
+            }
+    
+    except Exception as e:
+        print(f"      ❌ Error in ChaosProxy: {e}")
+        return {
+            "status_code": 500,
+            "body": {},
+            "error": f"ChaosProxy error: {str(e)}",
+            "tool_name": tool_name,
+            "chaos_injected": inject_chaos
+        }
+
+
+def _parse_tool_result(tool_result: Any, tool_name: str, chaos_injected: bool) -> Dict[str, Any]:
+    """Parse tool result from OpenAPI tool call."""
+    try:
+        if hasattr(tool_result, 'status_code'):
+            status_code = tool_result.status_code
+            body = tool_result.json() if hasattr(tool_result, 'json') else {}
+            error = None if status_code < 400 else f"HTTP {status_code}"
+        
+        elif hasattr(tool_result, 'response'):
+            response_data = tool_result.response
+            if isinstance(response_data, dict):
+                status_code = response_data.get('status_code', 200)
+                body = response_data.get('body', response_data)
+                error = response_data.get('error')
+            else:
+                status_code = 200
+                body = response_data
+                error = None
+        
+        elif isinstance(tool_result, dict):
+            status_code = tool_result.get('status_code', 200)
+            body = tool_result.get('body', tool_result)
+            error = tool_result.get('error')
+        
+        else:
+            status_code = 200
+            body = {"result": str(tool_result)}
+            error = None
+        
+        return {
+            "status_code": status_code,
+            "body": body,
+            "error": error,
+            "tool_name": tool_name,
+            "chaos_injected": chaos_injected
+        }
+    
+    except Exception as e:
+        return {
+            "status_code": 500,
+            "body": {},
+            "error": f"Failed to parse tool result: {str(e)}",
+            "tool_name": tool_name,
+            "chaos_injected": chaos_injected
+        }
+
+
+# ============================================================================
+# TESTING
+# ============================================================================
+
+async def test_chaos_proxy():
+    """Test ChaosAgent with and without chaos injection."""
+    print("\n" + "="*70)
+    print("CHAOS AGENT TEST - Petstore API Proxy")
+    print("="*70)
+    
+    # Test 1: No chaos (should succeed)
+    print("\n[TEST 1] Call without chaos (failure_rate=0.0)")
+    result1 = await call_chaos_proxy(
+        tool_name="findPetsByStatus",
+        params={"status": "available"},
+        failure_rate=0.0,
+        seed=42
+    )
+    print(f"   Result: status={result1['status_code']}, chaos={result1['chaos_injected']}")
+    
+    # Test 2: With chaos (should fail)
+    print("\n[TEST 2] Call with chaos (failure_rate=1.0)")
+    result2 = await call_chaos_proxy(
+        tool_name="findPetsByStatus",
+        params={"status": "available"},
+        failure_rate=1.0,
+        seed=42
+    )
+    print(f"   Result: status={result2['status_code']}, chaos={result2['chaos_injected']}")
+    
+    # Test 3: Probabilistic chaos
+    print("\n[TEST 3] Probabilistic chaos (failure_rate=0.5, seed=100)")
+    result3 = await call_chaos_proxy(
+        tool_name="getPetById",
+        params={"petId": 1},
+        failure_rate=0.5,
+        seed=100
+    )
+    print(f"   Result: status={result3['status_code']}, chaos={result3['chaos_injected']}")
+    
+    print("\n" + "="*70)
+    print("✅ CHAOS AGENT TEST COMPLETED")
+    print("="*70)
+
+
+if __name__ == "__main__":
+    """Run tests when executed directly."""
+    print("🧪 Testing ChaosAgent with Petstore API...")
+    asyncio.run(test_chaos_proxy())

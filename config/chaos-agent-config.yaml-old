@@ -1,0 +1,110 @@
+# ============================================================================
+# CHAOS AGENT CONFIGURATION
+# ============================================================================
+# 
+# This file configures the ChaosAgent to simulate any OpenAPI 3.0 API.
+#
+# Usage:
+#   config = ChaosAgentConfig.from_yaml("config/chaos_agent.yaml")
+#   agent = ChaosAgent(config)
+#
+# Author: chaos-playbook-engine Phase 3 (v10 UNIVERSAL)
+# Date: 2025-11-26
+# ============================================================================
+
+chaos_agent:
+  # OpenAPI spec location (URL or local file path)
+  # Examples:
+  #   - "https://petstore3.swagger.io/api/v3/openapi.json"
+  #   - "file://config/openapi/my_api.json"
+  #   - "config/openapi/my_api.json"
+  openapi_spec_url: "https://petstore3.swagger.io/api/v3/openapi.json"
+  
+  # Default chaos settings
+  # These values are used when failure_rate/seed are not provided in call()
+  default_failure_rate: 0.3  # 30% chance of error by default
+  default_seed: 42           # Deterministic seed for reproducibility
+  
+  # Error code weights (for weighted random selection)
+  # Higher weight = more likely to be selected
+  # Total doesn't need to sum to 100
+  error_weights:
+    "400": 40  # Bad Request (most common)
+    "404": 30  # Not Found
+    "422": 20  # Validation Exception
+    "500": 10  # Internal Server Error
+  
+  # Mock data generation settings
+  mock_success_enabled: true  # Generate realistic mock data for success
+  mock_list_size: 5           # Number of items in list responses
+
+
+# ============================================================================
+# EXPERIMENT CONFIGURATION
+# ============================================================================
+# 
+# These settings control the overall experiment behavior.
+# ============================================================================
+
+experiment:
+  # Experiment metadata
+  name: "chaos-playbook-phase3"
+  description: "Testing playbook-based error handling"
+  version: "v10"
+  
+  # Number of test iterations
+  iterations: 100
+  
+  # Playbook to use
+  playbook_path: "playbooks/playbook_petstore_default.json"
+  
+  # Output settings
+  output_dir: "output/experiments"
+  log_level: "INFO"
+
+
+# ============================================================================
+# ORDER AGENT CONFIGURATION
+# ============================================================================
+#
+# Settings for the OrderAgent that uses ChaosAgent as a tool.
+# ============================================================================
+
+order_agent:
+  # Retry settings (from playbook)
+  max_retries: 3
+  backoff_seconds: 2
+  
+  # Timeout settings
+  operation_timeout: 30  # seconds
+  total_timeout: 300     # seconds
+  
+  # Agent behavior
+  enable_logging: true
+  verbose: false
+
+
+# ============================================================================
+# ALTERNATIVE API CONFIGURATIONS
+# ============================================================================
+#
+# Examples for using ChaosAgent with different APIs
+# ============================================================================
+
+# Example: GitHub API
+# chaos_agent:
+#   openapi_spec_url: "https://raw.githubusercontent.com/github/rest-api-description/main/descriptions/api.github.com/api.github.com.json"
+#   default_failure_rate: 0.2
+#   default_seed: 100
+
+# Example: Stripe API
+# chaos_agent:
+#   openapi_spec_url: "https://raw.githubusercontent.com/stripe/openapi/master/openapi/spec3.json"
+#   default_failure_rate: 0.15
+#   default_seed: 200
+
+# Example: Local custom API
+# chaos_agent:
+#   openapi_spec_url: "config/openapi/my_custom_api.json"
+#   default_failure_rate: 0.4
+#   default_seed: 42

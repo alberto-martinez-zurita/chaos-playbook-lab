@@ -1,0 +1,243 @@
+{
+  "test_suite": "Swagger Petstore - OpenAPI 3.0_unit_tests",
+  "description": "Auto-generated happy-path unit tests from OpenAPI spec",
+  "generated_from": "Swagger Petstore - OpenAPI 3.0",
+  "api_version": "1.0.27",
+  "total_tests": 19,
+  "tests": [
+    {
+      "test_id": "UT_0001",
+      "test_name": "updatePet_happy_path",
+      "operation": "updatePet",
+      "http_method": "PUT",
+      "api_path": "/pet",
+      "params": {
+        "body": "example"
+      },
+      "expected_success": true,
+      "timeout_seconds": 10
+    },
+    {
+      "test_id": "UT_0002",
+      "test_name": "addPet_happy_path",
+      "operation": "addPet",
+      "http_method": "POST",
+      "api_path": "/pet",
+      "params": {
+        "body": "example"
+      },
+      "expected_success": true,
+      "timeout_seconds": 10
+    },
+    {
+      "test_id": "UT_0003",
+      "test_name": "findPetsByStatus_happy_path",
+      "operation": "findPetsByStatus",
+      "http_method": "GET",
+      "api_path": "/pet/findByStatus",
+      "params": {
+        "status": "available"
+      },
+      "expected_success": true,
+      "timeout_seconds": 10
+    },
+    {
+      "test_id": "UT_0004",
+      "test_name": "findPetsByTags_happy_path",
+      "operation": "findPetsByTags",
+      "http_method": "GET",
+      "api_path": "/pet/findByTags",
+      "params": {
+        "tags": [
+          "example"
+        ]
+      },
+      "expected_success": true,
+      "timeout_seconds": 10
+    },
+    {
+      "test_id": "UT_0005",
+      "test_name": "getPetById_happy_path",
+      "operation": "getPetById",
+      "http_method": "GET",
+      "api_path": "/pet/{petId}",
+      "params": {
+        "petId": 1
+      },
+      "expected_success": true,
+      "timeout_seconds": 10
+    },
+    {
+      "test_id": "UT_0006",
+      "test_name": "updatePetWithForm_happy_path",
+      "operation": "updatePetWithForm",
+      "http_method": "POST",
+      "api_path": "/pet/{petId}",
+      "params": {
+        "petId": 1,
+        "name": "example",
+        "status": "example"
+      },
+      "expected_success": true,
+      "timeout_seconds": 10
+    },
+    {
+      "test_id": "UT_0007",
+      "test_name": "deletePet_happy_path",
+      "operation": "deletePet",
+      "http_method": "DELETE",
+      "api_path": "/pet/{petId}",
+      "params": {
+        "api_key": "example",
+        "petId": 1
+      },
+      "expected_success": true,
+      "timeout_seconds": 10
+    },
+    {
+      "test_id": "UT_0008",
+      "test_name": "uploadFile_happy_path",
+      "operation": "uploadFile",
+      "http_method": "POST",
+      "api_path": "/pet/{petId}/uploadImage",
+      "params": {
+        "petId": 1,
+        "additionalMetadata": "example"
+      },
+      "expected_success": true,
+      "timeout_seconds": 10
+    },
+    {
+      "test_id": "UT_0009",
+      "test_name": "getInventory_happy_path",
+      "operation": "getInventory",
+      "http_method": "GET",
+      "api_path": "/store/inventory",
+      "params": {},
+      "expected_success": true,
+      "timeout_seconds": 10
+    },
+    {
+      "test_id": "UT_0010",
+      "test_name": "placeOrder_happy_path",
+      "operation": "placeOrder",
+      "http_method": "POST",
+      "api_path": "/store/order",
+      "params": {
+        "body": "example"
+      },
+      "expected_success": true,
+      "timeout_seconds": 10
+    },
+    {
+      "test_id": "UT_0011",
+      "test_name": "getOrderById_happy_path",
+      "operation": "getOrderById",
+      "http_method": "GET",
+      "api_path": "/store/order/{orderId}",
+      "params": {
+        "orderId": 1
+      },
+      "expected_success": true,
+      "timeout_seconds": 10
+    },
+    {
+      "test_id": "UT_0012",
+      "test_name": "deleteOrder_happy_path",
+      "operation": "deleteOrder",
+      "http_method": "DELETE",
+      "api_path": "/store/order/{orderId}",
+      "params": {
+        "orderId": 1
+      },
+      "expected_success": true,
+      "timeout_seconds": 10
+    },
+    {
+      "test_id": "UT_0013",
+      "test_name": "createUser_happy_path",
+      "operation": "createUser",
+      "http_method": "POST",
+      "api_path": "/user",
+      "params": {
+        "body": "example"
+      },
+      "expected_success": true,
+      "timeout_seconds": 10
+    },
+    {
+      "test_id": "UT_0014",
+      "test_name": "createUsersWithListInput_happy_path",
+      "operation": "createUsersWithListInput",
+      "http_method": "POST",
+      "api_path": "/user/createWithList",
+      "params": {
+        "body": [
+          "example"
+        ]
+      },
+      "expected_success": true,
+      "timeout_seconds": 10
+    },
+    {
+      "test_id": "UT_0015",
+      "test_name": "loginUser_happy_path",
+      "operation": "loginUser",
+      "http_method": "GET",
+      "api_path": "/user/login",
+      "params": {
+        "username": "example",
+        "password": "example"
+      },
+      "expected_success": true,
+      "timeout_seconds": 10
+    },
+    {
+      "test_id": "UT_0016",
+      "test_name": "logoutUser_happy_path",
+      "operation": "logoutUser",
+      "http_method": "GET",
+      "api_path": "/user/logout",
+      "params": {},
+      "expected_success": true,
+      "timeout_seconds": 10
+    },
+    {
+      "test_id": "UT_0017",
+      "test_name": "getUserByName_happy_path",
+      "operation": "getUserByName",
+      "http_method": "GET",
+      "api_path": "/user/{username}",
+      "params": {
+        "username": "example"
+      },
+      "expected_success": true,
+      "timeout_seconds": 10
+    },
+    {
+      "test_id": "UT_0018",
+      "test_name": "updateUser_happy_path",
+      "operation": "updateUser",
+      "http_method": "PUT",
+      "api_path": "/user/{username}",
+      "params": {
+        "username": "example",
+        "body": "example"
+      },
+      "expected_success": true,
+      "timeout_seconds": 10
+    },
+    {
+      "test_id": "UT_0019",
+      "test_name": "deleteUser_happy_path",
+      "operation": "deleteUser",
+      "http_method": "DELETE",
+      "api_path": "/user/{username}",
+      "params": {
+        "username": "example"
+      },
+      "expected_success": true,
+      "timeout_seconds": 10
+    }
+  ]
+}
