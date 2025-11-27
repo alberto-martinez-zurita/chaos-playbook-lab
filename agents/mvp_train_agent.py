@@ -17,7 +17,6 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-
 chaos_proxy = ChaosProxy(failure_rate=0.6,mock_mode=True) 
  
 
@@ -40,11 +39,7 @@ def add_scenario_to_playbook(operation: str, status_code: str,strategy: str, rea
     )
        
  
- 
- 
- 
- 
- 
+
  
 # Tool 1: GET /store/inventory
 async def get_inventory() -> dict:
@@ -77,7 +72,6 @@ async def place_order(pet_id: int, quantity: int) -> dict:
     return await chaos_proxy.send_request("POST", "/store/order", json_body=body)
  
 # Tool 4: PUT /pet (Update an existing pet)
-# Nota: Usamos PUT según tu documento de decisión para el paso 5 "UPDATE_PET_STATUS"
 async def update_pet_status(pet_id: int, name: str, status: str) -> dict:
     """Update an existing pet status.
    
@@ -94,7 +88,6 @@ async def update_pet_status(pet_id: int, name: str, status: str) -> dict:
     }
     return await chaos_proxy.send_request("PUT", "/pet", json_body=body)
  
-# Nueva Tool: Permite al agente ejecutar la estrategia de backoff
 async def wait_seconds(seconds: float) -> dict:
     """Pauses execution for a specified number of seconds.
    
@@ -104,36 +97,6 @@ async def wait_seconds(seconds: float) -> dict:
     print(f"⏳ AGENT WAITING: {seconds}s (Executing Backoff Strategy)...")
     await asyncio.sleep(seconds)
     return {"status": "success", "message": f"Waited {seconds} seconds"}
- 
-# Tool 5: Lookup Playbook (RAG)
-async def lookup_playbook(tool_name: str, error_code: str) -> Dict[str, Any]:
-    """
-    Consults the Chaos Playbook for a recovery strategy.
-   
-    Args:
-        tool_name: The name of the tool that failed (e.g., 'place_order').
-        error_code: The HTTP status code or error type (e.g., '503', 'timeout').
-    """
-    print(f"📖 PLAYBOOK LOOKUP: {tool_name} -> {error_code}")
-   
-    try:
-        with open("playbook_phase6_petstore_2.json", 'r') as f:
-            playbook = json.load(f)
-       
-        # 1. Buscar configuración específica de la tool
-        tool_config = playbook.get(tool_name, {})
-       
-        # 2. Buscar estrategia para ese código de error
-        strategy = tool_config.get(str(error_code))
-       
-        if strategy:
-            return {"status": "success", "found": True, "recommendation": strategy}
-       
-        # 3. Fallback a estrategia default
-        return {"status": "success", "found": False, "recommendation": playbook.get("default")}
-       
-    except Exception as e:
-        return {"status": "error", "message": f"Playbook read error: {str(e)}"}
  
  
 async def train_agent():
