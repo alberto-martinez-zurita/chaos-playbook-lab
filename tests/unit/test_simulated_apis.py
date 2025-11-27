@@ -6,7 +6,7 @@ and handles all supported endpoints properly.
 
 import pytest
 
-from chaos_playbook_engine.tools.simulated_apis import (
+from tools.simulated_apis import (
     call_simulated_erp_api,
     call_simulated_inventory_api,
     call_simulated_payments_api,

@@ -14,7 +14,7 @@ import pytest
 from pathlib import Path
 from datetime import datetime
 
-from chaos_playbook_engine.data.playbook_storage import PlaybookStorage
+from storage.playbook_storage import PlaybookStorage
 
 
 # ==================================================================

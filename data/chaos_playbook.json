@@ -312,6 +312,114 @@
         "agent": "OrderOrchestratorAgent",
         "saved_at": "2025-11-23T23:32:19.000236Z"
       }
+    },
+    {
+      "id": "PROC-027",
+      "failure_type": "timeout",
+      "api": "inventory",
+      "recovery_strategy": "Retry 3x with exponential backoff (2s, 4s, 8s)",
+      "success_rate": 1.0,
+      "created_at": "2025-11-26T20:12:03.874734Z",
+      "metadata": {
+        "agent": "OrderOrchestratorAgent",
+        "saved_at": "2025-11-26T20:12:03.874734Z"
+      }
+    },
+    {
+      "id": "PROC-028",
+      "failure_type": "service_unavailable",
+      "api": "payments",
+      "recovery_strategy": "Wait 4s then retry",
+      "success_rate": 0.95,
+      "created_at": "2025-11-26T20:12:05.203023Z",
+      "metadata": {
+        "agent": "OrderOrchestratorAgent",
+        "saved_at": "2025-11-26T20:12:05.203023Z"
+      }
+    },
+    {
+      "id": "PROC-029",
+      "failure_type": "timeout",
+      "api": "inventory",
+      "recovery_strategy": "Cascading timeout: retry both inventory and payments",
+      "success_rate": 0.95,
+      "created_at": "2025-11-26T20:12:10.019427Z",
+      "metadata": {
+        "agent": "OrderOrchestratorAgent",
+        "saved_at": "2025-11-26T20:12:10.019427Z"
+      }
+    },
+    {
+      "id": "PROC-030",
+      "failure_type": "timeout",
+      "api": "inventory",
+      "recovery_strategy": "Retry 3x with exponential backoff (2s, 4s, 8s)",
+      "success_rate": 1.0,
+      "created_at": "2025-11-26T22:18:31.114170Z",
+      "metadata": {
+        "agent": "OrderOrchestratorAgent",
+        "saved_at": "2025-11-26T22:18:31.113178Z"
+      }
+    },
+    {
+      "id": "PROC-031",
+      "failure_type": "service_unavailable",
+      "api": "payments",
+      "recovery_strategy": "Wait 4s then retry",
+      "success_rate": 0.95,
+      "created_at": "2025-11-26T22:18:32.438473Z",
+      "metadata": {
+        "agent": "OrderOrchestratorAgent",
+        "saved_at": "2025-11-26T22:18:32.438473Z"
+      }
+    },
+    {
+      "id": "PROC-032",
+      "failure_type": "timeout",
+      "api": "inventory",
+      "recovery_strategy": "Cascading timeout: retry both inventory and payments",
+      "success_rate": 0.95,
+      "created_at": "2025-11-26T22:18:37.240761Z",
+      "metadata": {
+        "agent": "OrderOrchestratorAgent",
+        "saved_at": "2025-11-26T22:18:37.240761Z"
+      }
+    },
+    {
+      "id": "PROC-033",
+      "failure_type": "timeout",
+      "api": "inventory",
+      "recovery_strategy": "Retry 3x with exponential backoff (2s, 4s, 8s)",
+      "success_rate": 1.0,
+      "created_at": "2025-11-26T22:40:36.097873Z",
+      "metadata": {
+        "agent": "OrderOrchestratorAgent",
+        "saved_at": "2025-11-26T22:40:36.095880Z"
+      }
+    },
+    {
+      "id": "PROC-034",
+      "failure_type": "service_unavailable",
+      "api": "payments",
+      "recovery_strategy": "Wait 4s then retry",
+      "success_rate": 0.95,
+      "created_at": "2025-11-26T22:40:37.419885Z",
+      "metadata": {
+        "agent": "OrderOrchestratorAgent",
+        "saved_at": "2025-11-26T22:40:37.418876Z"
+      }
+    },
+    {
+      "id": "PROC-035",
+      "failure_type": "timeout",
+      "api": "inventory",
+      "recovery_strategy": "Cascading timeout: retry both inventory and payments",
+      "success_rate": 0.95,
+      "created_at": "2025-11-26T22:40:42.225513Z",
+      "metadata": {
+        "agent": "OrderOrchestratorAgent",
+        "saved_at": "2025-11-26T22:40:42.225513Z"
+      }
     }
   ]
 }

@@ -6,7 +6,7 @@ pattern. Uses run_debug() for simplified testing with automatic output.
 
 import pytest
 
-from chaos_playbook_engine.services.runner_factory import create_order_orchestrator_runner
+from services.runner_factory import create_order_orchestrator_runner
 
 
 @pytest.mark.asyncio

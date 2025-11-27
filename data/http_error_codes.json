@@ -1,0 +1,12 @@
+{
+  "400": "Bad Request - The server cannot or will not process the request due to an apparent client error.",
+  "401": "Unauthorized - Authentication is required and has failed or has not yet been provided.",
+  "403": "Forbidden - The request was valid, but the server refuses action.",
+  "404": "Not Found - The requested resource could not be found.",
+  "408": "Request Timeout - The server timed out waiting for the request.",
+  "429": "Too Many Requests - The user has sent too many requests in a given amount of time.",
+  "500": "Internal Server Error - A generic error message, given when an unexpected condition was encountered.",
+  "502": "Bad Gateway - The server was acting as a gateway or proxy and received an invalid response.",
+  "503": "Service Unavailable - The server cannot handle the request (overloaded or down).",
+  "504": "Gateway Timeout - The server was acting as a gateway and did not receive a timely response."
+}

@@ -15,19 +15,19 @@ Run with:
 import pytest
 import asyncio
 
-from chaos_playbook_engine.config.chaos_config import ChaosConfig
-from chaos_playbook_engine.tools.simulated_apis import (
+from config.chaos_config import ChaosConfig
+from tools.simulated_apis import (
     call_simulated_inventory_api,
     call_simulated_payments_api,
     call_simulated_erp_api,
     call_simulated_shipping_api,
 )
-from chaos_playbook_engine.tools.retry_wrapper import with_retry
-from chaos_playbook_engine.agents.order_orchestrator import (
+from tools.retry_wrapper import with_retry
+from agents.order_orchestrator import (
     saveprocedure,
     loadprocedure,
 )
-from chaos_playbook_engine.data.playbook_storage import PlaybookStorage
+from storage.playbook_storage import PlaybookStorage
 
 
 # ==================================================================

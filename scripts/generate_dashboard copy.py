@@ -761,41 +761,28 @@ def extract_chart_data(metrics: Dict):
         data = metrics[rate_str]
         failure_rates.append(data['failure_rate'])
         
-        # ✅ FIX: Usar get() y valores por defecto seguros
-        baseline = data.get('baseline') or {}
-        playbook = data.get('playbook') or {}
-        
-        # Extraer Success Rate (con seguridad)
-        b_success = baseline.get('success_rate', {}).get('mean', 0.0)
-        p_success = playbook.get('success_rate', {}).get('mean', 0.0)
-        
-        baseline_success.append(b_success)
-        playbook_success.append(p_success)
-        
-        # Extraer Latency (con seguridad)
-        baseline_dur = baseline.get('duration_s', {}).get('mean', 0.0)
-        playbook_dur = playbook.get('duration_s', {}).get('mean', 0.0)
+        baseline_success.append(data['baseline']['success_rate']['mean'])
+        playbook_success.append(data['playbook']['success_rate']['mean'])
         
         # Calculate latency overhead percentage
+        baseline_dur = data['baseline']['duration_s']['mean']
+        playbook_dur = data['playbook']['duration_s']['mean']
         if baseline_dur > 0:
             overhead = ((playbook_dur / baseline_dur) - 1) * 100
         else:
             overhead = 0
         latency_overhead_pct.append(overhead)
         
-        # Extraer Consistency (con seguridad)
-        b_inc = baseline.get('inconsistencies', {}).get('mean', 0.0)
-        p_inc = playbook.get('inconsistencies', {}).get('mean', 0.0)
-        
-        baseline_cons = (1.0 - b_inc) * 100
-        playbook_cons = (1.0 - p_inc) * 100
+        # Calculate consistency (1 - inconsistencies) as percentage
+        baseline_cons = (1.0 - data['baseline']['inconsistencies']['mean']) * 100
+        playbook_cons = (1.0 - data['playbook']['inconsistencies']['mean']) * 100
         baseline_consistency.append(baseline_cons)
         playbook_consistency.append(playbook_cons)
         
-        # Calculate improvements
-        effectiveness_improvement.append((p_success - b_success) * 100)
+        # Calculate improvements for combined chart
+        effectiveness_improvement.append((data['playbook']['success_rate']['mean'] - data['baseline']['success_rate']['mean']) * 100)
         consistency_improvement.append(playbook_cons - baseline_cons)
-
+    
     return {
         'failure_rates': failure_rates,
         'baseline_success': baseline_success,

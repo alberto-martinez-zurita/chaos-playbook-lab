@@ -17,7 +17,7 @@ Tests cover:
 
 import pytest
 import random
-from chaos_playbook_engine.config.chaos_config import ChaosConfig, create_chaos_config
+from config.chaos_config import ChaosConfig, create_chaos_config
 
 
 class TestChaosConfigCreation:

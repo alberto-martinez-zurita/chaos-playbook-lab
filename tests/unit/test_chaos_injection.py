@@ -10,8 +10,8 @@ import pytest
 import asyncio
 from datetime import datetime
 
-from chaos_playbook_engine.config.chaos_config import ChaosConfig, create_chaos_config
-from chaos_playbook_engine.tools.chaos_injection_helper import (
+from config.chaos_config import ChaosConfig, create_chaos_config
+from tools.chaos_injection_helper import (
     inject_chaos_failure,
     is_retryable_error,
     get_suggested_backoff,

@@ -1,0 +1,10 @@
+environment: dev
+agent:
+  model: gemini-2.5-flash-lite
+runner:
+  type: InMemoryRunner
+session_service:
+  type: DatabaseSessionService
+  db_url: sqlite:///local_sessions.db
+experiment:
+  default_seed: 42
