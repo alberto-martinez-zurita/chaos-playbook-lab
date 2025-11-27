@@ -10,91 +10,17 @@ import asyncio
 from typing import Any, Dict, Optional
 from google.adk.models.google_llm import Gemini
 from google.genai import types
+from core.chaos_proxy import ChaosProxy
+from core.playbook_manager import PlaybookManager
 from dotenv import load_dotenv
- 
- 
+  
 load_dotenv()
+
+
+
+chaos_proxy = ChaosProxy(failure_rate=0.6,mock_mode=True) 
  
- 
-class PlaybookManager:
-    """
-    Manages a JSON playbook file with structure:
-    {
-      "operation": {
-        "status_code": {
-          "strategy": "...",
-          "reasoning": "...",
-          "config": {...}
-        }
-      }
-    }
-    """
- 
-    def __init__(self, filepath: str):
-        self.filepath = Path(filepath)
-        self.data: Dict[str, Any] = self._load()
- 
-    # -----------------------------
-    # Internal Load/Save
-    # -----------------------------
-    def _load(self) -> Dict[str, Any]:
-        """Load playbook from JSON file; return empty dict if missing."""
-        if not self.filepath.exists():
-            return {}
-        with self.filepath.open("r", encoding="utf-8") as f:
-            return json.load(f)
- 
-    def save(self) -> None:
-        """Save playbook back to JSON file."""
-        with self.filepath.open("w", encoding="utf-8") as f:
-            json.dump(self.data, f, indent=2, ensure_ascii=False)
- 
-    # -----------------------------
-    # Public API
-    # -----------------------------
-    def add_operation_or_response(
-        self,
-        operation: str,
-        status_code: str,
-        strategy: str,
-        reasoning: str,
-        config: Optional[Dict[str, Any]] = None,
-    ) -> None:
-        """
-        Add or update a response under an operation.
- 
-        If the operation does not exist → create it.
-        If it exists → add or update the status code entry.
-        """
- 
-        if operation not in self.data:
-            self.data[operation] = {}
- 
-        self.data[operation][status_code] = {
-            "strategy": strategy,
-            "reasoning": reasoning,
-            "config": config or {},
-        }
- 
-    def get_operation(self, operation: str) -> Optional[Dict[str, Any]]:
-        """Return the operation block or None if not present."""
-        return self.data.get(operation)
- 
-    def has_operation(self, operation: str) -> bool:
-        return operation in self.data
- 
-    def has_response(self, operation: str, status_code: str) -> bool:
-        return (
-            operation in self.data
-            and status_code in self.data[operation]
-        )
- 
-    def get_all(self) -> Dict[str, Any]:
-        """
-        Return the entire playbook structure as a dictionary.
-        """
-        return self.data
- 
+
  
  #load previous playbook to resume
 playbook = PlaybookManager("data/playbook_training.json")
@@ -117,47 +43,6 @@ def add_scenario_to_playbook(operation: str, status_code: str,strategy: str, rea
  
  
  
-class ChaosProxy:
-    def __init__(self, failure_rate: float):
-        self.failure_rate = failure_rate
-        self.rng = random.Random()
-        self.base_url = "https://petstore3.swagger.io/api/v3" # URL extraída del petstore3_openapi.json
- 
-    async def send_request(self, method: str, endpoint: str, params: dict = None, json_body: dict = None) -> Dict[str, Any]:
-        """
-        Proxy transparente: Decide si fallar o llamar a la API real.
-        """
-        # 1. Deterministic Chaos Check
-        if self.rng.random() < self.failure_rate:
-            error_type = self.rng.choice([502,401]) # Tipos de fallo soportados por el Playbook
-            print(f"🔥 CHAOS INJECTED: Simulating {error_type} on {endpoint}")
-            return {
-                "status": "error",
-                "code": error_type,
-                "message": f"Simulated chaos error {error_type}"
-            }
- 
-        # 2. Real API Call (Happy Path)
-        print(f"🌐 REAL API CALL: {method} {endpoint}")
-        async with httpx.AsyncClient() as client:
-            try:
-                if method == "GET":
-                    resp = await client.get(f"{self.base_url}{endpoint}", params=params, timeout=10.0)
-                elif method == "POST":
-                    resp = await client.post(f"{self.base_url}{endpoint}", json=json_body, timeout=10.0)
-                elif method == "PUT":
-                    resp = await client.put(f"{self.base_url}{endpoint}", json=json_body, timeout=10.0)
-               
-                # Normalizamos la respuesta para el Agente
-                if resp.status_code >= 400:
-                    return {"status": "error", "code": resp.status_code, "message": resp.text}
-                return {"status": "success", "code": resp.status_code, "data": resp.json()}
-           
-            except Exception as e:
-                 return {"status": "error", "code": 500, "message": str(e)}
- 
-# Instancia global para el MVP (en prod se inyectaría)
-chaos_proxy = ChaosProxy(failure_rate=0.3) # 30% Chaos
  
  
  
@@ -334,6 +219,7 @@ async def train_agent():
         - Never skip a failing step unless the playbook explicitly instructs it.
         - Never hallucinate successful results.
         - Your success metric is FINISHING THE PURCHASE UNASSISTED despite failures.
+        - In case the strategy suggested is escalate_to_human, you have to stop the execution and return a message to let the human complete or correct the order procedure
     """,
     output_key="steps_performed",
     tools=[get_inventory, find_pets_by_status, place_order, update_pet_status, wait_seconds, get_playbook]
@@ -403,6 +289,7 @@ async def train_agent():
             - `config` is optional and may include:
                 - wait_seconds: integer
                 - max_retries: integer
+                - ...
             If there is no extra configuration → set config=None.
  
             NEVER WRAP THIS IN JSON.  
@@ -417,6 +304,7 @@ async def train_agent():
                 - Consider the severity, repeatability, and context.
                 - Infer a smart recovery action.
                 - Do not rely on pre-defined rules — use reasoning.
+                - If you need you can also search in Google using the internal google_search tool to ground your result.
  
             ==========================
             PROHIBITED ACTIONS
@@ -443,7 +331,7 @@ async def train_agent():
     trainingAgent = LoopAgent(
     name="TrainingLoop",
     sub_agents=[orderAgent, playbookCreatorAgent],
-    max_iterations=2,
+    max_iterations=5,
     )
  
    

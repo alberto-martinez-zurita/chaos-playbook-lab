@@ -10,9 +10,9 @@ from typing import Dict, Any, Optional
 from pathlib import Path
 
 class ChaosProxy:
-    def __init__(self, failure_rate: float, seed: int, mock_mode: bool = False):
+    def __init__(self, failure_rate: float, seed: int | None = None, mock_mode: bool = False):
         self.failure_rate = failure_rate
-        self.rng = random.Random(seed)
+        self.rng = random.Random(seed) if seed is not None else random.Random()
         self.mock_mode = mock_mode
         self.base_url = "https://petstore3.swagger.io/api/v3"
         self.error_codes = self._load_error_codes()
