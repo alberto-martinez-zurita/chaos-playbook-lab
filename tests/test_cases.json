@@ -1,94 +1,13 @@
-{
-  "eval_set_id": "e08bff25-ad24-464d-9959-da293cceeada",
-  "name": "e08bff25-ad24-464d-9959-da293cceeada",
-  "description": null,
-  "eval_cases": [
-    {
-      "eval_id": "tests/test_cases.json",
-      "conversation": [
-        {
-          "invocation_id": "0d7dedcf-3b17-4606-ae07-2b7f656d1e3f",
-          "user_content": {
-            "parts": [
-              {
-                "media_resolution": null,
-                "code_execution_result": null,
-                "executable_code": null,
-                "file_data": null,
-                "function_call": null,
-                "function_response": null,
-                "inline_data": null,
-                "text": "Start a pet purchase session under possible failures",
-                "thought": null,
-                "thought_signature": null,
-                "video_metadata": null
-              }
-            ],
-            "role": "user"
-          },
-          "final_response": {
-            "parts": [
-              {
-                "media_resolution": null,
-                "code_execution_result": null,
-                "executable_code": null,
-                "file_data": null,
-                "function_call": null,
-                "function_response": null,
-                "inline_data": null,
-                "text": "The agent should attempt the purchase and escalate if human intervention is required.",
-                "thought": null,
-                "thought_signature": null,
-                "video_metadata": null
-              }
-            ],
-            "role": "model"
-          },
-          "intermediate_data": {
-            "tool_uses": [
-              {
-                "id": null,
-                "args": {},
-                "name": "get_inventory",
-                "partial_args": null,
-                "will_continue": null
-              },
-              {
-                "id": null,
-                "args": {},
-                "name": "find_pets_by_status",
-                "partial_args": null,
-                "will_continue": null
-              },
-              {
-                "id": null,
-                "args": {},
-                "name": "place_order",
-                "partial_args": null,
-                "will_continue": null
-              },
-              {
-                "id": null,
-                "args": {},
-                "name": "update_pet_status",
-                "partial_args": null,
-                "will_continue": null
-              }
-            ],
-            "tool_responses": [],
-            "intermediate_responses": []
-          },
-          "creation_timestamp": 1764279210.7185924,
-          "rubrics": null,
-          "app_details": null
-        }
-      ],
-      "conversation_scenario": null,
-      "session_input": null,
-      "creation_timestamp": 1764279210.7186124,
-      "rubrics": null,
-      "final_session_state": {}
-    }
-  ],
-  "creation_timestamp": 1764279210.7186368
-}
+[
+  {
+    "query": "Start a pet purchase session under possible failures",
+    "expected_tool_use": [
+      {"tool_name": "get_inventory", "tool_input": {}},
+      {"tool_name": "find_pets_by_status", "tool_input": {}},
+      {"tool_name": "place_order", "tool_input": {}},
+      {"tool_name": "update_pet_status", "tool_input": {}},
+       {"tool_name": "get_playbook", "tool_input": {}} 
+    ],
+    "reference": "Agent follows purchase flow or escalates via playbook"
+  }
+]
