@@ -1,0 +1,12 @@
+[
+  {
+    "query": "Start a pet purchase session under possible failures",
+    "expected_tool_use": [
+      {"tool_name": "get_inventory", "tool_input": {}},
+      {"tool_name": "find_pets_by_status", "tool_input": {"status": "available"}},
+      {"tool_name": "place_order", "tool_input": {"pet_id": 12345, "quantity": 1}},
+      {"tool_name": "update_pet_status", "tool_input": {"pet_id": 12345, "status": "sold", "name": "Fluffy"}}
+    ],
+    "reference": "{\"selected_pet_id\": 12345, \"completed\": true, \"error\": null}"
+  }
+]

@@ -1,0 +1,364 @@
+{
+  "get_inventory": {
+    "400": {
+      "strategy": "escalate_to_human",
+      "reasoning": "The request is malformed or missing required parameters. Automated retries will not fix an invalid request format or incomplete input.",
+      "config": {}
+    },
+    "401": {
+      "strategy": "escalate_to_human",
+      "reasoning": "Authentication failure prevents access to the inventory data. User credentials or auth configuration must be corrected manually.",
+      "config": {}
+    },
+    "403": {
+      "strategy": "escalate_to_human",
+      "reasoning": "Access is forbidden. The user or system lacks permission to retrieve inventory. Requires permission review by a human.",
+      "config": {}
+    },
+    "404": {
+      "strategy": "escalate_to_human",
+      "reasoning": "Inventory endpoint returned Not Found. This is not expected and indicates misconfiguration in routing or the underlying service.",
+      "config": {}
+    },
+    "405": {
+      "strategy": "escalate_to_human",
+      "reasoning": "Method not allowed indicates an API contract mismatch. Needs investigation.",
+      "config": {}
+    },
+    "408": {
+      "strategy": "wait",
+      "reasoning": "The request timed out. Likely a transient network or backend delay. Waiting and retrying is appropriate.",
+      "config": {
+        "max_retries": 3,
+        "wait_seconds": 5
+      }
+    },
+    "409": {
+      "strategy": "retry",
+      "reasoning": "Conflict indicates the resource is temporarily unavailable due to concurrent updates. Retrying may resolve it.",
+      "config": {
+        "max_retries": 3,
+        "wait_seconds": 2
+      }
+    },
+    "412": {
+      "strategy": "escalate_to_human",
+      "reasoning": "Precondition failed (ETag issues or stale resource). This cannot usually be resolved automatically.",
+      "config": {}
+    },
+    "413": {
+      "strategy": "escalate_to_human",
+      "reasoning": "The get_inventory tool returned a 413 Payload Too Large error. This indicates an issue with the request size that cannot be resolved by retrying or waiting. Therefore, the request must be escalated to a human for investigation and resolution.",
+      "config": {}
+    },
+    "415": {
+      "strategy": "escalate_to_human",
+      "reasoning": "Unsupported media type. Requires request format correction.",
+      "config": {}
+    },
+    "422": {
+      "strategy": "escalate_to_human",
+      "reasoning": "Semantic or validation problem. The request is well-formed but invalid.",
+      "config": {}
+    },
+    "429": {
+      "strategy": "wait",
+      "reasoning": "Too many requests. Waiting is the safest strategy.",
+      "config": {
+        "max_retries": 3,
+        "wait_seconds": 10
+      }
+    },
+    "500": {
+      "strategy": "escalate_to_human",
+      "reasoning": "Persistent server error indicates a backend failure requiring manual investigation.",
+      "config": {}
+    },
+    "501": {
+      "strategy": "escalate_to_human",
+      "reasoning": "Not implemented. No retry will fix missing functionality.",
+      "config": {}
+    },
+    "502": {
+      "strategy": "wait",
+      "reasoning": "Bad Gateway often indicates a transient dependency failure. Retrying may succeed.",
+      "config": {
+        "max_retries": 3,
+        "wait_seconds": 5
+      }
+    },
+    "503": {
+      "strategy": "wait",
+      "reasoning": "Service unavailable is usually temporary. Waiting gives the system time to recover.",
+      "config": {
+        "max_retries": 3,
+        "wait_seconds": 8
+      }
+    },
+    "504": {
+      "strategy": "wait",
+      "reasoning": "Gateway timeout suggests temporary backend slowness.",
+      "config": {
+        "max_retries": 3,
+        "wait_seconds": 5
+      }
+    },
+    "507": {
+      "strategy": "escalate_to_human",
+      "reasoning": "Insufficient storage is a server-side capacity issue requiring intervention.",
+      "config": {}
+    },
+    "508": {
+      "strategy": "retry",
+      "reasoning": "Loop detected may resolve after retrying the request.",
+      "config": {
+        "max_retries": 2,
+        "wait_seconds": 3
+      }
+    }
+  },
+  "find_pets_by_status": {
+    "400": {
+      "strategy": "escalate_to_human",
+      "reasoning": "Invalid status or malformed query.",
+      "config": {}
+    },
+    "401": {
+      "strategy": "escalate_to_human",
+      "reasoning": "Authentication is required to list pets.",
+      "config": {}
+    },
+    "403": {
+      "strategy": "escalate_to_human",
+      "reasoning": "User lacks permissions to access pet search functionality.",
+      "config": {}
+    },
+    "404": {
+      "strategy": "retry",
+      "reasoning": "Status filtering endpoint temporarily unavailable or incorrect routing. Retrying may resolve it.",
+      "config": {
+        "max_retries": 2,
+        "wait_seconds": 2
+      }
+    },
+    "408": {
+      "strategy": "wait",
+      "reasoning": "Timeout. Network fluctuations or backend delays are common.",
+      "config": {
+        "max_retries": 3,
+        "wait_seconds": 5
+      }
+    },
+    "409": {
+      "strategy": "retry",
+      "reasoning": "Resource conflict due to indexing or concurrent updates.",
+      "config": {
+        "max_retries": 3,
+        "wait_seconds": 2
+      }
+    },
+    "422": {
+      "strategy": "escalate_to_human",
+      "reasoning": "Invalid or unsupported status value.",
+      "config": {}
+    },
+    "429": {
+      "strategy": "wait",
+      "reasoning": "Rate limit exceeded. Must wait.",
+      "config": {
+        "max_retries": 3,
+        "wait_seconds": 10
+      }
+    },
+    "500": {
+      "strategy": "retry",
+      "reasoning": "Temporary backend failure when reading pet status index.",
+      "config": {
+        "max_retries": 2,
+        "wait_seconds": 3
+      }
+    },
+    "502": {
+      "strategy": "wait",
+      "reasoning": "Transient proxy error.",
+      "config": {
+        "max_retries": 3,
+        "wait_seconds": 5
+      }
+    },
+    "503": {
+      "strategy": "wait",
+      "reasoning": "Service overloaded; retry after waiting.",
+      "config": {
+        "max_retries": 3,
+        "wait_seconds": 8
+      }
+    }
+  },
+  "place_order": {
+    "400": {
+      "strategy": "escalate_to_human",
+      "reasoning": "Order payload invalid. Needs correction.",
+      "config": {}
+    },
+    "401": {
+      "strategy": "escalate_to_human",
+      "reasoning": "User not authenticated. Order cannot proceed.",
+      "config": {}
+    },
+    "403": {
+      "strategy": "escalate_to_human",
+      "reasoning": "User not authorized to place orders.",
+      "config": {}
+    },
+    "404": {
+      "strategy": "escalate_to_human",
+      "reasoning": "Pet not found. Retry won't fix incorrect IDs or missing inventory.",
+      "config": {}
+    },
+    "408": {
+      "strategy": "wait",
+      "reasoning": "Timeout during order placement. Backend may be busy.",
+      "config": {
+        "max_retries": 2,
+        "wait_seconds": 4
+      }
+    },
+    "409": {
+      "strategy": "retry",
+      "reasoning": "Conflict such as duplicate order or locked inventory entry.",
+      "config": {
+        "max_retries": 3,
+        "wait_seconds": 2
+      }
+    },
+    "422": {
+      "strategy": "escalate_to_human",
+      "reasoning": "Business rule violation: invalid order details.",
+      "config": {}
+    },
+    "429": {
+      "strategy": "wait",
+      "reasoning": "Too many orders in a short time. Must wait.",
+      "config": {
+        "max_retries": 3,
+        "wait_seconds": 10
+      }
+    },
+    "500": {
+      "strategy": "retry",
+      "reasoning": "Server failed to process order. Temporary condition possible.",
+      "config": {
+        "max_retries": 2,
+        "wait_seconds": 3
+      }
+    },
+    "502": {
+      "strategy": "wait",
+      "reasoning": "Gateway error while reaching order processor.",
+      "config": {
+        "max_retries": 3,
+        "wait_seconds": 5
+      }
+    },
+    "503": {
+      "strategy": "wait",
+      "reasoning": "Order system overloaded.",
+      "config": {
+        "max_retries": 3,
+        "wait_seconds": 8
+      }
+    }
+  },
+  "update_pet_status": {
+    "400": {
+      "strategy": "escalate_to_human",
+      "reasoning": "Invalid status update payload.",
+      "config": {}
+    },
+    "401": {
+      "strategy": "escalate_to_human",
+      "reasoning": "Authentication required to modify pet data.",
+      "config": {}
+    },
+    "403": {
+      "strategy": "escalate_to_human",
+      "reasoning": "Caller lacks permissions to update pet records.",
+      "config": {}
+    },
+    "404": {
+      "strategy": "escalate_to_human",
+      "reasoning": "Pet not found — retry not useful.",
+      "config": {}
+    },
+    "408": {
+      "strategy": "wait",
+      "reasoning": "Timeout while updating. Possibly temporary.",
+      "config": {
+        "max_retries": 3,
+        "wait_seconds": 5
+      }
+    },
+    "409": {
+      "strategy": "retry",
+      "reasoning": "Conflict due to concurrent updates. Retry after delay.",
+      "config": {
+        "max_retries": 3,
+        "wait_seconds": 2
+      }
+    },
+    "412": {
+      "strategy": "retry",
+      "reasoning": "Precondition failed (ETag mismatch). Refetch and retry may succeed.",
+      "config": {
+        "max_retries": 2,
+        "wait_seconds": 2
+      }
+    },
+    "422": {
+      "strategy": "escalate_to_human",
+      "reasoning": "Invalid new status (business rule violation).",
+      "config": {}
+    },
+    "429": {
+      "strategy": "wait",
+      "reasoning": "Rate limit reached. Must wait.",
+      "config": {
+        "max_retries": 3,
+        "wait_seconds": 10
+      }
+    },
+    "500": {
+      "strategy": "retry",
+      "reasoning": "Internal error during update. Retry may succeed.",
+      "config": {
+        "max_retries": 2,
+        "wait_seconds": 3
+      }
+    },
+    "502": {
+      "strategy": "wait",
+      "reasoning": "Temporary proxy or gateway issue.",
+      "config": {
+        "max_retries": 3,
+        "wait_seconds": 5
+      }
+    },
+    "503": {
+      "strategy": "wait",
+      "reasoning": "Service temporarily unavailable.",
+      "config": {
+        "max_retries": 3,
+        "wait_seconds": 8
+      }
+    },
+    "504": {
+      "strategy": "wait",
+      "reasoning": "Gateway timeout while updating pet status.",
+      "config": {
+        "max_retries": 3,
+        "wait_seconds": 5
+      }
+    }
+  }
+}
