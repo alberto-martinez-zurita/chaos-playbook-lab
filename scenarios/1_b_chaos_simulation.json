@@ -1,0 +1,35 @@
+{
+  "title": "⚔️  Agent A/B Comparison: Simulated Agent No Playbook vs Simulated Agent Retrieves Playbook",
+  "steps": [
+    {
+      "name": "1. Executing A/B Comparison Experiment",
+      "script": "scripts/run_agent_comparison.py",
+      "args": [
+        "--agent-a", "baseline",
+        "--agent-b", "playbook_simulated",
+        "--failure-rates", "0.10",
+        "--experiments-per-rate", "5",
+        "--seed", "42"
+      ]
+    },
+    {
+      "name": "2. Generating Comparative Plots",
+      "script": "scripts/plot_parametric_results.py",
+      "args": ["--latest"]
+    },
+    {
+      "name": "3. Generating Analysis Report",
+      "script": "scripts/generate_parametric_report.py",
+      "args": ["--latest"]
+    },
+    {
+      "name": "4. Building Interactive Dashboard",
+      "script": "scripts/generate_dashboard.py",
+      "args": ["--latest"]
+    }
+  ],
+  "auto_open": [
+    "report.md",
+    "dashboard.html"
+  ]
+}

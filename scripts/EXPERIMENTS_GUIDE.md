@@ -38,19 +38,25 @@ Use this script to perform A/B testing between two specific agent configurations
 
 ```bash
 poetry run python scripts/run_agent_comparison.py \
-  --agent-a playbook_simulated \
-  --agent-b order_agent_llm \
+  --agent-a petstore_agent \
+  --playbook-a data/playbook_petstore_strong.json \
+  --agent-b petstore_agent \
+  --playbook-b data/playbook_petstore_weak.json \
   --failure-rates 0.10 \
-  --experiments-per-rate 5
+  --experiments-per-rate 5 \
+  --seed 42
 ```
 
 ### Parameters
 
   * **`--agent-a`**: The identifier for the first agent/strategy.
   * **`--agent-b`**: The identifier for the second agent/strategy.
+  * **`--playbook-a`**: The playbook for the first agent/strategy.
+  * **`--playbook-b`**: The playbook for the second agent/strategy.
   * **`--failure-rates`**: The specific failure rate(s) under which to compare the agents.
   * **`--experiments-per-rate`**: How many trials to run per agent per failure rate.
-
+  * **`--seed`**: The seed for the random experiment.
+  
 ### Outputs
 
 Files are saved in a new timestamped directory:

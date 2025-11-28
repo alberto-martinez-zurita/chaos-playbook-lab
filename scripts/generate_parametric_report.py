@@ -50,6 +50,14 @@ def generate_executive_summary(metrics: Dict, n_experiments: int) -> str:
     playbook_success = max_rate_data['playbook']['success_rate']['mean']
     improvement = playbook_success - baseline_success
     
+    # SAFE CALCULATION: Handle division by zero
+    if baseline_success > 0:
+        rel_improvement = f"{improvement/baseline_success*100:.1f}%"
+    elif playbook_success > 0:
+        rel_improvement = "Infinite (Baseline 0%)"
+    else:
+        rel_improvement = "0.0%"  # Both failed completely
+
     summary = f"""## Executive Summary
 
 This parametric study evaluated the **Chaos Playbook Engine** across {len(failure_rates)} failure rates (0% to {max_rate*100:.0f}%) with {n_experiments} experiment pairs per rate, totaling **{n_experiments * len(failure_rates) * 2} individual runs**.
@@ -59,7 +67,7 @@ This parametric study evaluated the **Chaos Playbook Engine** across {len(failur
 **🎯 Primary Result:** Under maximum chaos conditions ({max_rate*100:.0f}% failure rate):
 - **Baseline Agent**: {baseline_success*100:.0f}% success rate
 - **Playbook Agent**: {playbook_success*100:.0f}% success rate
-- **Improvement**: **+{improvement*100:.0f} percentage points** ({improvement/baseline_success*100:.1f}% relative improvement)
+- **Improvement**: **+{improvement*100:.0f} percentage points** ({rel_improvement} relative improvement)
 
 **✅ Hypothesis Validation:** The RAG-powered Playbook Agent demonstrates **significantly higher resilience** under chaos conditions compared to the baseline agent.
 

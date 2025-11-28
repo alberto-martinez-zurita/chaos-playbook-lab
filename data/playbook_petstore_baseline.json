@@ -1,0 +1,10 @@
+{
+  "_metadata": {
+    "description": "Baseline Playbook - Simulates an agent with NO resilience. Fails immediately on any error."
+  },
+  "default": {
+    "strategy": "fail_fast",
+    "reasoning": "No recovery knowledge available (Baseline). System must abort.",
+    "config": {}
+  }
+}

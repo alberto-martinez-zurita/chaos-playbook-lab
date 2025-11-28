@@ -1,10 +1,11 @@
 """
 run_agent_comparison.py - Agent Comparison with Phase 5 Dashboard Integration
 =============================================================================
-FINAL VERSION v5.1 - With API Rate Limit Handling
+FINAL VERSION v5.5 - Fresh Agent Instantiation per Experiment (Fixes State Pollution)
 """
 
 import sys
+import asyncio
 import argparse
 import asyncio
 import json
@@ -18,271 +19,77 @@ from datetime import datetime
 # ==============================================================================
 # SETUP PATHS
 # ==============================================================================
-project_root = Path(__file__).resolve().parent.parent
+current_file = Path(__file__).resolve()
+project_root = current_file.parent.parent
+src_path = project_root / "src" / "chaos_playbook_engine"
+
+if str(src_path) not in sys.path:
+    sys.path.insert(0, str(src_path))
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
-from config.config_loader import load_config
+from core.logging_setup import setup_logger
 from agents.petstore_agent import PetstoreAgent
-from agents.order_agent_llm import (
-    initialize_order_agent_llm,
-    process_order_simple,
-    PlaybookStorage
-)
-from tools.simulated_apis import (
-    call_simulated_inventory_api,
-    call_simulated_payments_api,
-    call_simulated_shipping_api,
-    call_simulated_erp_api,
-)
 from config.chaos_config import ChaosConfig
-
-
-# ================================
-# AGENT IMPLEMENTATIONS
-# ================================
-
-class BaselineAgent:
-    """Phase 5 baseline agent - no retries."""
-    
-    def __init__(self, playbook_path: Optional[str] = None):
-        pass
-    
-    async def process_order(
-        self,
-        order_id: str,
-        failure_rate: float,
-        seed: int
-    ) -> Dict:
-        """Process order WITHOUT retries."""
-        steps = ["inventory", "payment", "shipment", "erp"]
-        steps_completed = []
-        self.workflow_status = "unknown"
-        
-        for i, step in enumerate(steps):
-            chaos_config = ChaosConfig(
-                enabled=True,
-                failure_rate=failure_rate,
-                failure_type="timeout",
-                max_delay_seconds=2,
-                seed=seed + i
-            )
-            
-            if step == "inventory":
-                result = await call_simulated_inventory_api(
-                    "check_stock",
-                    {"sku": order_id, "qty": 1},
-                    chaos_config
-                )
-            elif step == "payment":
-                result = await call_simulated_payments_api(
-                    "capture",
-                    {"amount": 100.0, "currency": "USD"},
-                    chaos_config
-                )
-            elif step == "shipment":
-                result = await call_simulated_shipping_api(
-                    "create_shipment",
-                    {"order_id": order_id, "address": "123 Main St"},
-                    chaos_config
-                )
-            else:  # erp
-                result = await call_simulated_erp_api(
-                    "create_order",
-                    {"order_id": order_id, "status": "completed"},
-                    chaos_config
-                )
-            
-            if result["status"] == "error":
-                return {
-                    "status": "failure",
-                    "steps_completed": steps_completed,
-                    "failed_at": step
-                }
-            
-            steps_completed.append(step)
-        
-        return {
-            "status": "success",
-            "steps_completed": steps_completed,
-            "failed_at": None
-        }
-
-
-class PlaybookSimulatedAgent:
-    """Phase 5 playbook agent - hardcoded retries."""
-    
-    def __init__(self, playbook_path: Optional[str] = None, max_retries: int = 2):
-        self.max_retries = max_retries
-    
-    async def process_order(
-        self,
-        order_id: str,
-        failure_rate: float,
-        seed: int
-    ) -> Dict:
-        """Process order WITH hardcoded retries."""
-        steps = ["inventory", "payment", "shipment", "erp"]
-        steps_completed = []
-        
-        for step_idx, step in enumerate(steps):
-            success = False
-            
-            for attempt in range(self.max_retries + 1):
-                chaos_config = ChaosConfig(
-                    enabled=True,
-                    failure_rate=failure_rate,
-                    failure_type="timeout",
-                    max_delay_seconds=2,
-                    seed=seed + step_idx + attempt * 1000
-                )
-                
-                if step == "inventory":
-                    result = await call_simulated_inventory_api(
-                        "check_stock",
-                        {"sku": order_id, "qty": 1},
-                        chaos_config
-                    )
-                elif step == "payment":
-                    result = await call_simulated_payments_api(
-                        "capture",
-                        {"amount": 100.0, "currency": "USD"},
-                        chaos_config
-                    )
-                elif step == "shipment":
-                    result = await call_simulated_shipping_api(
-                        "create_shipment",
-                        {"order_id": order_id, "address": "123 Main St"},
-                        chaos_config
-                    )
-                else:  # erp
-                    result = await call_simulated_erp_api(
-                        "create_order",
-                        {"order_id": order_id, "status": "completed"},
-                        chaos_config
-                    )
-                
-                if result["status"] == "success":
-                    success = True
-                    break
-                
-                if attempt < self.max_retries:
-                    await asyncio.sleep(0.5)
-            
-            if not success:
-                return {
-                    "status": "failure",
-                    "steps_completed": steps_completed,
-                    "failed_at": step
-                }
-            
-            steps_completed.append(step)
-        
-        return {
-            "status": "success",
-            "steps_completed": steps_completed,
-            "failed_at": None
-        }
-
-
-class OrderAgentLLMWrapper:
-    """Phase 6 OrderAgentLLM wrapper."""
-    
-    def __init__(self, playbook_path: str = "data/playbook_phase6.json"):
-        self.playbook_path = playbook_path
-        from agents import order_agent_llm
-        order_agent_llm.playbook_storage = PlaybookStorage(path=playbook_path)
-        print(f"  OrderAgentLLM using: {playbook_path}")
-    
-    async def process_order(
-        self,
-        order_id: str,
-        failure_rate: float,
-        seed: int
-    ) -> Dict:
-        """Process order with playbook-driven retries."""
-        result = await process_order_simple(
-            order_id=order_id,
-            order_index=seed,
-            failure_rate=failure_rate
-        )
-        
-        return {
-            "status": result["status"],
-            "steps_completed": result["steps_completed"],
-            "failed_at": None if result["status"] == "success" else "unknown"
-        }
-
+from config.config_loader import load_config
 
 # ================================
 # AGENT FACTORY
 # ================================
 
-def create_agent(
-    agent_type: Literal["baseline", "playbook_simulated", "order_agent_llm", "petstore_llm"],
-    playbook_path: Optional[str] = None
-):
-    """Create agent instance."""
-    if agent_type == "baseline":
-        return BaselineAgent()
-    elif agent_type == "playbook_simulated":
-        return PlaybookSimulatedAgent()
-    elif agent_type == "petstore_llm":
-        if playbook_path is None:
-            playbook_path = "data/playbook_phase6_petstore.json"
-        return PetstoreAgent(playbook_path=playbook_path)
-    else:
-        if playbook_path is None:
-            playbook_path = "data/playbook_phase6.json"
-        return OrderAgentLLMWrapper(playbook_path=playbook_path)
+def create_petstore_agent(playbook_path: str, verbose: bool) -> PetstoreAgent:
+    """Instancia un PetstoreAgent con un playbook específico."""
+    return PetstoreAgent(playbook_path=playbook_path, mock_mode=False, verbose=verbose)
 
 # ================================
-# EXPERIMENT EXECUTION (MEJORADO)
+# EXPERIMENT EXECUTION
 # ================================
 
 async def run_experiment_safe(
     experiment_id: str,
-    agent: any,
-    agent_name: str,
+    playbook_path: str,  # ✅ CHANGE: Pass playbook path instead of agent instance
+    agent_label: str,
     failure_rate: float,
-    seed: int
+    seed: int,
+    verbose: bool,
+    logger
 ) -> Dict:
-    """Run single experiment with error handling for 429s."""
+    """Run single LLM experiment with FRESH agent instance."""
     import time
     start_time = time.time()
     
     try:
-        # Intentamos ejecutar el agente
+        # ✅ CRITICAL FIX: Create FRESH agent for every single experiment
+        # This eliminates any state pollution between runs (A vs B, or Exp 1 vs Exp 2)
+        agent = create_petstore_agent(playbook_path, verbose)
+        
         result = await agent.process_order(
             order_id=f"exp_{experiment_id}",
             failure_rate=failure_rate,
             seed=seed
         )
         
-        # ✅ DEBUG: Imprimir qué devolvió exactamente el agente
-        print(f"    🔍 DEBUG RESULT: Status='{result['status']}', FailedAt='{result.get('failed_at')}'")
-
         outcome = result["status"]
         steps = len(result["steps_completed"])
         failed_at = result.get("failed_at", "")
         
+        logger.debug(f"  Exp {experiment_id}: Outcome={outcome}, Steps={steps}, Time={result['duration_ms']:.0f}ms")
+        
     except Exception as e:
-        # Capturamos crash del runner (ej. API Error)
-        print(f"  🔥 CRASH: {str(e)[:100]}...")
+        logger.error(f"  🔥 CRASH {experiment_id}: {str(e)[:100]}...")
         outcome = "failure"
         steps = 0
         failed_at = "runner_crash"
         
-        # Si es Rate Limit, forzamos una pausa larga
         if "429" in str(e) or "quota" in str(e).lower():
-            print("  ⏳ Quota exceeded. Cooling down for 60s...")
+            logger.warning("  ⏳ Quota exceeded. Cooling down for 60s...")
             await asyncio.sleep(60)
 
     duration_ms = (time.time() - start_time) * 1000
     
     return {
         "experiment_id": experiment_id,
-        "agent": agent_name,
+        "agent": agent_label,
         "failure_rate": failure_rate,
         "seed": seed,
         "outcome": outcome,
@@ -292,258 +99,129 @@ async def run_experiment_safe(
     }
 
 # ================================
-# PHASE 5 FORMAT CONVERSION
+# DATA SAVING
 # ================================
 
-def save_phase5_format(
-    experiments: List[Dict],
-    output_dir: Path,
-    agent_names: Dict[str, str]
-) -> None:
-    """Save results in Phase 5 format matching generate_dashboard.py expectations."""
-    
-    # 1. Save raw_results.csv
+def calculate_inconsistency(exp: Dict) -> int:
+    if exp["outcome"] == "success": return 0
+    steps = exp.get("steps_completed", 0)
+    if steps == 3: return 1
+    return 0
+
+def save_phase5_format(experiments: List[Dict], output_dir: Path, agent_labels: Dict[str, str], logger) -> None:
     csv_path = output_dir / "raw_results.csv"
     with open(csv_path, "w", newline="") as f:
-        fieldnames = [
-            "experiment_id", "agent_type", "outcome", "duration_s", 
-            "inconsistencies_count", "strategies_used", "seed", "failure_rate"
-        ]
+        fieldnames = ["experiment_id", "agent_type", "outcome", "duration_s", "inconsistencies_count", "strategies_used", "seed", "failure_rate"]
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
-        
         for exp in experiments:
-            # Determinación correcta del tipo de agente para la comparación A/B
-            if exp["experiment_id"].startswith("A-"):
-                agent_type = "baseline"
-            elif exp["experiment_id"].startswith("B-"):
-                agent_type = "playbook"
-            else:
-                agent_type = agent_names.get(exp["agent"], exp["agent"])
-
-            prefix = "BASE" if agent_type == "baseline" else "PLAY"
-            exp_id = f"{prefix}-{exp['seed']}"
+            if exp["experiment_id"].startswith("A-"): atype = "baseline"
+            elif exp["experiment_id"].startswith("B-"): atype = "playbook"
+            else: atype = "unknown"
             
             writer.writerow({
-                "experiment_id": exp_id,
-                "agent_type": agent_type,
+                "experiment_id": f"{atype.upper()}-{exp['seed']}",
+                "agent_type": atype,
                 "outcome": exp["outcome"],
                 "duration_s": round(exp["duration_ms"] / 1000, 2),
-                "inconsistencies_count": 0,
+                "inconsistencies_count": calculate_inconsistency(exp),
                 "strategies_used": "",
                 "seed": exp["seed"],
                 "failure_rate": exp["failure_rate"]
             })
-    
-    # 2. Calculate aggregated metrics
-    by_rate = defaultdict(lambda: {
-        "failure_rate": None,
-        "n_experiments": 0,
-        "baseline": None,
-        "playbook": None
-    })
-    
+            
+    by_rate = defaultdict(lambda: {"failure_rate": None, "n_experiments": 0, "baseline": None, "playbook": None})
     rate_groups = defaultdict(list)
-    for exp in experiments:
-        rate_groups[exp["failure_rate"]].append(exp)
+    for exp in experiments: rate_groups[exp["failure_rate"]].append(exp)
     
     for rate, rate_exps in rate_groups.items():
         rate_str = str(rate)
         by_rate[rate_str]["failure_rate"] = rate
         by_rate[rate_str]["n_experiments"] = len(rate_exps) // 2
         
-        agent_groups = defaultdict(list)
-        for exp in rate_exps:
-            if exp["experiment_id"].startswith("A-"):
-                atype = "baseline"
-            elif exp["experiment_id"].startswith("B-"):
-                atype = "playbook"
-            else:
-                atype = "unknown"
-            agent_groups[atype].append(exp)
+        exps_a = [e for e in rate_exps if e["experiment_id"].startswith("A-")]
+        exps_b = [e for e in rate_exps if e["experiment_id"].startswith("B-")]
         
-        for atype in ["baseline", "playbook"]:
-            agent_exps = agent_groups.get(atype, [])
-            if not agent_exps:
-                # Default safe values
-                by_rate[rate_str][atype] = {
-                    "n_runs": 0,
-                    "success_rate": {"mean": 0.0, "std": 0.0},
-                    "duration_s": {"mean": 0.0, "std": 0.0},
-                    "inconsistencies": {"mean": 0.0, "std": 0.0}
-                }
+        groups = {"baseline": exps_a, "playbook": exps_b}
+        for key, exps in groups.items():
+            if not exps:
+                by_rate[rate_str][key] = {"n_runs": 0, "success_rate": {"mean": 0.0, "std": 0.0}, "duration_s": {"mean": 0.0, "std": 0.0}, "inconsistencies": {"mean": 0.0, "std": 0.0}}
                 continue
-
-            successes = sum(1 for e in agent_exps if e["outcome"] == "success")
-            latencies = [float(e["duration_ms"]) for e in agent_exps]
-            avg_duration = sum(latencies) / len(latencies) / 1000 if latencies else 0.0
+            successes = sum(1 for e in exps if e["outcome"] == "success")
+            latencies = [e["duration_ms"] for e in exps]
+            inconsistencies = [calculate_inconsistency(e) for e in exps]
+            avg_dur = sum(latencies)/len(latencies)/1000 if latencies else 0
+            avg_inc = sum(inconsistencies)/len(inconsistencies) if inconsistencies else 0
+            by_rate[rate_str][key] = {"n_runs": len(exps), "success_rate": {"mean": successes/len(exps), "std": 0.0}, "duration_s": {"mean": avg_dur, "std": 0.0}, "inconsistencies": {"mean": avg_inc, "std": 0.0}}
             
-            by_rate[rate_str][atype] = {
-                "n_runs": len(agent_exps),
-                "success_rate": {"mean": successes / len(agent_exps), "std": 0.0},
-                "duration_s": {"mean": avg_duration, "std": 0.0},
-                "inconsistencies": {"mean": 0, "std": 0.0}
-            }
-    
     json_path = output_dir / "aggregated_metrics.json"
-    with open(json_path, "w") as f:
-        json.dump(dict(by_rate), f, indent=2)
-    
-    print(f"\n✅ Results saved to {output_dir}")
+    with open(json_path, "w") as f: json.dump(dict(by_rate), f, indent=2)
+    logger.info(f"✅ Results saved to {output_dir}")
 
 # ================================
-# MAIN COMPARISON LOGIC
+# MAIN LOGIC
 # ================================
 
 async def run_comparison(args) -> bool:
-    print("\n" + "="*70)
-    print("AGENT COMPARISON - PARAMETRIC EXPERIMENTS")
-    print("="*70)
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    output_dir = (Path("results") / "parametric_experiments" / f"run_{timestamp}").resolve()
+    logger = setup_logger("agent_comparison", verbose=args.verbose, log_dir=str(output_dir))
     
-    # 1. CARGAR CONFIGURACIÓN
-    config = load_config() # Carga dev_config.yaml o prod_config.yaml según ENV
+    logger.info("="*70)
+    logger.info("🤖 PETSTORE AGENT COMPARISON (Phase 6 - Fresh Instances)")
+    logger.info("="*70)
     
-    # 2. DETERMINAR SEMILLA (Prioridad: CLI > YAML > Hardcoded 42)
-    if args.seed is not None:
-        base_seed = args.seed
-        source = "CLI"
-    else:
-        # Intenta leer del yaml, si falla usa 42
-        base_seed = config.get('experiment', {}).get('default_seed', 42)
-        source = "YAML"
-
-    print(f"\nConfiguration:")
-    print(f"  Agent A: {args.agent_a}")
-    if args.playbook_a:
-        print(f"    Playbook: {args.playbook_a}")
-    print(f"  Agent B: {args.agent_b}")
-    if args.playbook_b:
-        print(f"    Playbook: {args.playbook_b}")
-    print(f"  Failure rates: {args.failure_rates}")
-    print(f"  Experiments per rate: {args.experiments_per_rate}")
-    print(f"  Total experiments: {len(args.failure_rates) * args.experiments_per_rate * 2}")
-    
-    print("\n[1/4] Initializing agents...")
-    try:
-        agent_a = create_agent(args.agent_a, args.playbook_a)
-        agent_b = create_agent(args.agent_b, args.playbook_b)
-    except Exception as e:
-        print(f"❌ Agent initialization failed: {e}")
-        return False
-    
-    print("\n[2/4] Running experiments...")
+    config = load_config()
+    base_seed = args.seed if args.seed is not None else config.get('experiment', {}).get('default_seed', 42)
     
     all_results = []
-
-    # Configuración de seguridad para API Rate Limits
-    SAFE_DELAY_SECONDS = 5  # Pausa entre experimentos para recargar quota
+    SAFE_DELAY_SECONDS = 10
     
     for rate in args.failure_rates:
-        print(f"\n📊 Failure rate: {rate:.0%}")
+        logger.info(f"\n📊 Chaos Level: {rate:.0%}")
         
-        # --- AGENT A LOOP ---
-        print(f"\n  Agent A ({args.agent_a}):")
+        # --- RUN AGENT A ---
+        logger.info(f"  👉 Agent A ({args.agent_a_label})...")
         for i in range(args.experiments_per_rate):
             seed = base_seed + i
-            exp_id = f"A-{rate:.2f}-{i+1:03d}"
+            # ✅ Change: Pass playbook path string, not instance
+            res = await run_experiment_safe(f"A-{rate:.2f}-{i+1:03d}", args.playbook_a, args.agent_a_label, rate, seed, args.verbose, logger)
+            all_results.append(res)
+            if args.verbose: print(f"    Run {i+1}: {'✅' if res['outcome']=='success' else '❌'}")
+            if i < args.experiments_per_rate - 1: await asyncio.sleep(SAFE_DELAY_SECONDS)
             
-            # Run safe
-            result = await run_experiment_safe(exp_id, agent_a, args.agent_a, rate, seed)
-            all_results.append(result)
-            
-            success_icon = "✅" if result["outcome"] == "success" else "❌"
-            print(f"    Run {i+1}: {success_icon} ({result['duration_ms']}ms)")
-            
-            # 🛑 THROTTLING: Pausa obligatoria para evitar 429
-            if i < args.experiments_per_rate - 1:
-                await asyncio.sleep(SAFE_DELAY_SECONDS)
-        
-        # Pausa extra entre agentes
         await asyncio.sleep(SAFE_DELAY_SECONDS)
 
-        # --- AGENT B LOOP ---
-        print(f"\n  Agent B ({args.agent_b}):")
+        # --- RUN AGENT B ---
+        logger.info(f"  👉 Agent B ({args.agent_b_label})...")
         for i in range(args.experiments_per_rate):
             seed = base_seed + i
-            exp_id = f"B-{rate:.2f}-{i+1:03d}"
+            # ✅ Change: Pass playbook path string, not instance
+            res = await run_experiment_safe(f"B-{rate:.2f}-{i+1:03d}", args.playbook_b, args.agent_b_label, rate, seed, args.verbose, logger)
+            all_results.append(res)
+            if args.verbose: print(f"    Run {i+1}: {'✅' if res['outcome']=='success' else '❌'}")
+            if i < args.experiments_per_rate - 1: await asyncio.sleep(SAFE_DELAY_SECONDS)
             
-            # Run safe
-            result = await run_experiment_safe(exp_id, agent_b, args.agent_b, rate, seed)
-            all_results.append(result)
-            
-            success_icon = "✅" if result["outcome"] == "success" else "❌"
-            print(f"    Run {i+1}: {success_icon} ({result['duration_ms']}ms)")
-            
-            # 🛑 THROTTLING
-            if i < args.experiments_per_rate - 1:
-                await asyncio.sleep(SAFE_DELAY_SECONDS)
-        
         base_seed += args.experiments_per_rate
-        await asyncio.sleep(SAFE_DELAY_SECONDS) # Pausa entre rates
+        await asyncio.sleep(SAFE_DELAY_SECONDS)
     
-    print("\n[3/4] Calculating success rates...")
-    print("-" * 70)
-    
-    success_rates = {args.agent_a: {}, args.agent_b: {}}
-    
-    for agent_name in [args.agent_a, args.agent_b]:
-        for rate in args.failure_rates:
-            agent_rate_results = [
-                r for r in all_results 
-                if r["agent"] == agent_name and r["failure_rate"] == rate
-            ]
-            successes = sum(1 for r in agent_rate_results if r["outcome"] == "success")
-            success_rates[agent_name][rate] = successes / len(agent_rate_results)
-    
-    print("\n" + "="*70)
-    print("SUCCESS RATES COMPARISON")
-    print("="*70)
-    print(f"\n{'Failure Rate':<15} | {args.agent_a[:20]:>20} | {args.agent_b[:20]:>20} | {'Delta':>10}")
-    print("-" * 70)
-    
-    for rate in args.failure_rates:
-        rate_a = success_rates[args.agent_a][rate]
-        rate_b = success_rates[args.agent_b][rate]
-        delta = rate_b - rate_a
-        
-        print(f"{rate:>13.0%} | {rate_a:>19.1%} | {rate_b:>19.1%} | {delta:>+9.1%}")    
-    output_dir = Path("results") / "parametric_experiments" / f"run_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
+    logger.info("\n[4/4] Saving results...")
     output_dir.mkdir(parents=True, exist_ok=True)
-    
-    print("\n[4/4] Saving results...")
-    agent_names = { args.agent_a: "baseline", args.agent_b: "playbook" }
-    save_phase5_format(all_results, output_dir, agent_names)
-    
-    print("\n" + "="*70)
-    print("FILES SAVED")
-    print("="*70)
-    print(f"  Location: {output_dir}")
-    print(f"  - raw_results.csv (Phase 5 format)")
-    print(f"  - aggregated_metrics.json (Phase 5 format - COMPLETE STRUCTURE)")
-    
-    print("\n" + "="*70)
-    print("✅ AGENT COMPARISON COMPLETED")
-    print("="*70)
-    
-    print("\n📋 Next step:")
-    print("  python scripts/generate_dashboard.py --latest")
+    labels_map = {"A": "baseline", "B": "playbook"}
+    save_phase5_format(all_results, output_dir, labels_map, logger)
     
     return True
 
-
-# ================================
-# CLI ARGUMENT PARSING
-# ================================
-
 def parse_args():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--agent-a", type=str, required=True)
-    parser.add_argument("--agent-b", type=str, required=True)
-    parser.add_argument("--playbook-a", type=str, default=None)
-    parser.add_argument("--playbook-b", type=str, default=None)
+    parser.add_argument("--agent-a-label", type=str, default="Weak Agent")
+    parser.add_argument("--playbook-a", type=str, required=True)
+    parser.add_argument("--agent-b-label", type=str, default="Strong Agent")
+    parser.add_argument("--playbook-b", type=str, required=True)
     parser.add_argument("--failure-rates", type=float, nargs="+", required=True)
-    parser.add_argument("--experiments-per-rate", type=int, default=100)
-    parser.add_argument("--seed",type=int,default=None,help="Base seed for reproducibility (overrides config.yaml)")
+    parser.add_argument("--experiments-per-rate", type=int, default=5)
+    parser.add_argument("--seed", type=int, default=None)
+    parser.add_argument("--verbose", action="store_true")
     return parser.parse_args()
 
 if __name__ == "__main__":

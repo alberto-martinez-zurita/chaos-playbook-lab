@@ -1,34 +1,39 @@
 """
 Chaos Proxy - Middleware for Chaos Injection (Phase 6 Enhanced)
-Includes Mock Mode and Knowledge-Based Error Injection.
+Includes Mock Mode, Knowledge-Based Error Injection, and Professional Logging.
 """
 import random
 import httpx
 import json
 import os
+import logging
 from typing import Dict, Any, Optional
 from pathlib import Path
 
 class ChaosProxy:
-    def __init__(self, failure_rate: float, seed: int, mock_mode: bool = False):
+    def __init__(self, failure_rate: float, seed: int, mock_mode: bool = True, verbose: bool = False):
         self.failure_rate = failure_rate
         self.rng = random.Random(seed)
         self.mock_mode = mock_mode
+        self.verbose = verbose
+        
+        # Inicializar Logger (se conecta al setup global si existe)
+        self.logger = logging.getLogger("ChaosProxy")
+        
         self.base_url = "https://petstore3.swagger.io/api/v3"
         self.error_codes = self._load_error_codes()
 
     def _load_error_codes(self) -> Dict[str, str]:
         """Load HTTP error definitions from knowledge base."""
         try:
-            # Busca el archivo relativo a la ubicación de este script (src/chaos_playbook_engine/core)
-            # Sube 3 niveles para llegar a la raíz del proyecto y entra en data/
+            # Estrategia de búsqueda robusta de la ruta
             current_dir = Path(__file__).resolve().parent
-            project_root = current_dir.parent.parent.parent # Ajusta según tu estructura exacta
             
-            # Intento robusto de encontrar el archivo
+            # Buscar en ubicaciones probables (relativo a core/ o root)
             possible_paths = [
-                Path("data/http_error_codes.json"), # Desde root de ejecución
-                current_dir.parent.parent / "data" / "http_error_codes.json", # Relativo
+                Path("data/http_error_codes.json"), # Ejecución desde root
+                current_dir.parent.parent / "data" / "http_error_codes.json", # Relativo interno
+                current_dir.parent / "data" / "http_error_codes.json"
             ]
             
             json_path = None
@@ -41,16 +46,25 @@ class ChaosProxy:
                 with open(json_path, 'r', encoding='utf-8') as f:
                     return json.load(f)
             else:
-                print(f"⚠️ Warning: http_error_codes.json not found in {possible_paths}. Using fallback.")
+                self.logger.warning(f"⚠️ http_error_codes.json not found in {possible_paths}. Using fallback.")
+                if self.verbose:
+                    print(f"⚠️ Warning: http_error_codes.json not found. Using fallback.")
                 return {"500": "Internal Server Error (Fallback)", "503": "Service Unavailable (Fallback)"}
                 
         except Exception as e:
-            print(f"⚠️ Warning: Error loading http_error_codes.json: {e}")
+            self.logger.warning(f"⚠️ Error loading http_error_codes.json: {e}")
+            if self.verbose:
+                print(f"⚠️ Warning: Error loading http_error_codes.json: {e}")
             return {"500": "Internal Server Error (Fallback)", "503": "Service Unavailable (Fallback)"}
 
     async def send_request(self, method: str, endpoint: str, params: dict = None, json_body: dict = None) -> Dict[str, Any]:
         """
-        Proxy inteligente con Mock Mode.
+        Proxy inteligente: 
+        1. Decide si inyectar caos (basado en failure_rate).
+        2. Si caos: Elige un error de la Knowledge Base.
+        3. Si no caos:
+           - Si mock_mode=True: Devuelve 200 OK simulado.
+           - Si mock_mode=False: Llama a la API real.
         """
         # 1. Deterministic Chaos Check
         if self.rng.random() < self.failure_rate:
@@ -61,20 +75,27 @@ class ChaosProxy:
             error_code = self.rng.choice(keys)
             error_msg = self.error_codes.get(error_code, "Unknown Error")
             
-            print(f"🔥 CHAOS INJECTED: Simulating {error_code} on {endpoint}")
+            self.logger.info(f"🔥 CHAOS INJECTED: Simulating {error_code} on {endpoint}")
+            if self.verbose: # ✅ Solo print si verbose=True
+                print(f"🔥 CHAOS INJECTED: Simulating {error_code} on {endpoint}")
+                    
             return {
                 "status": "error",
                 "code": int(error_code),
                 "message": f"Simulated Chaos: {error_msg}"
             }
 
-        # 2. Happy Path - MOCK MODE CHECK
+        # 2. Happy Path - MOCK MODE
         if self.mock_mode:
-            print(f"🎭 MOCK API CALL: {method} {endpoint} (Skipping network)")
+            self.logger.info(f"🎭 MOCK API CALL: {method} {endpoint} (Skipping network)")
+            if self.verbose: # ✅ Solo print si verbose=True
+                print(f"🎭 MOCK API CALL: {method} {endpoint} (Skipping network)")
             return self._generate_mock_response(method, endpoint)
         
         # 3. Real API Call
-        print(f"🌐 REAL API CALL: {method} {endpoint}")
+        self.logger.info(f"🌐 REAL API CALL: {method} {endpoint}")
+        if self.verbose: # ✅ Solo print si verbose=True
+            print(f"🌐 REAL API CALL: {method} {endpoint}")        
         async with httpx.AsyncClient() as client:
             try:
                 if method == "GET":
@@ -84,15 +105,20 @@ class ChaosProxy:
                 elif method == "PUT":
                     resp = await client.put(f"{self.base_url}{endpoint}", json=json_body, timeout=10.0)
                 
+                # Normalizamos la respuesta para el Agente
                 if resp.status_code >= 400:
+                    self.logger.warning(f"❌ API Error {resp.status_code}: {resp.text[:100]}")
                     return {"status": "error", "code": resp.status_code, "message": resp.text}
+                
                 return {"status": "success", "code": resp.status_code, "data": resp.json()}
             
             except Exception as e:
+                 self.logger.error(f"💥 Network Exception: {str(e)}")
                  return {"status": "error", "code": 500, "message": str(e)}
 
     def _generate_mock_response(self, method: str, endpoint: str) -> Dict[str, Any]:
         """Generate plausible mock data for 200 OK."""
+        # Respuestas simuladas para mantener al agente feliz sin tocar la API real
         if "inventory" in endpoint:
             return {"status": "success", "code": 200, "data": {"available": 100, "sold": 5, "pending": 2}}
         elif "findByStatus" in endpoint:

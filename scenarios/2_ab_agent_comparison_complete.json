@@ -1,0 +1,36 @@
+{
+  "title": "⚔️  Agent A/B Comparison: No Playbook vs Weak Playbook",
+  "steps": [
+    {
+      "name": "1. Executing A/B Comparison Experiment",
+      "script": "scripts/run_agent_comparison.py",
+      "args": [
+        "--agent-a", "petstore_agent",
+        "--agent-b", "petstore_agent",
+        "--playbook-b", "data/playbook_petstore_weak.json",
+        "--failure-rates", "0.10",
+        "--experiments-per-rate", "5",
+        "--seed", "842"
+      ]
+    },
+    {
+      "name": "2. Generating Comparative Plots",
+      "script": "scripts/plot_parametric_results.py",
+      "args": ["--latest"]
+    },
+    {
+      "name": "3. Generating Analysis Report",
+      "script": "scripts/generate_parametric_report.py",
+      "args": ["--latest"]
+    },
+    {
+      "name": "4. Building Interactive Dashboard",
+      "script": "scripts/generate_dashboard.py",
+      "args": ["--latest"]
+    }
+  ],
+  "auto_open": [
+    "report.md",
+    "dashboard.html"
+  ]
+}

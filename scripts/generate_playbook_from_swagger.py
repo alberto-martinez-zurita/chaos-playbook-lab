@@ -1,9 +1,17 @@
 """
 generate_playbook_from_swagger.py - Auto-generate default playbook from OpenAPI Swagger
 
+UPDATED: Support for local file input or URL
+
 USAGE:
-    python scripts/generate_playbook_from_swagger.py \\
-        --swagger-url https://petstore.swagger.io/v2/swagger.json \\
+    # From URL
+    python scripts/generate_playbook_from_swagger.py \
+        --swagger-url https://petstore3.swagger.io/api/v3/openapi.json \
+        --output data/playbook_petstore_default.json
+    
+    # From local file
+    python scripts/generate_playbook_from_swagger.py \
+        --swagger-file apis/petstore3_openapi.json \
         --output data/playbook_petstore_default.json
 
 PURPOSE:
@@ -18,7 +26,7 @@ HEURISTICS:
     - 503 (Service Unavailable): Retry 4x with 3s backoff
 
 AUTHOR: Auto-generated script for chaos-playbook-engine Phase 6
-DATE: 2025-11-26
+DATE: 2025-11-26 (Updated)
 """
 
 import argparse
@@ -28,35 +36,60 @@ from typing import Dict, List, Any
 from pathlib import Path
 
 
-def fetch_swagger_spec(swagger_url: str) -> Dict[str, Any]:
+def fetch_swagger_spec(swagger_url: str = None, swagger_file: str = None) -> Dict[str, Any]:
     """
-    Download Swagger/OpenAPI specification from URL.
+    Load Swagger/OpenAPI specification from URL or local file.
     
     Args:
-        swagger_url: URL to swagger.json or OpenAPI spec
+        swagger_url: URL to swagger.json or OpenAPI spec (optional)
+        swagger_file: Path to local swagger/openapi JSON file (optional)
     
     Returns:
         dict: Parsed Swagger specification
-    """
-    print(f"📥 Downloading Swagger spec from: {swagger_url}")
     
-    try:
-        response = requests.get(swagger_url, timeout=10)
-        response.raise_for_status()
+    Raises:
+        ValueError: If neither URL nor file provided
+        FileNotFoundError: If local file doesn't exist
+        requests.RequestException: If URL download fails
+        json.JSONDecodeError: If JSON parsing fails
+    """
+    if swagger_file:
+        # Load from local file
+        file_path = Path(swagger_file)
+        if not file_path.exists():
+            raise FileNotFoundError(f"Swagger file not found: {swagger_file}")
         
-        spec = response.json()
-        print(f"✅ Successfully downloaded Swagger spec")
+        print(f"📂 Reading Swagger spec from: {swagger_file}")
+        with open(file_path, 'r', encoding='utf-8') as f:
+            spec = json.load(f)
+        
+        print(f"✅ Successfully loaded Swagger spec")
         print(f"   Title: {spec.get('info', {}).get('title', 'Unknown')}")
         print(f"   Version: {spec.get('info', {}).get('version', 'Unknown')}")
-        
         return spec
     
-    except requests.RequestException as e:
-        print(f"❌ Error downloading Swagger spec: {e}")
-        raise
-    except json.JSONDecodeError as e:
-        print(f"❌ Error parsing Swagger JSON: {e}")
-        raise
+    elif swagger_url:
+        # Download from URL
+        print(f"📥 Downloading Swagger spec from: {swagger_url}")
+        try:
+            response = requests.get(swagger_url, timeout=10)
+            response.raise_for_status()
+            spec = response.json()
+            
+            print(f"✅ Successfully downloaded Swagger spec")
+            print(f"   Title: {spec.get('info', {}).get('title', 'Unknown')}")
+            print(f"   Version: {spec.get('info', {}).get('version', 'Unknown')}")
+            return spec
+        
+        except requests.RequestException as e:
+            print(f"❌ Error downloading Swagger spec: {e}")
+            raise
+        except json.JSONDecodeError as e:
+            print(f"❌ Error parsing Swagger JSON: {e}")
+            raise
+    
+    else:
+        raise ValueError("Must provide either --swagger-url or --swagger-file")
 
 
 def get_default_strategy(error_code: int, method: str) -> Dict[str, Any]:
@@ -64,13 +97,13 @@ def get_default_strategy(error_code: int, method: str) -> Dict[str, Any]:
     Get default retry strategy based on HTTP error code and method.
     
     Heuristics:
-    - 400 (Bad Request): May be transient validation → Retry 1x for safe methods
-    - 404 (Not Found): May be eventual consistency → Retry 2x for safe methods
-    - 405 (Method Not Allowed): Programming error → No retry
-    - 500 (Internal Error): Server issue → Retry 3x with backoff
-    - 503 (Service Unavailable): Temporary → Retry 4x with backoff
-    - Safe methods (GET, HEAD): More aggressive retries (idempotent)
-    - Unsafe methods (POST, PUT): Conservative retries (avoid duplicates)
+        - 400 (Bad Request): May be transient validation → Retry 1x for safe methods
+        - 404 (Not Found): May be eventual consistency → Retry 2x for safe methods
+        - 405 (Method Not Allowed): Programming error → No retry
+        - 500 (Internal Error): Server issue → Retry 3x with backoff
+        - 503 (Service Unavailable): Temporary → Retry 4x with backoff
+        - Safe methods (GET, HEAD): More aggressive retries (idempotent)
+        - Unsafe methods (POST, PUT): Conservative retries (avoid duplicates)
     
     Args:
         error_code: HTTP status code (400, 404, 500, etc.)
@@ -162,7 +195,6 @@ def extract_error_codes(responses: Dict[str, Any]) -> List[int]:
         list: List of error status codes (400+)
     """
     error_codes = []
-    
     for status_code, response_spec in responses.items():
         try:
             code = int(status_code)
@@ -361,24 +393,37 @@ def main():
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog='''
 Examples:
-    # Generate default playbook
+    # Generate from URL
     python scripts/generate_playbook_from_swagger.py \\
-        --swagger-url https://petstore.swagger.io/v2/swagger.json \\
+        --swagger-url https://petstore3.swagger.io/api/v3/openapi.json \\
+        --output data/playbook_petstore_default.json
+    
+    # Generate from local file
+    python scripts/generate_playbook_from_swagger.py \\
+        --swagger-file apis/petstore3_openapi.json \\
         --output data/playbook_petstore_default.json
     
     # Generate with variations
     python scripts/generate_playbook_from_swagger.py \\
-        --swagger-url https://petstore.swagger.io/v2/swagger.json \\
+        --swagger-file apis/petstore3_openapi.json \\
         --output data/playbook_petstore_default.json \\
         --generate-variations
         '''
     )
     
-    parser.add_argument(
+    # Mutually exclusive group for input source
+    input_group = parser.add_mutually_exclusive_group(required=True)
+    
+    input_group.add_argument(
         '--swagger-url',
         type=str,
-        required=True,
         help='URL to Swagger/OpenAPI JSON specification'
+    )
+    
+    input_group.add_argument(
+        '--swagger-file',
+        type=str,
+        help='Path to local Swagger/OpenAPI JSON file (e.g., apis/petstore3_openapi.json)'
     )
     
     parser.add_argument(
@@ -397,8 +442,11 @@ Examples:
     args = parser.parse_args()
     
     try:
-        # Step 1: Download Swagger spec
-        swagger_spec = fetch_swagger_spec(args.swagger_url)
+        # Step 1: Load Swagger spec (from URL or file)
+        swagger_spec = fetch_swagger_spec(
+            swagger_url=args.swagger_url,
+            swagger_file=args.swagger_file
+        )
         
         # Step 2: Generate playbook
         playbook = generate_playbook(swagger_spec)
@@ -414,7 +462,7 @@ Examples:
         print(f"\n🎉 SUCCESS!")
         print(f"   Playbook ready to use with OrderAgent")
         print(f"\n   Next step: Integrate with chaos_agent_petstore.py")
-        
+    
     except Exception as e:
         print(f"\n❌ FAILED: {e}")
         import traceback

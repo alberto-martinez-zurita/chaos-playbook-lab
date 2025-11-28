@@ -1,0 +1,24 @@
+{
+  "title": "⚔️ Agent A/B Comparison: Strong vs Weak Playbook",
+  "steps": [
+    {
+      "name": "1. Generating Comparative Plots",
+      "script": "scripts/plot_parametric_results.py",
+      "args": ["--latest"]
+    },
+    {
+      "name": "2. Generating Analysis Report",
+      "script": "scripts/generate_parametric_report.py",
+      "args": ["--latest"]
+    },
+    {
+      "name": "3. Building Interactive Dashboard",
+      "script": "scripts/generate_dashboard.py",
+      "args": ["--latest"]
+    }
+  ],
+  "auto_open": [
+    "report.md",
+    "dashboard.html"
+  ]
+}

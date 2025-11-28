@@ -1,0 +1,131 @@
+{
+  "get_inventory": {
+    "400": {
+      "strategy": "fail_fast",
+      "reasoning": "Bad Request on GET. Logic error.",
+      "config": {}
+    },
+    "401": {
+      "strategy": "fail_fast",
+      "reasoning": "Unauthorized. Credentials invalid.",
+      "config": {}
+    },
+    "403": {
+      "strategy": "fail_fast",
+      "reasoning": "Forbidden. Access denied.",
+      "config": {}
+    },
+    "404": {
+      "strategy": "fail_fast",
+      "reasoning": "Critical: Inventory endpoint not found.",
+      "config": {}
+    },
+    "408": {
+      "strategy": "retry_linear_backoff",
+      "reasoning": "Read timeout. Safe to retry.",
+      "config": { "delay": 1.0, "max_retries": 3 }
+    },
+    "429": {
+      "strategy": "wait_and_retry",
+      "reasoning": "Rate limit. Wait for quota reset.",
+      "config": { "wait_seconds": 5, "max_retries": 3 }
+    },
+    "500": {
+      "strategy": "retry_exponential_backoff",
+      "reasoning": "Server Error. Retry.",
+      "config": { "base_delay": 1.0, "max_retries": 3 }
+    },
+    "502": {
+      "strategy": "retry_exponential_backoff",
+      "reasoning": "Bad Gateway. Retry.",
+      "config": { "base_delay": 1.0, "max_retries": 3 }
+    },
+    "503": {
+      "strategy": "retry_exponential_backoff",
+      "reasoning": "Service Unavailable. Retry.",
+      "config": { "base_delay": 1.0, "max_retries": 5 }
+    },
+    "504": {
+      "strategy": "retry_exponential_backoff",
+      "reasoning": "Gateway Timeout. Retry.",
+      "config": { "base_delay": 2.0, "max_retries": 3 }
+    }
+  },
+  "find_pets_by_status": {
+    "400": { "strategy": "fail_fast", "config": {} },
+    "401": { "strategy": "fail_fast", "config": {} },
+    "403": { "strategy": "fail_fast", "config": {} },
+    "408": {
+      "strategy": "retry_linear_backoff",
+      "reasoning": "Search timeout. Retry.",
+      "config": { "delay": 2.0, "max_retries": 3 }
+    },
+    "429": {
+      "strategy": "wait_and_retry",
+      "reasoning": "Backing off.",
+      "config": { "wait_seconds": 3, "max_retries": 3 }
+    },
+    "500": { "strategy": "retry_exponential_backoff", "config": { "base_delay": 1.0, "max_retries": 3 } },
+    "502": { "strategy": "retry_exponential_backoff", "config": { "base_delay": 1.0, "max_retries": 3 } },
+    "503": { "strategy": "retry_exponential_backoff", "config": { "base_delay": 1.0, "max_retries": 3 } },
+    "504": { "strategy": "retry_exponential_backoff", "config": { "base_delay": 1.0, "max_retries": 3 } }
+  },
+  "place_order": {
+    "400": {
+      "strategy": "fail_fast",
+      "reasoning": "Invalid Input. Do not retry.",
+      "config": {}
+    },
+    "401": { "strategy": "fail_fast", "config": {} },
+    "403": { "strategy": "fail_fast", "config": {} },
+    "404": { "strategy": "fail_fast", "config": {} },
+    "422": {
+      "strategy": "fail_fast",
+      "reasoning": "Validation Exception.",
+      "config": {}
+    },
+    "408": {
+      "strategy": "retry_exponential_backoff",
+      "reasoning": "Timeout on write. Retry carefully.",
+      "config": { "base_delay": 2.0, "max_retries": 3 }
+    },
+    "429": {
+      "strategy": "wait_and_retry",
+      "reasoning": "Rate limit on write.",
+      "config": { "wait_seconds": 5, "max_retries": 5 }
+    },
+    "500": { "strategy": "retry_exponential_backoff", "config": { "base_delay": 2.0, "max_retries": 2 } },
+    "502": { "strategy": "retry_exponential_backoff", "config": { "base_delay": 2.0, "max_retries": 2 } },
+    "503": { "strategy": "retry_exponential_backoff", "config": { "base_delay": 3.0, "max_retries": 3 } },
+    "504": { "strategy": "retry_exponential_backoff", "config": { "base_delay": 3.0, "max_retries": 3 } }
+  },
+  "update_pet_status": {
+    "400": { "strategy": "fail_fast", "config": {} },
+    "401": { "strategy": "fail_fast", "config": {} },
+    "403": { "strategy": "fail_fast", "config": {} },
+    "404": {
+      "strategy": "retry_linear_backoff",
+      "reasoning": "Pet not found immediately after order (Eventual Consistency).",
+      "config": { "delay": 3.0, "max_retries": 3 }
+    },
+    "405": { "strategy": "fail_fast", "config": {} },
+    "408": {
+      "strategy": "retry_exponential_backoff",
+      "reasoning": "Timeout on update.",
+      "config": { "base_delay": 1.0, "max_retries": 3 }
+    },
+    "429": {
+      "strategy": "wait_and_retry",
+      "config": { "wait_seconds": 4, "max_retries": 3 }
+    },
+    "500": { "strategy": "retry_exponential_backoff", "config": { "base_delay": 1.0, "max_retries": 5 } },
+    "502": { "strategy": "retry_exponential_backoff", "config": { "base_delay": 1.0, "max_retries": 5 } },
+    "503": { "strategy": "retry_exponential_backoff", "config": { "base_delay": 1.0, "max_retries": 5 } },
+    "504": { "strategy": "retry_exponential_backoff", "config": { "base_delay": 1.0, "max_retries": 5 } }
+  },
+  "default": {
+    "strategy": "escalate_to_human",
+    "reasoning": "Unknown error scenario.",
+    "config": {}
+  }
+}

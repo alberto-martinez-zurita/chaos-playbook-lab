@@ -1,6 +1,6 @@
 PROJECT CONTENT EXTRACTION
 Root: C:\Users\alber\Documents\workspace\google\5-Day AI Agentic Immersive\capstone\chaos-playbook-engine-v2\chaos-playbook-lab
-Total files: 55
+Total files: 67
 
 ================================================================================
 FILE LIST:
@@ -10,6 +10,7 @@ FILE LIST:
   - agents\mvp_petstore_chaos.py
   - agents\order_agent_llm.py
   - agents\order_orchestrator.py
+  - agents\petstore_agent.py
   - apis\petstore3_openapi.json
   - config\__init__.py
   - config\chaos_agent.yaml
@@ -20,6 +21,7 @@ FILE LIST:
   - config\settings.py
   - core\chaos_proxy.py
   - data\chaos_playbook.json
+  - data\http_error_codes.json
   - data\playbook-aggressive.json
   - data\playbook-conservative.json
   - data\playbook-uniform.json
@@ -27,23 +29,33 @@ FILE LIST:
   - data\playbook_petstore_conservative.json
   - data\playbook_petstore_default.json
   - data\playbook_petstore_no_retries.json
+  - data\playbook_petstore_strong.json
+  - data\playbook_petstore_weak.json
   - data\playbook_phase6.json
   - data\playbook_phase6_petstore.json
-  - data\playbook_phase6_petstore_2.json
   - data\unit_tests_local.json
   - data\unit_tests_petstore.json
+  - experiments\ab_test_runner.py
+  - experiments\aggregate_metrics.py
+  - experiments\parametric_runner.py
   - pyproject.toml
   - README.md
   - requirements.txt
   - scan_project.py
+  - scenarios\1_chaos_simulation.json
+  - scenarios\2_1_ab_agent_comparison_complete.json
+  - scenarios\2_2_ab_agent_comparison_complete.json
+  - scenarios\3_ab_report_and_dashboard.json
+  - scenarios\test.json
+  - scenarios\test_2.json
   - scripts\EXPERIMENTS_GUIDE.md
   - scripts\generate_dashboard.py
   - scripts\generate_parametric_report.py
   - scripts\generate_playbook_from_swagger.py
-  - scripts\generate_playbook_from_swagger_v2.py
   - scripts\generate_tools_from_swagger.py
   - scripts\plot_parametric_results.py
   - scripts\run_agent_comparison.py
+  - scripts\run_showcase.py
   - services\__init__.py
   - services\experiment_evaluator.py
   - services\runner_factory.py
@@ -1470,6 +1482,206 @@ Important: Execute ALL 4 steps in order before responding with the summary."""
         ]
     )
 
+
+
+================================================================================
+FILE: agents\petstore_agent.py
+================================================================================
+
+"""
+PetstoreAgent - Real API Chaos Implementation (Phase 6)
+=======================================================
+Wrapper compatible con run_agent_comparison.py que utiliza
+la API real de Petstore v3 a través de un ChaosProxy intermedio.
+"""
+
+import asyncio
+import json
+import time
+import os
+from typing import Dict, Any
+from dotenv import load_dotenv
+
+# Framework
+from google.adk.agents import LlmAgent
+from google.adk.models.google_llm import Gemini
+from google.adk.runners import InMemoryRunner
+
+# Core Logic
+from core.chaos_proxy import ChaosProxy
+from config.config_loader import load_config, get_model_name
+
+class PetstoreAgent:
+    """
+    Agente que opera sobre la API real de Petstore v3 a través de un ChaosProxy.
+    """
+
+    def __init__(self, playbook_path: str, mock_mode: bool = None):
+        # 1. CARGA EXPLÍCITA DE CREDENCIALES Y CONFIG
+        load_dotenv() 
+        try:
+            self.config = load_config()
+            self.model_name = get_model_name(self.config)
+        except Exception as e:
+            print(f"⚠️ Config error: {e}. Using defaults.")
+            self.model_name = "gemini-2.0-flash-exp"
+            self.config = {"mock_mode": False}
+
+        if not os.getenv("GOOGLE_API_KEY"):
+             raise ValueError("❌ CRITICAL: GOOGLE_API_KEY not found.")
+
+        self.playbook_path = playbook_path
+        self.playbook_data = self._load_playbook()
+        
+        # 3. DETERMINAR MOCK MODE (Prioridad: Argumento > Config > False)
+        if mock_mode is not None:
+            self.mock_mode = mock_mode
+        else:
+            self.mock_mode = self.config.get('mock_mode', False)
+
+        # ✅ ESTADO UNIFICADO (String, no booleano)
+        self.workflow_status = "unknown" 
+
+    def _load_playbook(self) -> Dict:
+        try:
+            with open(self.playbook_path, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except Exception as e:
+            print(f"⚠️ Error loading playbook {self.playbook_path}: {e}")
+            return {}
+
+    async def process_order(self, order_id: str, failure_rate: float, seed: int) -> Dict[str, Any]:
+        
+        # INYECCIÓN DE MOCK MODE AL PROXY
+        proxy = ChaosProxy(failure_rate=failure_rate, seed=seed, mock_mode=self.mock_mode)
+        
+        # ✅ RESETEAR ESTADO AL INICIO DE CADA ORDEN
+        self.workflow_status = "unknown"
+        
+        # --- TOOLS ---
+        async def get_inventory() -> dict:
+            """Returns a map of status codes to quantities."""
+            return await proxy.send_request("GET", "/store/inventory")
+
+        async def find_pets_by_status(status: str = "available") -> dict:
+            """Finds Pets by status."""
+            return await proxy.send_request("GET", "/pet/findByStatus", params={"status": status})
+
+        async def place_order(pet_id: int, quantity: int) -> dict:
+            """Place an order for a pet."""
+            body = {
+                "petId": pet_id,
+                "quantity": quantity,
+                "status": "placed",
+                "complete": False
+            }
+            return await proxy.send_request("POST", "/store/order", json_body=body)
+
+        async def update_pet_status(pet_id: int, name: str, status: str) -> dict:
+            """Update pet status."""
+            body = {
+                "id": pet_id,
+                "name": name,
+                "status": status,
+                "photoUrls": []
+            }
+            return await proxy.send_request("PUT", "/pet", json_body=body)
+
+        async def wait_seconds(seconds: float) -> dict:
+            """Pauses execution (Backoff strategy)."""
+            print(f"⏳ WAIT STRATEGY: {seconds}s...")
+            await asyncio.sleep(seconds)
+            return {"status": "success", "message": f"Waited {seconds} seconds"}
+
+        async def lookup_playbook(tool_name: str, error_code: str) -> Dict[str, Any]:
+            """Consults the Chaos Playbook."""
+            print(f"📖 PLAYBOOK LOOKUP: {tool_name} -> {error_code}")
+            tool_config = self.playbook_data.get(tool_name, {})
+            strategy = tool_config.get(str(error_code))
+            if strategy:
+                return {"status": "success", "found": True, "recommendation": strategy}
+            default = self.playbook_data.get("default")
+            return {"status": "success", "found": False, "recommendation": default}
+
+        async def report_workflow_success(summary: str) -> dict:
+            """Call ONLY if ALL 4 steps completed successfully."""
+            print(f"🎉 SUCCESS REPORTED: {summary}")
+            self.workflow_status = "success" # ✅ USO CORRECTO
+            return {"status": "success", "message": "Workflow complete"}
+
+        async def report_workflow_failure(reason: str) -> dict:
+            """Call if you cannot proceed or playbook says 'fail_fast'."""
+            print(f"💀 FAILURE REPORTED: {reason}")
+            self.workflow_status = "failure" # ✅ USO CORRECTO
+            return {"status": "success", "message": "Failure reported"}
+
+        # --- AGENT ---
+        try:
+            adk_agent = LlmAgent(
+                name="PetstoreChaosAgent",
+                model=Gemini(
+                    model=self.model_name,
+                    temperature=0.0 # ✅ DETERMINISMO
+                ),
+                instruction=f"""
+                Eres un agente de compras AUTÓNOMO. Orden: {order_id}
+                
+                FLUJO OBLIGATORIO (4 pasos):
+                1. get_inventory
+                2. find_pets_by_status (usa status='available')
+                3. place_order (usa un ID válido del paso 2)
+                4. update_pet_status (marca como 'sold')
+                
+                SI TERMINAS TODO BIEN:
+                - Llama a `report_workflow_success`.
+                
+                SI FALLAS IRRECUPERABLEMENTE:
+                - Llama a `report_workflow_failure`.
+                
+                MANEJO DE ERRORES:
+                - Si falla una tool, USA `lookup_playbook`.
+                - Si dice "retry", reintenta.
+                - Si dice "fail_fast", llama a `report_workflow_failure` inmediatamente.
+                """,
+                tools=[
+                    get_inventory, find_pets_by_status, place_order, update_pet_status, 
+                    lookup_playbook, wait_seconds, report_workflow_success, report_workflow_failure
+                ]
+            )
+
+            # ✅ FIX: Definir app_name explícitamente para evitar warnings
+            runner = InMemoryRunner(agent=adk_agent, app_name="chaos_playbook")
+            start_time = time.time()
+        
+            response = await runner.run_debug(f"Procesa la orden {order_id}.")
+            
+            # FIX DE SEGURIDAD: Si el LLM dice que acabó pero olvidó la tool
+            response_text = str(response).lower()
+            if self.workflow_status == "unknown": # ✅ USO CORRECTO
+                if "completad" in response_text or "success" in response_text:
+                     print("⚠️ WARNING: Agent claimed success in text but missed tool call.")
+            
+            duration_ms = (time.time() - start_time) * 1000
+            
+            # Determinar estado final
+            status = self.workflow_status if self.workflow_status != "unknown" else "failure" # ✅ USO CORRECTO
+            
+            return {
+                "status": status,
+                "steps_completed": [],
+                "failed_at": None if status == "success" else "unknown",
+                "duration_ms": duration_ms
+            }
+
+        except Exception as e:
+            print(f"❌ Excepción en runner: {e}")
+            return {
+                "status": "failure",
+                "steps_completed": [],
+                "failed_at": "exception",
+                "error": str(e),
+                "duration_ms": 0.0
+            }
 
 
 ================================================================================
@@ -3017,7 +3229,14 @@ class ConfigLoader:
         # Añadir al config para referencia
         config['api_key'] = api_key
         config['use_vertex_ai'] = False
+
+        # 2. MOCK MODE (Nuevo)
+        # Lee del .env, default False si no existe
+        mock_mode_env = os.getenv("MOCK_MODE", "false").lower()
+        config['mock_mode'] = mock_mode_env in ("true", "1", "yes")
         
+        print(f"   ⚙️  Mock Mode: {config['mock_mode']}")
+
         return config
     
     def _validate_config(self, config: Dict[str, Any]):
@@ -3113,6 +3332,8 @@ runner:
 session_service:
   type: DatabaseSessionService
   db_url: sqlite:///local_sessions.db
+experiment:
+  default_seed: 42
 
 
 ================================================================================
@@ -3178,27 +3399,82 @@ def get_settings() -> Settings:
 FILE: core\chaos_proxy.py
 ================================================================================
 
+"""
+Chaos Proxy - Middleware for Chaos Injection (Phase 6 Enhanced)
+Includes Mock Mode and Knowledge-Based Error Injection.
+"""
+import random
+import httpx
+import json
+import os
+from typing import Dict, Any, Optional
+from pathlib import Path
+
 class ChaosProxy:
-    def __init__(self, failure_rate: float, seed: int):
+    def __init__(self, failure_rate: float, seed: int, mock_mode: bool = False):
         self.failure_rate = failure_rate
         self.rng = random.Random(seed)
-        self.base_url = "https://petstore3.swagger.io/api/v3" # URL extraída del petstore3_openapi.json
+        self.mock_mode = mock_mode
+        self.base_url = "https://petstore3.swagger.io/api/v3"
+        self.error_codes = self._load_error_codes()
+
+    def _load_error_codes(self) -> Dict[str, str]:
+        """Load HTTP error definitions from knowledge base."""
+        try:
+            # Busca el archivo relativo a la ubicación de este script (src/chaos_playbook_engine/core)
+            # Sube 3 niveles para llegar a la raíz del proyecto y entra en data/
+            current_dir = Path(__file__).resolve().parent
+            project_root = current_dir.parent.parent.parent # Ajusta según tu estructura exacta
+            
+            # Intento robusto de encontrar el archivo
+            possible_paths = [
+                Path("data/http_error_codes.json"), # Desde root de ejecución
+                current_dir.parent.parent / "data" / "http_error_codes.json", # Relativo
+            ]
+            
+            json_path = None
+            for p in possible_paths:
+                if p.exists():
+                    json_path = p
+                    break
+            
+            if json_path:
+                with open(json_path, 'r', encoding='utf-8') as f:
+                    return json.load(f)
+            else:
+                print(f"⚠️ Warning: http_error_codes.json not found in {possible_paths}. Using fallback.")
+                return {"500": "Internal Server Error (Fallback)", "503": "Service Unavailable (Fallback)"}
+                
+        except Exception as e:
+            print(f"⚠️ Warning: Error loading http_error_codes.json: {e}")
+            return {"500": "Internal Server Error (Fallback)", "503": "Service Unavailable (Fallback)"}
 
     async def send_request(self, method: str, endpoint: str, params: dict = None, json_body: dict = None) -> Dict[str, Any]:
         """
-        Proxy transparente: Decide si fallar o llamar a la API real.
+        Proxy inteligente con Mock Mode.
         """
         # 1. Deterministic Chaos Check
         if self.rng.random() < self.failure_rate:
-            error_type = self.rng.choice([404, 503, 408, 429]) # Tipos de fallo soportados por el Playbook
-            print(f"🔥 CHAOS INJECTED: Simulating {error_type} on {endpoint}")
+            # Elegir un error de la lista cargada
+            keys = list(self.error_codes.keys())
+            if not keys: keys = ["500"] # Fallback safety
+            
+            error_code = self.rng.choice(keys)
+            error_msg = self.error_codes.get(error_code, "Unknown Error")
+            
+            print(f"🔥 CHAOS INJECTED: Simulating {error_code} on {endpoint}")
             return {
                 "status": "error",
-                "code": error_type,
-                "message": f"Simulated chaos error {error_type}"
+                "code": int(error_code),
+                "message": f"Simulated Chaos: {error_msg}"
             }
 
-        # 2. Real API Call (Happy Path)
+        # 2. Happy Path - MOCK MODE CHECK
+        if self.mock_mode:
+            print(f"🎭 MOCK API CALL: {method} {endpoint} (Skipping network)")
+            return self._generate_mock_response(method, endpoint)
+        
+        # 3. Real API Call
         print(f"🌐 REAL API CALL: {method} {endpoint}")
         async with httpx.AsyncClient() as client:
             try:
@@ -3209,7 +3485,6 @@ class ChaosProxy:
                 elif method == "PUT":
                     resp = await client.put(f"{self.base_url}{endpoint}", json=json_body, timeout=10.0)
                 
-                # Normalizamos la respuesta para el Agente
                 if resp.status_code >= 400:
                     return {"status": "error", "code": resp.status_code, "message": resp.text}
                 return {"status": "success", "code": resp.status_code, "data": resp.json()}
@@ -3217,6 +3492,18 @@ class ChaosProxy:
             except Exception as e:
                  return {"status": "error", "code": 500, "message": str(e)}
 
+    def _generate_mock_response(self, method: str, endpoint: str) -> Dict[str, Any]:
+        """Generate plausible mock data for 200 OK."""
+        if "inventory" in endpoint:
+            return {"status": "success", "code": 200, "data": {"available": 100, "sold": 5, "pending": 2}}
+        elif "findByStatus" in endpoint:
+            return {"status": "success", "code": 200, "data": [{"id": 12345, "name": "MockPet", "status": "available"}]}
+        elif "order" in endpoint:
+            return {"status": "success", "code": 200, "data": {"id": 999, "petId": 12345, "status": "placed", "complete": True}}
+        elif "pet" in endpoint and method == "PUT":
+             return {"status": "success", "code": 200, "data": {"id": 12345, "name": "MockPet", "status": "sold"}}
+        else:
+            return {"status": "success", "code": 200, "data": {"message": "Mock success"}}
 
 
 ================================================================================
@@ -3647,6 +3934,24 @@ FILE: data\chaos_playbook.json
       }
     }
   ]
+}
+
+
+================================================================================
+FILE: data\http_error_codes.json
+================================================================================
+
+{
+  "400": "Bad Request - The server cannot or will not process the request due to an apparent client error.",
+  "401": "Unauthorized - Authentication is required and has failed or has not yet been provided.",
+  "403": "Forbidden - The request was valid, but the server refuses action.",
+  "404": "Not Found - The requested resource could not be found.",
+  "408": "Request Timeout - The server timed out waiting for the request.",
+  "429": "Too Many Requests - The user has sent too many requests in a given amount of time.",
+  "500": "Internal Server Error - A generic error message, given when an unexpected condition was encountered.",
+  "502": "Bad Gateway - The server was acting as a gateway or proxy and received an invalid response.",
+  "503": "Service Unavailable - The server cannot handle the request (overloaded or down).",
+  "504": "Gateway Timeout - The server was acting as a gateway and did not receive a timely response."
 }
 
 
@@ -5647,6 +5952,134 @@ FILE: data\playbook_petstore_no_retries.json
 
 
 ================================================================================
+FILE: data\playbook_petstore_strong.json
+================================================================================
+
+{
+  "get_inventory": {
+    "408": {
+      "strategy": "retry_linear_backoff",
+      "reasoning": "Read timeout. Safe to retry immediately.",
+      "config": { "delay": 1.0, "max_retries": 3 }
+    },
+    "429": {
+      "strategy": "wait_and_retry",
+      "reasoning": "Rate limit. Wait for quota reset.",
+      "config": { "wait_seconds": 5, "max_retries": 3 }
+    },
+    "503": {
+      "strategy": "retry_exponential_backoff",
+      "reasoning": "Service Unavailable. Safe to retry.",
+      "config": { "base_delay": 1.0, "max_retries": 5 }
+    },
+    "404": {
+      "strategy": "escalate_to_human",
+      "reasoning": "Critical: Inventory endpoint missing.",
+      "config": {}
+    }
+  },
+  "find_pets_by_status": {
+    "408": {
+      "strategy": "retry_linear_backoff",
+      "reasoning": "Search timeout. Retry.",
+      "config": { "delay": 2.0, "max_retries": 3 }
+    },
+    "429": {
+      "strategy": "wait_and_retry",
+      "reasoning": "Too many requests. Backing off.",
+      "config": { "wait_seconds": 3, "max_retries": 3 }
+    },
+    "503": {
+      "strategy": "retry_exponential_backoff",
+      "reasoning": "Service down. Retry.",
+      "config": { "base_delay": 1.0, "max_retries": 3 }
+    }
+  },
+  "place_order": {
+    "408": {
+      "strategy": "retry_exponential_backoff",
+      "reasoning": "Timeout on write. Use exponential backoff to let server recover. Risk of duplicate is managed by manual check if needed.",
+      "config": { "base_delay": 2.0, "max_retries": 3 }
+    },
+    "429": {
+      "strategy": "wait_and_retry",
+      "reasoning": "Rate limit on write. Wait longer before retrying.",
+      "config": { "wait_seconds": 5, "max_retries": 5 }
+    },
+    "503": {
+      "strategy": "retry_exponential_backoff",
+      "reasoning": "Server unavailable. Retry carefully.",
+      "config": { "base_delay": 3.0, "max_retries": 3 }
+    },
+    "500": {
+      "strategy": "retry_exponential_backoff",
+      "reasoning": "Internal Server Error. Retry carefully.",
+      "config": { "base_delay": 2.0, "max_retries": 2 }
+    },
+    "400": {
+      "strategy": "fail_fast",
+      "reasoning": "Invalid Input (Swagger 400). Do not retry.",
+      "config": {}
+    },
+    "422": {
+      "strategy": "fail_fast",
+      "reasoning": "Validation Exception. Do not retry.",
+      "config": {}
+    }
+  },
+  "update_pet_status": {
+    "408": {
+      "strategy": "retry_exponential_backoff",
+      "reasoning": "Timeout on update. Idempotent operation, safe to retry.",
+      "config": { "base_delay": 1.0, "max_retries": 3 }
+    },
+    "404": {
+      "strategy": "retry_linear_backoff",
+      "reasoning": "Pet not found immediately after order. Likely eventual consistency lag.",
+      "config": { "delay": 3.0, "max_retries": 3 }
+    },
+    "429": {
+      "strategy": "wait_and_retry",
+      "reasoning": "Rate limit.",
+      "config": { "wait_seconds": 4, "max_retries": 3 }
+    },
+    "503": {
+      "strategy": "retry_exponential_backoff",
+      "reasoning": "Service unavailable.",
+      "config": { "base_delay": 1.0, "max_retries": 5 }
+    }
+  },
+  "default": {
+    "strategy": "escalate_to_human",
+    "reasoning": "Unknown error scenario. Manual intervention required.",
+    "config": {}
+  }
+}
+
+
+================================================================================
+FILE: data\playbook_petstore_weak.json
+================================================================================
+
+{
+  "default": {
+    "strategy": "fail_fast",
+    "reasoning": "WEAK AGENT: I give up immediately on error.",
+    "config": {}
+  },
+  "get_inventory": {
+    "503": { "strategy": "fail_fast", "config": {} },
+    "429": { "strategy": "fail_fast", "config": {} },
+    "408": { "strategy": "fail_fast", "config": {} }
+  },
+  "place_order": {
+    "503": { "strategy": "fail_fast", "config": {} },
+    "408": { "strategy": "fail_fast", "config": {} }
+  }
+}
+
+
+================================================================================
 FILE: data\playbook_phase6.json
 ================================================================================
 
@@ -5797,112 +6230,6 @@ FILE: data\playbook_phase6_petstore.json
   "default": {
     "strategy": "escalate_to_human",
     "reasoning": "Unknown error scenario.",
-    "config": {}
-  }
-}
-
-
-================================================================================
-FILE: data\playbook_phase6_petstore_2.json
-================================================================================
-
-{
-  "get_inventory": {
-    "408": {
-      "strategy": "retry_linear_backoff",
-      "reasoning": "Read timeout. Safe to retry immediately.",
-      "config": { "delay": 1.0, "max_retries": 3 }
-    },
-    "429": {
-      "strategy": "wait_and_retry",
-      "reasoning": "Rate limit. Wait for quota reset.",
-      "config": { "wait_seconds": 5, "max_retries": 3 }
-    },
-    "503": {
-      "strategy": "retry_exponential_backoff",
-      "reasoning": "Service Unavailable. Safe to retry.",
-      "config": { "base_delay": 1.0, "max_retries": 5 }
-    },
-    "404": {
-      "strategy": "escalate_to_human",
-      "reasoning": "Critical: Inventory endpoint missing.",
-      "config": {}
-    }
-  },
-  "find_pets_by_status": {
-    "408": {
-      "strategy": "retry_linear_backoff",
-      "reasoning": "Search timeout. Retry.",
-      "config": { "delay": 2.0, "max_retries": 3 }
-    },
-    "429": {
-      "strategy": "wait_and_retry",
-      "reasoning": "Too many requests. Backing off.",
-      "config": { "wait_seconds": 3, "max_retries": 3 }
-    },
-    "503": {
-      "strategy": "retry_exponential_backoff",
-      "reasoning": "Service down. Retry.",
-      "config": { "base_delay": 1.0, "max_retries": 3 }
-    }
-  },
-  "place_order": {
-    "408": {
-      "strategy": "retry_exponential_backoff",
-      "reasoning": "Timeout on write. Use exponential backoff to let server recover. Risk of duplicate is managed by manual check if needed.",
-      "config": { "base_delay": 2.0, "max_retries": 3 }
-    },
-    "429": {
-      "strategy": "wait_and_retry",
-      "reasoning": "Rate limit on write. Wait longer before retrying.",
-      "config": { "wait_seconds": 5, "max_retries": 5 }
-    },
-    "503": {
-      "strategy": "retry_exponential_backoff",
-      "reasoning": "Server unavailable. Retry carefully.",
-      "config": { "base_delay": 3.0, "max_retries": 3 }
-    },
-    "500": {
-      "strategy": "retry_exponential_backoff",
-      "reasoning": "Internal Server Error. Retry carefully.",
-      "config": { "base_delay": 2.0, "max_retries": 2 }
-    },
-    "400": {
-      "strategy": "fail_fast",
-      "reasoning": "Invalid Input (Swagger 400). Do not retry.",
-      "config": {}
-    },
-    "422": {
-      "strategy": "fail_fast",
-      "reasoning": "Validation Exception. Do not retry.",
-      "config": {}
-    }
-  },
-  "update_pet_status": {
-    "408": {
-      "strategy": "retry_exponential_backoff",
-      "reasoning": "Timeout on update. Idempotent operation, safe to retry.",
-      "config": { "base_delay": 1.0, "max_retries": 3 }
-    },
-    "404": {
-      "strategy": "retry_linear_backoff",
-      "reasoning": "Pet not found immediately after order. Likely eventual consistency lag.",
-      "config": { "delay": 3.0, "max_retries": 3 }
-    },
-    "429": {
-      "strategy": "wait_and_retry",
-      "reasoning": "Rate limit.",
-      "config": { "wait_seconds": 4, "max_retries": 3 }
-    },
-    "503": {
-      "strategy": "retry_exponential_backoff",
-      "reasoning": "Service unavailable.",
-      "config": { "base_delay": 1.0, "max_retries": 5 }
-    }
-  },
-  "default": {
-    "strategy": "escalate_to_human",
-    "reasoning": "Unknown error scenario. Manual intervention required.",
     "config": {}
   }
 }
@@ -6394,6 +6721,1201 @@ FILE: data\unit_tests_petstore.json
 
 
 ================================================================================
+FILE: experiments\ab_test_runner.py
+================================================================================
+
+"""
+A/B Test Runner for Chaos Playbook Engine - OPCIÓN A+ (V3 Updated)
+
+Location: experiments/ab_test_runner.py
+
+Purpose: Compare Baseline agent (simple, no retries) vs Playbook-enhanced agent
+         (sophisticated, with RAG-powered retries)
+
+Design Decision:
+- Baseline: Simple agent that accepts first failure (no retries)
+  → Fast but unreliable (70% success on 30% chaos)
+- Playbook: Sophisticated agent that retries with smart backoff
+  → Slower but reliable (99% success on 30% chaos)
+
+This design demonstrates the value of RAG-powered recovery strategies.
+
+Usage:
+    runner = ABTestRunner()
+    results = runner.run_batch_experiments(n=100)
+    runner.export_results_csv(results, "ab_test_results.csv")
+"""
+
+import asyncio
+import csv
+import os  # ✅ For verbose mode
+import time
+import re  # ✅ For regex parsing
+from datetime import datetime
+from typing import Any, Dict, List, Optional
+from dataclasses import dataclass, asdict
+
+from chaos_playbook_engine.config.chaos_config import ChaosConfig
+from chaos_playbook_engine.tools.simulated_apis import (
+    call_simulated_inventory_api,
+    call_simulated_payments_api,
+    call_simulated_erp_api,
+    call_simulated_shipping_api,
+)
+from chaos_playbook_engine.agents.order_orchestrator import loadprocedure
+from chaos_playbook_engine.data.playbook_storage import PlaybookStorage
+
+
+@dataclass
+class ExperimentResult:
+    """Result of a single A/B experiment."""
+    experiment_id: str
+    agent_type: str  # "baseline" or "playbook"
+    chaos_config: Dict[str, Any]
+    outcome: str  # "success", "failure", or "inconsistent"
+    total_duration_s: float
+    api_calls: List[Dict[str, Any]]
+    playbook_strategies_used: List[str]
+    inconsistencies: List[str]
+
+
+class ABTestRunner:
+    """
+    A/B Test Runner for Chaos Playbook Engine.
+    
+    Compares:
+    - Baseline: Simple agent with NO retries (accepts first failure)
+    - Playbook: Sophisticated agent with RAG-powered retries
+    
+    Design Rationale:
+    The difference in retry strategy demonstrates the value of RAG-powered
+    recovery decisions. Baseline is fast but unreliable. Playbook is slower
+    but reliable, showing the trade-off of investing in intelligent recovery.
+    """
+
+    def __init__(self, playbook_path: str = "data/chaos_playbook.json"):
+        """Initialize A/B Test Runner."""
+        self.playbook_storage = PlaybookStorage(playbook_path)
+
+    async def run_baseline_experiment(self, chaos_config: ChaosConfig) -> ExperimentResult:
+        """
+        Run baseline experiment (SIMPLE - NO retries).
+        
+        Design: Baseline is a simple agent that does NOT retry on failures.
+                If an API fails, it accepts the failure and continues with next API.
+        
+        This demonstrates:
+        - Fast execution (no backoff delays)
+        - Unreliable for transient failures (30% failure rate = cascading failures)
+        - Result: ~70% success rate on 30% chaos injection
+        """
+        experiment_id = f"BASE-{chaos_config.seed}"
+        start_time = time.time()
+        api_calls = []
+        inconsistencies = []
+
+        # Track state for inconsistency detection
+        inventory_reserved = False
+        payment_captured = False
+        order_created = False
+        shipment_created = False
+
+        try:
+            # Step 1: Check inventory (NO RETRY)
+            inventory_result = await call_simulated_inventory_api(
+                "check_stock",
+                {"sku": "WIDGET-A", "quantity": 2},
+                chaos_config
+            )
+            api_calls.append({
+                "api": "inventory",
+                "endpoint": "check_stock",
+                "attempt": 1,
+                "status": inventory_result.get("status", "unknown"),
+                "duration": inventory_result.get("duration", 0)
+            })
+            if inventory_result["status"] == "success":
+                inventory_reserved = True
+            # NO RETRY - if failed, just mark and continue
+
+            # Step 2: Capture payment (NO RETRY)
+            payment_result = await call_simulated_payments_api(
+                "capture",
+                {"amount": 100.0, "method": "credit_card"},
+                chaos_config
+            )
+            api_calls.append({
+                "api": "payments",
+                "endpoint": "capture",
+                "attempt": 1,
+                "status": payment_result.get("status", "unknown"),
+                "duration": payment_result.get("duration", 0)
+            })
+            if payment_result["status"] == "success":
+                payment_captured = True
+
+            # Step 3: Create order in ERP (NO RETRY)
+            erp_result = await call_simulated_erp_api(
+                "create_order",
+                {"order_id": "ORDER-123", "items": [{"sku": "WIDGET-A", "quantity": 2}]},
+                chaos_config
+            )
+            api_calls.append({
+                "api": "erp",
+                "endpoint": "create_order",
+                "attempt": 1,
+                "status": erp_result.get("status", "unknown"),
+                "duration": erp_result.get("duration", 0)
+            })
+            if erp_result["status"] == "success":
+                order_created = True
+
+            # Step 4: Create shipment (NO RETRY)
+            shipping_result = await call_simulated_shipping_api(
+                "create_shipment",
+                {"order_id": "ORDER-123", "address": "123 Main St"},
+                chaos_config
+            )
+            api_calls.append({
+                "api": "shipping",
+                "endpoint": "create_shipment",
+                "attempt": 1,
+                "status": shipping_result.get("status", "unknown"),
+                "duration": shipping_result.get("duration", 0)
+            })
+            if shipping_result["status"] == "success":
+                shipment_created = True
+
+            # Detect inconsistencies
+            if payment_captured and not order_created:
+                inconsistencies.append("payment_without_order")
+            if order_created and not payment_captured:
+                inconsistencies.append("order_without_payment")
+
+            # Determine outcome
+            if inconsistencies:
+                outcome = "inconsistent"
+            elif order_created and payment_captured and shipment_created:
+                outcome = "success"
+            else:
+                outcome = "failure"
+
+        except Exception as e:
+            outcome = "failure"
+            inconsistencies.append(f"exception: {str(e)}")
+
+        duration = time.time() - start_time
+
+        return ExperimentResult(
+            experiment_id=experiment_id,
+            agent_type="baseline",
+            chaos_config=asdict(chaos_config),
+            outcome=outcome,
+            total_duration_s=round(duration, 2),
+            api_calls=api_calls,
+            playbook_strategies_used=[],  # Baseline never uses Playbook
+            inconsistencies=inconsistencies
+        )
+
+    async def run_playbook_experiment(self, chaos_config: ChaosConfig) -> ExperimentResult:
+        """
+        Run playbook experiment (SOPHISTICATED - WITH retries).
+        
+        Design: Playbook is a sophisticated agent that retries on failures.
+                When an API fails, it queries the Playbook for a recovery strategy
+                (including backoff timing), then retries intelligently.
+        
+        This demonstrates:
+        - Slower execution (backoff delays when failures occur)
+        - Reliable for transient failures (queries playbook for backoff > max_delay)
+        - Result: ~99% success rate even on 30% chaos injection
+        """
+        experiment_id = f"PLAY-{chaos_config.seed}"
+        start_time = time.time()
+        api_calls = []
+        strategies_used = []
+        inconsistencies = []
+
+        # Track state
+        inventory_reserved = False
+        payment_captured = False
+        order_created = False
+        shipment_created = False
+
+        try:
+            # Step 1: Check inventory (WITH Playbook)
+            inventory_result = await self._call_with_playbook_retry(
+                call_simulated_inventory_api,
+                "inventory",
+                "check_stock",
+                {"sku": "WIDGET-A", "quantity": 2},
+                chaos_config,
+                api_calls,
+                strategies_used
+            )
+            if inventory_result["status"] == "success":
+                inventory_reserved = True
+
+            # Step 2: Capture payment (WITH Playbook)
+            payment_result = await self._call_with_playbook_retry(
+                call_simulated_payments_api,
+                "payments",
+                "capture",
+                {"amount": 100.0, "method": "credit_card"},
+                chaos_config,
+                api_calls,
+                strategies_used
+            )
+            if payment_result["status"] == "success":
+                payment_captured = True
+
+            # Step 3: Create order (WITH Playbook)
+            erp_result = await self._call_with_playbook_retry(
+                call_simulated_erp_api,
+                "erp",
+                "create_order",
+                {"order_id": "ORDER-123", "items": [{"sku": "WIDGET-A", "quantity": 2}]},
+                chaos_config,
+                api_calls,
+                strategies_used
+            )
+            if erp_result["status"] == "success":
+                order_created = True
+
+            # Step 4: Create shipment (WITH Playbook)
+            shipping_result = await self._call_with_playbook_retry(
+                call_simulated_shipping_api,
+                "shipping",
+                "create_shipment",
+                {"order_id": "ORDER-123", "address": "123 Main St"},
+                chaos_config,
+                api_calls,
+                strategies_used
+            )
+            if shipping_result["status"] == "success":
+                shipment_created = True
+
+            # Detect inconsistencies
+            if payment_captured and not order_created:
+                inconsistencies.append("payment_without_order")
+            if order_created and not payment_captured:
+                inconsistencies.append("order_without_payment")
+
+            # Determine outcome
+            if inconsistencies:
+                outcome = "inconsistent"
+            elif order_created and payment_captured and shipment_created:
+                outcome = "success"
+            else:
+                outcome = "failure"
+
+        except Exception as e:
+            outcome = "failure"
+            inconsistencies.append(f"exception: {str(e)}")
+
+        duration = time.time() - start_time
+
+        return ExperimentResult(
+            experiment_id=experiment_id,
+            agent_type="playbook",
+            chaos_config=asdict(chaos_config),
+            outcome=outcome,
+            total_duration_s=round(duration, 2),
+            api_calls=api_calls,
+            playbook_strategies_used=strategies_used,
+            inconsistencies=inconsistencies
+        )
+
+    async def run_batch_experiments(
+        self,
+        n: int = 100,
+        failure_rate: float = 0.3,
+        failure_type: str = "timeout",
+        max_delay_seconds: int = 2  # ✅ V3: 3 → 2 (fail faster)
+    ) -> List[ExperimentResult]:
+        """
+        Run batch of n experiments (both baseline and playbook).
+        
+        Args:
+            n: Number of experiment pairs to run
+            failure_rate: Failure injection rate (default: 0.3)
+            failure_type: Type of failure (default: "timeout")
+            max_delay_seconds: Max delay for chaos (default: 2 for V3)
+        
+        Returns:
+            List of 2*n ExperimentResults (n baseline + n playbook)
+        """
+        # ✅ Check if verbose mode is enabled (retrocompatible)
+        verbose = os.environ.get("CHAOS_VERBOSE", "0") == "1"
+
+        results = []
+        for i in range(n):
+            seed = 42 + i
+            chaos_config = ChaosConfig(
+                enabled=True,
+                failure_rate=failure_rate,        # ✅ V3: Use parameter
+                failure_type=failure_type,         # ✅ V3: Use parameter
+                seed=seed,
+                max_delay_seconds=max_delay_seconds  # ✅ V3: Use parameter (default=2)
+            )
+
+            # Run baseline
+            baseline_result = await self.run_baseline_experiment(chaos_config)
+            results.append(baseline_result)
+
+            # ✅ Progress dot only in quiet mode (retrocompatible)
+            if not verbose:
+                print(".", end="", flush=True)
+
+            # Run playbook
+            playbook_result = await self.run_playbook_experiment(chaos_config)
+            results.append(playbook_result)
+
+            # ✅ Progress dot only in quiet mode (retrocompatible)
+            if not verbose:
+                print(".", end="", flush=True)
+
+            # Keep existing progress message every 10 pairs (only if verbose)
+            if (i + 1) % 10 == 0 and verbose:
+                print(f"Completed {i + 1}/{n} experiment pairs...")
+
+        return results
+
+    def export_results_csv(self, results: List[ExperimentResult], filename: str):
+        """Export experiment results to CSV."""
+        with open(filename, "w", newline="") as csvfile:
+            fieldnames = [
+                "experiment_id",
+                "agent_type",
+                "outcome",
+                "duration_s",
+                "inconsistencies_count",
+                "strategies_used",
+                "seed",
+                "failure_rate"
+            ]
+
+            writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            writer.writeheader()
+
+            for result in results:
+                writer.writerow({
+                    "experiment_id": result.experiment_id,
+                    "agent_type": result.agent_type,
+                    "outcome": result.outcome,
+                    "duration_s": result.total_duration_s,
+                    "inconsistencies_count": len(result.inconsistencies),
+                    "strategies_used": ";".join(result.playbook_strategies_used) or "none",
+                    "seed": result.chaos_config.get("seed", "unknown"),
+                    "failure_rate": result.chaos_config.get("failure_rate", 0.0)
+                })
+
+        print(f"✅ Exported {len(results)} results to {filename}")
+
+    async def _call_with_playbook_retry(
+        self,
+        api_func,
+        api_name: str,
+        endpoint: str,
+        payload: Dict[str, Any],
+        chaos_config: ChaosConfig,
+        api_calls: List[Dict[str, Any]],
+        strategies_used: List[str],
+        max_retries: int = 3
+    ) -> Dict[str, Any]:
+        """
+        Call API with Playbook-aware retry.
+        
+        Only used by Playbook agent. Queries playbook for recovery strategy
+        on failures, then applies intelligent backoff before retry.
+        """
+        for attempt in range(1, max_retries + 1):
+            result = await api_func(endpoint, payload, chaos_config)
+
+            api_calls.append({
+                "api": api_name,
+                "endpoint": endpoint,
+                "attempt": attempt,
+                "status": result.get("status", "unknown"),
+                "duration": result.get("duration", 0)
+            })
+
+            if result["status"] == "success":
+                return result
+
+            # On failure: query Playbook for recovery strategy
+            if attempt < max_retries:
+                error_type = result.get("error", "unknown")
+
+                # Query loadprocedure (RAG-powered playbook)
+                playbook_result = await loadprocedure(error_type, api_name)
+
+                if playbook_result.get("status") == "found":
+                    strategy = playbook_result.get("recovery_strategy", "retry 2s")
+                    strategies_used.append(f"{error_type}-{api_name}")
+
+                    # ✅ Extract backoff using regex (robust parsing)
+                    match = re.search(r'(\d+)s', strategy)
+                    if match:
+                        backoff_seconds = int(match.group(1))
+                        await asyncio.sleep(backoff_seconds)
+                    else:
+                        await asyncio.sleep(2)  # Default if no match
+                else:
+                    # No strategy found, use default
+                    await asyncio.sleep(2)
+
+        return result  # Return last failure
+
+
+
+================================================================================
+FILE: experiments\aggregate_metrics.py
+================================================================================
+
+"""
+Metrics Aggregator for A/B Test Results - v4.0 (Consistency-First Design)
+
+Location: experiments/aggregate_metrics.py
+
+Purpose: Calculate and compare metrics between Baseline and Playbook agents.
+
+V4 CHANGES:
+- Migrated from "Inconsistency Reduction" to "Consistency Improvement" 
+- More intuitive metric direction (all improvements are positive increases)
+- Mathematically equivalent validation logic
+- All existing tests remain compatible (consistency = 1 - inconsistency)
+
+Rationale:
+With consistency metric, ALL KPIs move in same direction:
+- Success Rate: ↑ better
+- Consistency Rate: ↑ better  
+- Latency: managed overhead
+
+Usage:
+    aggregator = MetricsAggregator()
+    baseline_metrics = aggregator.calculate_success_rate(baseline_results)
+    playbook_metrics = aggregator.calculate_success_rate(playbook_results)
+    comparison = aggregator.compare_baseline_vs_playbook(baseline_results, playbook_results)
+    aggregator.export_summary_json(comparison, "metrics_summary.json")
+"""
+
+import json
+import math
+from typing import Any, Dict, List
+from dataclasses import dataclass
+
+from experiments.ab_test_runner import ExperimentResult
+
+
+@dataclass
+class MetricsSummary:
+    """Summary statistics for a set of experiments."""
+    mean: float
+    std: float
+    confidence_interval_95: tuple
+    sample_size: int
+
+
+class MetricsAggregator:
+    """
+    Aggregate and analyze A/B test results.
+
+    Calculates:
+    - Success rates with confidence intervals
+    - Consistency rates (NEW: inverse of inconsistency)
+    - Latency statistics
+    - Comparative improvements
+    """
+
+    def calculate_success_rate(
+        self,
+        results: List[ExperimentResult]
+    ) -> Dict[str, Any]:
+        """
+        Calculate success rate with confidence intervals.
+
+        Args:
+            results: List of ExperimentResult
+
+        Returns:
+            {
+                "mean": 0.85,
+                "std": 0.357,
+                "confidence_interval_95": (0.78, 0.92),
+                "sample_size": 50,
+                "successes": 42,
+                "failures": 5,
+                "inconsistent": 3
+            }
+        """
+        if not results:
+            return {
+                "mean": 0.0,
+                "std": 0.0,
+                "confidence_interval_95": (0.0, 0.0),
+                "sample_size": 0,
+                "successes": 0,
+                "failures": 0,
+                "inconsistent": 0
+            }
+
+        # Count outcomes
+        successes = sum(1 for r in results if r.outcome == "success")
+        failures = sum(1 for r in results if r.outcome == "failure")
+        inconsistent = sum(1 for r in results if r.outcome == "inconsistent")
+
+        n = len(results)
+        success_rate = successes / n if n > 0 else 0.0
+
+        # Calculate standard deviation (for binomial: sqrt(p(1-p)/n))
+        std = math.sqrt(success_rate * (1 - success_rate) / n) if n > 0 else 0.0
+
+        # Calculate 95% confidence interval (z=1.96 for 95% CI)
+        margin = 1.96 * std
+        ci_lower = max(0.0, success_rate - margin)
+        ci_upper = min(1.0, success_rate + margin)
+
+        return {
+            "mean": round(success_rate, 4),
+            "std": round(std, 4),
+            "confidence_interval_95": (round(ci_lower, 4), round(ci_upper, 4)),
+            "sample_size": n,
+            "successes": successes,
+            "failures": failures,
+            "inconsistent": inconsistent
+        }
+
+    def calculate_consistency_rate(
+        self,
+        results: List[ExperimentResult]
+    ) -> Dict[str, Any]:
+        """
+        Calculate consistency rate (NEW: inverse of inconsistency).
+
+        Consistency = transactions WITHOUT inconsistent states.
+        This metric is MORE INTUITIVE than inconsistency because:
+        - Higher is better (aligns with success rate direction)
+        - Positive framing ("maintain consistency" vs "reduce inconsistency")
+
+        Args:
+            results: List of ExperimentResult
+
+        Returns:
+            {
+                "consistency_rate": 0.94,  # 1 - inconsistency_rate
+                "inconsistency_rate": 0.06,  # For backward compat
+                "consistent_count": 47,
+                "inconsistent_count": 3,
+                "sample_size": 50,
+                "inconsistency_types": {
+                    "payment_without_order": 2,
+                    "order_without_payment": 1
+                }
+            }
+        """
+        if not results:
+            return {
+                "consistency_rate": 0.0,
+                "inconsistency_rate": 0.0,
+                "consistent_count": 0,
+                "inconsistent_count": 0,
+                "sample_size": 0,
+                "inconsistency_types": {}
+            }
+
+        n = len(results)
+        inconsistent_count = sum(1 for r in results if r.outcome == "inconsistent")
+        consistent_count = n - inconsistent_count
+
+        inconsistency_rate = inconsistent_count / n if n > 0 else 0.0
+        consistency_rate = 1.0 - inconsistency_rate  # NEW: Positive metric
+
+        # Count inconsistency types (for debugging)
+        inconsistency_types = {}
+        for result in results:
+            for inc_type in result.inconsistencies:
+                inconsistency_types[inc_type] = inconsistency_types.get(inc_type, 0) + 1
+
+        return {
+            "consistency_rate": round(consistency_rate, 4),  # NEW: Primary metric
+            "inconsistency_rate": round(inconsistency_rate, 4),  # Keep for backward compat
+            "consistent_count": consistent_count,
+            "inconsistent_count": inconsistent_count,
+            "sample_size": n,
+            "inconsistency_types": inconsistency_types
+        }
+
+    def calculate_latency_stats(
+        self,
+        results: List[ExperimentResult]
+    ) -> Dict[str, Any]:
+        """
+        Calculate latency statistics.
+
+        Args:
+            results: List of ExperimentResult
+
+        Returns:
+            {
+                "mean_latency_s": 5.2,
+                "median_latency_s": 4.8,
+                "p95_latency_s": 8.5,
+                "p99_latency_s": 12.1,
+                "min_latency_s": 2.1,
+                "max_latency_s": 15.3,
+                "std_latency_s": 2.4
+            }
+        """
+        if not results:
+            return {
+                "mean_latency_s": 0.0,
+                "median_latency_s": 0.0,
+                "p95_latency_s": 0.0,
+                "p99_latency_s": 0.0,
+                "min_latency_s": 0.0,
+                "max_latency_s": 0.0,
+                "std_latency_s": 0.0
+            }
+
+        durations = [r.total_duration_s for r in results]
+        durations_sorted = sorted(durations)
+        n = len(durations)
+
+        # Mean
+        mean_latency = sum(durations) / n
+
+        # Median
+        if n % 2 == 0:
+            median_latency = (durations_sorted[n//2 - 1] + durations_sorted[n//2]) / 2
+        else:
+            median_latency = durations_sorted[n//2]
+
+        # Percentiles
+        p95_index = int(n * 0.95)
+        p99_index = int(n * 0.99)
+        p95_latency = durations_sorted[p95_index] if p95_index < n else durations_sorted[-1]
+        p99_latency = durations_sorted[p99_index] if p99_index < n else durations_sorted[-1]
+
+        # Min/Max
+        min_latency = durations_sorted[0]
+        max_latency = durations_sorted[-1]
+
+        # Standard deviation
+        variance = sum((d - mean_latency) ** 2 for d in durations) / n
+        std_latency = math.sqrt(variance)
+
+        return {
+            "mean_latency_s": round(mean_latency, 2),
+            "median_latency_s": round(median_latency, 2),
+            "p95_latency_s": round(p95_latency, 2),
+            "p99_latency_s": round(p99_latency, 2),
+            "min_latency_s": round(min_latency, 2),
+            "max_latency_s": round(max_latency, 2),
+            "std_latency_s": round(std_latency, 2)
+        }
+
+    def compare_baseline_vs_playbook(
+        self,
+        baseline_results: List[ExperimentResult],
+        playbook_results: List[ExperimentResult]
+    ) -> Dict[str, Any]:
+        """
+        Compare Baseline vs Playbook performance.
+
+        Args:
+            baseline_results: Baseline experiment results
+            playbook_results: Playbook experiment results
+
+        Returns:
+            {
+                "baseline": {...},
+                "playbook": {...},
+                "improvements": {
+                    "success_rate_improvement": 0.23,
+                    "consistency_improvement": 0.05,  # NEW: Positive metric
+                    "latency_overhead_pct": 67.5
+                },
+                "validation": {
+                    "metric_001_success_rate_20pct": True/False,
+                    "metric_002_consistency_maintained": True/False,  # NEW
+                    "metric_003_latency_200pct": True/False
+                }
+            }
+        """
+        # Calculate metrics for each
+        baseline_success = self.calculate_success_rate(baseline_results)
+        playbook_success = self.calculate_success_rate(playbook_results)
+
+        baseline_consistency = self.calculate_consistency_rate(baseline_results)  # NEW
+        playbook_consistency = self.calculate_consistency_rate(playbook_results)  # NEW
+
+        baseline_latency = self.calculate_latency_stats(baseline_results)
+        playbook_latency = self.calculate_latency_stats(playbook_results)
+
+        # Extract values
+        baseline_sr = baseline_success["mean"]
+        playbook_sr = playbook_success["mean"]
+
+        baseline_cr = baseline_consistency["consistency_rate"]  # NEW
+        playbook_cr = playbook_consistency["consistency_rate"]  # NEW
+
+        baseline_lat = baseline_latency["mean_latency_s"]
+        playbook_lat = playbook_latency["mean_latency_s"]
+
+        # ============ SUCCESS RATE IMPROVEMENT ============
+        if baseline_sr > 0:
+            success_rate_improvement = (playbook_sr - baseline_sr) / baseline_sr
+        else:
+            # If baseline = 0%, absolute difference is the improvement
+            success_rate_improvement = playbook_sr - baseline_sr
+
+        # ============ CONSISTENCY IMPROVEMENT (NEW) ============
+        # Positive metric: higher consistency = better
+        # Mathematically equivalent to inconsistency reduction but MORE INTUITIVE
+        if baseline_cr < 1.0:  # If baseline has room for improvement
+            # Calculate relative improvement in consistency
+            consistency_improvement = (playbook_cr - baseline_cr) / (1.0 - baseline_cr)
+        else:
+            # Baseline is already 100% consistent
+            # Playbook MUST maintain it
+            consistency_improvement = playbook_cr - baseline_cr  # 1.0 - 1.0 = 0 (NEUTRAL)
+
+        # ============ LATENCY OVERHEAD ============
+        if baseline_lat > 0:
+            latency_overhead_pct = ((playbook_lat - baseline_lat) / baseline_lat * 100)
+        else:
+            latency_overhead_pct = 0.0  # Can't calculate without baseline latency
+
+        # Count Playbook strategies used
+        strategies_used = []
+        for result in playbook_results:
+            strategies_used.extend(result.playbook_strategies_used)
+        unique_strategies = len(set(strategies_used))
+
+        # ============ VALIDATION CRITERIA ============
+        # Metric-001: Success rate must improve by ≥20%
+        metric_001_pass = success_rate_improvement >= 0.20
+
+        # Metric-002: Consistency must be maintained or improved (NEW)
+        # Simpler logic: playbook consistency >= baseline consistency
+        metric_002_pass = playbook_cr >= baseline_cr
+
+        # Metric-003: Latency overhead must be ≤200%
+        metric_003_pass = latency_overhead_pct <= 200.0
+
+        return {
+            "baseline": {
+                "success_rate": baseline_success,
+                "consistency": baseline_consistency,  # NEW key name
+                "latency": baseline_latency
+            },
+            "playbook": {
+                "success_rate": playbook_success,
+                "consistency": playbook_consistency,  # NEW key name
+                "latency": playbook_latency,
+                "unique_strategies_used": unique_strategies,
+                "total_strategy_uses": len(strategies_used)
+            },
+            "improvements": {
+                "success_rate_improvement": round(success_rate_improvement, 4),
+                "success_rate_improvement_pct": round(success_rate_improvement * 100, 2),
+                "consistency_improvement": round(consistency_improvement, 4),  # NEW
+                "consistency_improvement_pct": round(consistency_improvement * 100, 2),  # NEW
+                "latency_overhead_pct": round(latency_overhead_pct, 2)
+            },
+            "validation": {
+                "metric_001_success_rate_20pct": metric_001_pass,
+                "metric_002_consistency_maintained": metric_002_pass,  # NEW name
+                "metric_003_latency_200pct": metric_003_pass
+            }
+        }
+
+    def export_summary_json(
+        self,
+        comparison: Dict[str, Any],
+        filename: str = "metrics_summary.json"
+    ):
+        """
+        Export comparison summary to JSON file.
+
+        Args:
+            comparison: Result from compare_baseline_vs_playbook()
+            filename: Output JSON filename
+        """
+        with open(filename, 'w') as f:
+            json.dump(comparison, f, indent=2)
+
+    def print_summary(
+        self,
+        comparison: Dict[str, Any]
+    ):
+        """
+        Print human-readable summary to console.
+
+        Args:
+            comparison: Result from compare_baseline_vs_playbook()
+        """
+        print("\n" + "="*60)
+        print("A/B TEST RESULTS SUMMARY")
+        print("="*60)
+
+        # Baseline metrics
+        baseline = comparison["baseline"]
+        print(f"\nBASELINE AGENT:")
+        print(f"  Success Rate: {baseline['success_rate']['mean']:.2%} ± {baseline['success_rate']['std']:.4f}")
+        print(f"  Consistency Rate: {baseline['consistency']['consistency_rate']:.2%}")  # NEW
+        print(f"  Mean Latency: {baseline['latency']['mean_latency_s']:.2f}s")
+
+        # Playbook metrics
+        playbook = comparison["playbook"]
+        print(f"\nPLAYBOOK AGENT:")
+        print(f"  Success Rate: {playbook['success_rate']['mean']:.2%} ± {playbook['success_rate']['std']:.4f}")
+        print(f"  Consistency Rate: {playbook['consistency']['consistency_rate']:.2%}")  # NEW
+        print(f"  Mean Latency: {playbook['latency']['mean_latency_s']:.2f}s")
+        print(f"  Strategies Used: {playbook['unique_strategies_used']} unique, {playbook['total_strategy_uses']} total")
+
+        # Improvements
+        improvements = comparison["improvements"]
+        print(f"\nIMPROVEMENTS:")
+        print(f"  Success Rate: +{improvements['success_rate_improvement_pct']:.2f}%")
+        print(f"  Consistency: +{improvements['consistency_improvement_pct']:.2f}%")  # NEW
+        print(f"  Latency Overhead: +{improvements['latency_overhead_pct']:.2f}%")
+
+        # Validation
+        validation = comparison["validation"]
+        print(f"\nSUCCESS CRITERIA:")
+        print(f"  Metric-001 (Success +20%): {'✓ PASS' if validation['metric_001_success_rate_20pct'] else '✗ FAIL'}")
+        print(f"  Metric-002 (Consistency ≥baseline): {'✓ PASS' if validation['metric_002_consistency_maintained'] else '✗ FAIL'}")  # NEW
+        print(f"  Metric-003 (Latency <200%): {'✓ PASS' if validation['metric_003_latency_200pct'] else '✗ FAIL'}")
+        print("="*60 + "\n")
+
+
+
+================================================================================
+FILE: experiments\parametric_runner.py
+================================================================================
+
+"""
+Parametric A/B Test Runner - PHASE 5.1 FIXED v2
+
+Location: chaos_playbook_engine/experiments/parametric_runner.py
+
+Purpose: Execute A/B tests across multiple failure rates systematically
+
+FIXES APPLIED:
+- Line 104: ABTestRunner() initialized without parameters
+- Line 107-110: failure_rate passed to run_batch_experiments() method
+- Line 189: chaos_config.get("seed", "") instead of chaos_config.seed (dict access)
+
+Architecture:
+- ParametricConfig: Configuration dataclass with validation
+- ParametricABTestRunner: Orchestrates experiments across failure rates
+- Integration with ABTestRunner for actual experiment execution
+- Automated aggregation and export
+
+Usage:
+    config = ParametricConfig(
+        failure_rates=[0.0, 0.1, 0.2],
+        experiments_per_rate=10
+    )
+    runner = ParametricABTestRunner(config)
+    await runner.run_parametric_experiments()
+"""
+
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import List, Dict, Any
+import json
+import csv
+from datetime import datetime
+import statistics
+
+from chaos_playbook_engine.experiments.ab_test_runner import ABTestRunner
+from chaos_playbook_engine.experiments.aggregate_metrics import MetricsAggregator
+
+
+@dataclass
+class ParametricConfig:
+    """Configuration for parametric experiments.
+    
+    Attributes:
+        failure_rates: List of failure rates to test (must be in [0.0, 1.0])
+        experiments_per_rate: Number of experiment pairs per rate
+        project_root: Root directory for results (default: current directory)
+    """
+    failure_rates: List[float]
+    experiments_per_rate: int
+    project_root: Path = field(default_factory=Path.cwd)
+    
+    def __post_init__(self):
+        """Validate configuration after initialization."""
+        # Validate failure rates
+        for rate in self.failure_rates:
+            if not (0.0 <= rate <= 1.0):
+                raise ValueError(
+                    f"failure_rate must be in [0.0, 1.0], got {rate}"
+                )
+        
+        # Create results directory
+        self.results_dir = self.project_root / "results" / "parametric_experiments"
+        self.results_dir.mkdir(parents=True, exist_ok=True)
+
+
+class ParametricABTestRunner:
+    """Executes A/B tests across multiple failure rates.
+    
+    Orchestrates ABTestRunner to run experiments with different chaos configs,
+    aggregates results by failure rate, and exports comprehensive metrics.
+    """
+    
+    def __init__(self, config: ParametricConfig):
+        """Initialize parametric runner.
+        
+        Args:
+            config: ParametricConfig with failure rates and experiment counts
+        """
+        self.config = config
+        
+        # Create timestamped run directory
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        self.run_dir = config.results_dir / f"run_{timestamp}"
+        self.run_dir.mkdir(parents=True, exist_ok=True)
+        
+        # Storage for all results
+        self.all_results: List[Dict[str, Any]] = []
+        
+        # Aggregator for metrics
+        self.aggregator = MetricsAggregator()
+    
+    async def run_parametric_experiments(self) -> Dict[str, Any]:
+        """Execute parametric experiments across all failure rates.
+        
+        Returns:
+            dict: Summary with total experiments, files, and metadata
+        """
+        print(f"\n🚀 Starting parametric experiments...")
+        print(f"   Failure rates: {self.config.failure_rates}")
+        print(f"   Experiments per rate: {self.config.experiments_per_rate}")
+        print(f"   Total: {len(self.config.failure_rates) * self.config.experiments_per_rate * 2} runs\n")
+        
+        # Run experiments for each failure rate
+        for idx, rate in enumerate(self.config.failure_rates, 1):
+            print(f"[{idx}/{len(self.config.failure_rates)}] Testing failure_rate={rate:.2f}")
+            
+            # ✅ FIXED: Create ABTestRunner without parameters
+            runner = ABTestRunner()
+            
+            # ✅ FIXED: Pass failure_rate to run_batch_experiments()
+            results = await runner.run_batch_experiments(
+                n=self.config.experiments_per_rate,
+                failure_rate=rate
+            )
+            
+            # Add failure_rate metadata to each result
+            for r in results:
+                r.failure_rate = rate
+            
+            # Accumulate results
+            self.all_results.extend(results)
+            
+            print(f"   ✅ Completed {len(results)} experiments (rate={rate:.2f})\n")
+        
+        print(f"✅ All experiments completed: {len(self.all_results)} total results\n")
+        
+        # Export results
+        self.export_results()
+        
+        # Return summary
+        return {
+            "total_experiments": len(self.config.failure_rates) * self.config.experiments_per_rate,
+            "failure_rates": self.config.failure_rates,
+            "experiments_per_rate": self.config.experiments_per_rate,
+            "run_directory": str(self.run_dir),
+            "files": {
+                "raw_results": str(self.run_dir / "raw_results.csv"),
+                "metrics_summary": str(self.run_dir / "aggregated_metrics.json")
+            }
+        }
+    
+    def export_results(self):
+        """Export raw results and aggregated metrics."""
+        # Export raw results to CSV
+        csv_path = self.run_dir / "raw_results.csv"
+        self._export_csv(csv_path)
+        
+        # Aggregate metrics by failure rate
+        aggregated = self._aggregate_by_rate()
+        
+        # Export aggregated metrics to JSON
+        json_path = self.run_dir / "aggregated_metrics.json"
+        with open(json_path, 'w') as f:
+            json.dump(aggregated, f, indent=2)
+        
+        print(f"📊 Results exported:")
+        print(f"   - Raw CSV: {csv_path}")
+        print(f"   - Aggregated JSON: {json_path}\n")
+    
+    def _export_csv(self, path: Path):
+        """Export all results to CSV file."""
+        if not self.all_results:
+            return
+        
+        fieldnames = [
+            "experiment_id",
+            "agent_type",
+            "outcome",
+            "duration_s",
+            "inconsistencies_count",
+            "strategies_used",
+            "seed",
+            "failure_rate"
+        ]
+        
+        with open(path, 'w', newline='') as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer.writeheader()
+            
+            for result in self.all_results:
+                writer.writerow({
+                    "experiment_id": result.experiment_id,
+                    "agent_type": result.agent_type,
+                    "outcome": result.outcome,
+                    "duration_s": f"{result.total_duration_s:.2f}",
+                    "inconsistencies_count": len(result.inconsistencies),
+                    "strategies_used": ",".join(result.playbook_strategies_used) if result.playbook_strategies_used else "",
+                    "seed": result.chaos_config.get("seed", "") if result.chaos_config else "",
+                    "failure_rate": result.failure_rate
+                })
+    
+    def _aggregate_by_rate(self) -> Dict[str, Any]:
+        """Aggregate metrics grouped by failure rate.
+        
+        Returns:
+            dict: Nested structure {rate: {metric_name: value}}
+        """
+        aggregated = {}
+        
+        for rate in self.config.failure_rates:
+            # Filter results for this rate
+            rate_results = [r for r in self.all_results if r.failure_rate == rate]
+            
+            # Split by agent type
+            baseline_results = [r for r in rate_results if r.agent_type == "baseline"]
+            playbook_results = [r for r in rate_results if r.agent_type == "playbook"]
+            
+            # Calculate metrics for each agent type
+            aggregated[str(rate)] = {
+                "failure_rate": rate,
+                "n_experiments": self.config.experiments_per_rate,
+                "baseline": self._calculate_agent_metrics(baseline_results),
+                "playbook": self._calculate_agent_metrics(playbook_results)
+            }
+        
+        return aggregated
+    
+    def _calculate_agent_metrics(self, results: List[Any]) -> Dict[str, Any]:
+        """Calculate metrics for a set of results.
+        
+        Args:
+            results: List of ExperimentResult objects
+            
+        Returns:
+            dict: Metrics with mean, std, counts
+        """
+        if not results:
+            return {
+                "n_runs": 0,
+                "success_rate": {"mean": 0.0, "std": 0.0},
+                "duration_s": {"mean": 0.0, "std": 0.0},
+                "inconsistencies": {"mean": 0.0, "std": 0.0}
+            }
+        
+        # Success rate
+        success_count = sum(1 for r in results if r.outcome == "success")
+        success_rate = success_count / len(results) if results else 0.0
+        
+        # Duration statistics
+        durations = [r.total_duration_s for r in results]
+        
+        # Inconsistencies statistics
+        inconsistency_counts = [len(r.inconsistencies) for r in results]
+        
+        return {
+            "n_runs": len(results),
+            "success_rate": {
+                "mean": success_rate,
+                "std": 0.0  # Single value, no std
+            },
+            "duration_s": {
+                "mean": self._mean(durations),
+                "std": self._std(durations)
+            },
+            "inconsistencies": {
+                "mean": self._mean(inconsistency_counts),
+                "std": self._std(inconsistency_counts)
+            }
+        }
+    
+    @staticmethod
+    def _mean(values: List[float]) -> float:
+        """Calculate mean of values."""
+        return statistics.mean(values) if values else 0.0
+    
+    @staticmethod
+    def _std(values: List[float]) -> float:
+        """Calculate standard deviation of values."""
+        return statistics.stdev(values) if len(values) > 1 else 0.0
+    
+    def display_summary(self):
+        """Display summary of results to terminal."""
+        print("\n" + "=" * 70)
+        print("PARAMETRIC EXPERIMENT SUMMARY")
+        print("=" * 70)
+        
+        # Load aggregated metrics
+        json_path = self.run_dir / "aggregated_metrics.json"
+        if not json_path.exists():
+            print("No aggregated metrics found.")
+            return
+        
+        with open(json_path, 'r') as f:
+            metrics = json.load(f)
+        
+        # Display metrics by rate
+        for rate_str in sorted(metrics.keys(), key=float):
+            rate_data = metrics[rate_str]
+            rate = rate_data["failure_rate"]
+            
+            print(f"\n📊 Failure Rate: {rate:.1%}")
+            print(f"   Experiments: {rate_data['n_experiments']}")
+            
+            baseline = rate_data["baseline"]
+            playbook = rate_data["playbook"]
+            
+            print(f"\n   Baseline Agent:")
+            print(f"      Success Rate: {baseline['success_rate']['mean']:.1%}")
+            print(f"      Avg Duration: {baseline['duration_s']['mean']:.2f}s ± {baseline['duration_s']['std']:.2f}s")
+            print(f"      Avg Inconsistencies: {baseline['inconsistencies']['mean']:.2f} ± {baseline['inconsistencies']['std']:.2f}")
+            
+            print(f"\n   Playbook Agent:")
+            print(f"      Success Rate: {playbook['success_rate']['mean']:.1%}")
+            print(f"      Avg Duration: {playbook['duration_s']['mean']:.2f}s ± {playbook['duration_s']['std']:.2f}s")
+            print(f"      Avg Inconsistencies: {playbook['inconsistencies']['mean']:.2f} ± {playbook['inconsistencies']['std']:.2f}")
+            
+            # Calculate improvement
+            success_improvement = playbook['success_rate']['mean'] - baseline['success_rate']['mean']
+            duration_improvement = baseline['duration_s']['mean'] - playbook['duration_s']['mean']
+            
+            print(f"\n   Improvement:")
+            print(f"      Success Rate: {success_improvement:+.1%}")
+            print(f"      Duration: {duration_improvement:+.2f}s")
+        
+        print("\n" + "=" * 70)
+
+
+
+================================================================================
 FILE: pyproject.toml
 ================================================================================
 
@@ -6413,6 +7935,8 @@ python-dotenv = "^1.0.0"
 matplotlib = "^3.10.7"
 seaborn = "^0.13.2"
 numpy = "^2.3.5"
+rich = "^14.2.0"
+pyautogui = "^0.9.54"
 
 [tool.poetry.group.dev.dependencies]
 pytest = "^7.4.0"
@@ -7438,6 +8962,238 @@ if __name__ == '__main__':
 
 
 ================================================================================
+FILE: scenarios\1_chaos_simulation.json
+================================================================================
+
+{
+  "title": "🎥 Chaos Agent - Video Demo Protocol",
+  "steps": [
+    {
+      "name": "1. Running Chaos Experiments (Fast Mode)",
+      "script": "scripts/run_parametric_experiments.py",
+      "args": [
+        "--failure-rates", "0.0", "0.01", "0.03", "0.05", "0.10", "0.15", "0.20", "0.25", "0.30",
+        "--experiments-per-rate", "100"
+      ]
+    },
+    {
+      "name": "2. Generating Visualizations",
+      "script": "scripts/plot_parametric_results.py",
+      "args": ["--latest"]
+    },
+    {
+      "name": "3. Compiling Markdown Report",
+      "script": "scripts/generate_parametric_report.py",
+      "args": ["--latest"]
+    },
+    {
+      "name": "4. Building Interactive Dashboard",
+      "script": "scripts/generate_dashboard.py",
+      "args": ["--latest"]
+    }
+  ],
+  "auto_open": [
+    "report.md",
+    "dashboard.html"
+  ]
+}
+
+
+================================================================================
+FILE: scenarios\2_1_ab_agent_comparison_complete.json
+================================================================================
+
+{
+  "title": "⚔️  Agent A/B Comparison: No Playbook vs Weak Playbook",
+  "steps": [
+    {
+      "name": "1. Executing A/B Comparison Experiment",
+      "script": "scripts/run_agent_comparison.py",
+      "args": [
+        "--agent-a", "petstore_agent",
+        "--agent-b", "petstore_agent",
+        "--playbook-b", "data/playbook_petstore_weak.json",
+        "--failure-rates", "0.10",
+        "--experiments-per-rate", "5",
+        "--seed", "42"
+      ]
+    },
+    {
+      "name": "2. Generating Comparative Plots",
+      "script": "scripts/plot_parametric_results.py",
+      "args": ["--latest"]
+    },
+    {
+      "name": "3. Generating Analysis Report",
+      "script": "scripts/generate_parametric_report.py",
+      "args": ["--latest"]
+    },
+    {
+      "name": "4. Building Interactive Dashboard",
+      "script": "scripts/generate_dashboard.py",
+      "args": ["--latest"]
+    }
+  ],
+  "auto_open": [
+    "report.md",
+    "dashboard.html"
+  ]
+}
+
+
+================================================================================
+FILE: scenarios\2_2_ab_agent_comparison_complete.json
+================================================================================
+
+{
+  "title": "⚔️ Agent A/B Comparison: Strong vs Weak Playbook",
+  "steps": [
+    {
+      "name": "1. Executing A/B Comparison Experiment",
+      "script": "scripts/run_agent_comparison.py",
+      "args": [
+        "--agent-a", "petstore_agent",
+        "--playbook-a", "data/playbook_petstore_strong.json",
+        "--agent-b", "petstore_agent",
+        "--playbook-b", "data/playbook_petstore_weak.json",
+        "--failure-rates", "0.10",
+        "--experiments-per-rate", "5",
+        "--seed", "42"
+      ]
+    },
+    {
+      "name": "2. Generating Comparative Plots",
+      "script": "scripts/plot_parametric_results.py",
+      "args": ["--latest"]
+    },
+    {
+      "name": "3. Generating Analysis Report",
+      "script": "scripts/generate_parametric_report.py",
+      "args": ["--latest"]
+    },
+    {
+      "name": "4. Building Interactive Dashboard",
+      "script": "scripts/generate_dashboard.py",
+      "args": ["--latest"]
+    }
+  ],
+  "auto_open": [
+    "report.md",
+    "dashboard.html"
+  ]
+}
+
+
+================================================================================
+FILE: scenarios\3_ab_report_and_dashboard.json
+================================================================================
+
+{
+  "title": "⚔️ Agent A/B Comparison: Strong vs Weak Playbook",
+  "steps": [
+    {
+      "name": "1. Generating Comparative Plots",
+      "script": "scripts/plot_parametric_results.py",
+      "args": ["--latest"]
+    },
+    {
+      "name": "2. Generating Analysis Report",
+      "script": "scripts/generate_parametric_report.py",
+      "args": ["--latest"]
+    },
+    {
+      "name": "3. Building Interactive Dashboard",
+      "script": "scripts/generate_dashboard.py",
+      "args": ["--latest"]
+    }
+  ],
+  "auto_open": [
+    "report.md",
+    "dashboard.html"
+  ]
+}
+
+
+================================================================================
+FILE: scenarios\test.json
+================================================================================
+
+{
+  "title": "🎥 Chaos Agent - Video Demo Protocol",
+  "steps": [
+    {
+      "name": "1. Running Chaos Experiments (Fast Mode)",
+      "script": "scripts/run_parametric_experiments.py",
+      "args": [
+        "--failure-rates", "0.25", "0.30",
+        "--experiments-per-rate", "3"
+      ]
+    },
+    {
+      "name": "2. Generating Visualizations",
+      "script": "scripts/plot_parametric_results.py",
+      "args": ["--latest"]
+    },
+    {
+      "name": "3. Compiling Markdown Report",
+      "script": "scripts/generate_parametric_report.py",
+      "args": ["--latest"]
+    },
+    {
+      "name": "4. Building Interactive Dashboard",
+      "script": "scripts/generate_dashboard.py",
+      "args": ["--latest"]
+    }
+  ],
+  "auto_open": [
+    "report.md",
+    "dashboard.html"
+  ]
+}
+
+
+================================================================================
+FILE: scenarios\test_2.json
+================================================================================
+
+{
+  "title": "⚔️  Agent A/B Comparison: Simulated Agent No Playbook vs Simulated Agent Retrieves Playbook",
+  "steps": [
+    {
+      "name": "1. Executing A/B Comparison Experiment",
+      "script": "scripts/run_agent_comparison.py",
+      "args": [
+        "--agent-a", "baseline",
+        "--agent-b", "playbook_simulated",
+        "--failure-rates", "0.10",
+        "--experiments-per-rate", "5",
+        "--seed", "42"
+      ]
+    },
+    {
+      "name": "2. Generating Comparative Plots",
+      "script": "scripts/plot_parametric_results.py",
+      "args": ["--latest"]
+    },
+    {
+      "name": "3. Generating Analysis Report",
+      "script": "scripts/generate_parametric_report.py",
+      "args": ["--latest"]
+    },
+    {
+      "name": "4. Building Interactive Dashboard",
+      "script": "scripts/generate_dashboard.py",
+      "args": ["--latest"]
+    }
+  ],
+  "auto_open": [
+    "report.md",
+    "dashboard.html"
+  ]
+}
+
+
+================================================================================
 FILE: scripts\EXPERIMENTS_GUIDE.md
 ================================================================================
 
@@ -7481,19 +9237,25 @@ Use this script to perform A/B testing between two specific agent configurations
 
 ```bash
 poetry run python scripts/run_agent_comparison.py \
-  --agent-a playbook_simulated \
-  --agent-b order_agent_llm \
+  --agent-a petstore_agent \
+  --playbook-a data/playbook_petstore_strong.json \
+  --agent-b petstore_agent \
+  --playbook-b data/playbook_petstore_weak.json \
   --failure-rates 0.10 \
-  --experiments-per-rate 5
+  --experiments-per-rate 5 \
+  --seed 42
 ```
 
 ### Parameters
 
   * **`--agent-a`**: The identifier for the first agent/strategy.
   * **`--agent-b`**: The identifier for the second agent/strategy.
+  * **`--playbook-a`**: The playbook for the first agent/strategy.
+  * **`--playbook-b`**: The playbook for the second agent/strategy.
   * **`--failure-rates`**: The specific failure rate(s) under which to compare the agents.
   * **`--experiments-per-rate`**: How many trials to run per agent per failure rate.
-
+  * **`--seed`**: The seed for the random experiment.
+  
 ### Outputs
 
 Files are saved in a new timestamped directory:
@@ -8357,28 +10119,41 @@ def extract_chart_data(metrics: Dict):
         data = metrics[rate_str]
         failure_rates.append(data['failure_rate'])
         
-        baseline_success.append(data['baseline']['success_rate']['mean'])
-        playbook_success.append(data['playbook']['success_rate']['mean'])
+        # ✅ FIX: Usar get() y valores por defecto seguros
+        baseline = data.get('baseline') or {}
+        playbook = data.get('playbook') or {}
+        
+        # Extraer Success Rate (con seguridad)
+        b_success = baseline.get('success_rate', {}).get('mean', 0.0)
+        p_success = playbook.get('success_rate', {}).get('mean', 0.0)
+        
+        baseline_success.append(b_success)
+        playbook_success.append(p_success)
+        
+        # Extraer Latency (con seguridad)
+        baseline_dur = baseline.get('duration_s', {}).get('mean', 0.0)
+        playbook_dur = playbook.get('duration_s', {}).get('mean', 0.0)
         
         # Calculate latency overhead percentage
-        baseline_dur = data['baseline']['duration_s']['mean']
-        playbook_dur = data['playbook']['duration_s']['mean']
         if baseline_dur > 0:
             overhead = ((playbook_dur / baseline_dur) - 1) * 100
         else:
             overhead = 0
         latency_overhead_pct.append(overhead)
         
-        # Calculate consistency (1 - inconsistencies) as percentage
-        baseline_cons = (1.0 - data['baseline']['inconsistencies']['mean']) * 100
-        playbook_cons = (1.0 - data['playbook']['inconsistencies']['mean']) * 100
+        # Extraer Consistency (con seguridad)
+        b_inc = baseline.get('inconsistencies', {}).get('mean', 0.0)
+        p_inc = playbook.get('inconsistencies', {}).get('mean', 0.0)
+        
+        baseline_cons = (1.0 - b_inc) * 100
+        playbook_cons = (1.0 - p_inc) * 100
         baseline_consistency.append(baseline_cons)
         playbook_consistency.append(playbook_cons)
         
-        # Calculate improvements for combined chart
-        effectiveness_improvement.append((data['playbook']['success_rate']['mean'] - data['baseline']['success_rate']['mean']) * 100)
+        # Calculate improvements
+        effectiveness_improvement.append((p_success - b_success) * 100)
         consistency_improvement.append(playbook_cons - baseline_cons)
-    
+
     return {
         'failure_rates': failure_rates,
         'baseline_success': baseline_success,
@@ -8632,6 +10407,14 @@ def generate_executive_summary(metrics: Dict, n_experiments: int) -> str:
     playbook_success = max_rate_data['playbook']['success_rate']['mean']
     improvement = playbook_success - baseline_success
     
+    # SAFE CALCULATION: Handle division by zero
+    if baseline_success > 0:
+        rel_improvement = f"{improvement/baseline_success*100:.1f}%"
+    elif playbook_success > 0:
+        rel_improvement = "Infinite (Baseline 0%)"
+    else:
+        rel_improvement = "0.0%"  # Both failed completely
+
     summary = f"""## Executive Summary
 
 This parametric study evaluated the **Chaos Playbook Engine** across {len(failure_rates)} failure rates (0% to {max_rate*100:.0f}%) with {n_experiments} experiment pairs per rate, totaling **{n_experiments * len(failure_rates) * 2} individual runs**.
@@ -8641,7 +10424,7 @@ This parametric study evaluated the **Chaos Playbook Engine** across {len(failur
 **🎯 Primary Result:** Under maximum chaos conditions ({max_rate*100:.0f}% failure rate):
 - **Baseline Agent**: {baseline_success*100:.0f}% success rate
 - **Playbook Agent**: {playbook_success*100:.0f}% success rate
-- **Improvement**: **+{improvement*100:.0f} percentage points** ({improvement/baseline_success*100:.1f}% relative improvement)
+- **Improvement**: **+{improvement*100:.0f} percentage points** ({rel_improvement} relative improvement)
 
 **✅ Hypothesis Validation:** The RAG-powered Playbook Agent demonstrates **significantly higher resilience** under chaos conditions compared to the baseline agent.
 
@@ -8998,439 +10781,6 @@ if __name__ == "__main__":
 
 ================================================================================
 FILE: scripts\generate_playbook_from_swagger.py
-================================================================================
-
-"""
-generate_playbook_from_swagger.py - Auto-generate default playbook from OpenAPI Swagger
-
-USAGE:
-    python scripts/generate_playbook_from_swagger.py \\
-        --swagger-url https://petstore.swagger.io/v2/swagger.json \\
-        --output data/playbook_petstore_default.json
-
-PURPOSE:
-    Read Swagger/OpenAPI specification and generate a playbook with sensible
-    default retry strategies for each (tool, error_code) combination.
-
-HEURISTICS:
-    - 400 (Bad Request): Retry 1x for GET, 0x for POST/PUT (avoid duplicates)
-    - 404 (Not Found): Retry 2x for GET, 1x for POST/PUT
-    - 405 (Method Not Allowed): No retry (programming error)
-    - 500 (Internal Error): Retry 3x with 2s backoff
-    - 503 (Service Unavailable): Retry 4x with 3s backoff
-
-AUTHOR: Auto-generated script for chaos-playbook-engine Phase 6
-DATE: 2025-11-26
-"""
-
-import argparse
-import json
-import requests
-from typing import Dict, List, Any
-from pathlib import Path
-
-
-def fetch_swagger_spec(swagger_url: str) -> Dict[str, Any]:
-    """
-    Download Swagger/OpenAPI specification from URL.
-    
-    Args:
-        swagger_url: URL to swagger.json or OpenAPI spec
-    
-    Returns:
-        dict: Parsed Swagger specification
-    """
-    print(f"📥 Downloading Swagger spec from: {swagger_url}")
-    
-    try:
-        response = requests.get(swagger_url, timeout=10)
-        response.raise_for_status()
-        
-        spec = response.json()
-        print(f"✅ Successfully downloaded Swagger spec")
-        print(f"   Title: {spec.get('info', {}).get('title', 'Unknown')}")
-        print(f"   Version: {spec.get('info', {}).get('version', 'Unknown')}")
-        
-        return spec
-    
-    except requests.RequestException as e:
-        print(f"❌ Error downloading Swagger spec: {e}")
-        raise
-    except json.JSONDecodeError as e:
-        print(f"❌ Error parsing Swagger JSON: {e}")
-        raise
-
-
-def get_default_strategy(error_code: int, method: str) -> Dict[str, Any]:
-    """
-    Get default retry strategy based on HTTP error code and method.
-    
-    Heuristics:
-    - 400 (Bad Request): May be transient validation → Retry 1x for safe methods
-    - 404 (Not Found): May be eventual consistency → Retry 2x for safe methods
-    - 405 (Method Not Allowed): Programming error → No retry
-    - 500 (Internal Error): Server issue → Retry 3x with backoff
-    - 503 (Service Unavailable): Temporary → Retry 4x with backoff
-    - Safe methods (GET, HEAD): More aggressive retries (idempotent)
-    - Unsafe methods (POST, PUT): Conservative retries (avoid duplicates)
-    
-    Args:
-        error_code: HTTP status code (400, 404, 500, etc.)
-        method: HTTP method (get, post, put, delete)
-    
-    Returns:
-        dict: Strategy with action, max_retries, backoff_seconds
-    """
-    is_safe_method = method.upper() in ['GET', 'HEAD', 'OPTIONS']
-    
-    # Default strategies by error code
-    strategies = {
-        400: {
-            'action': 'retry',
-            'max_retries': 1 if is_safe_method else 0,
-            'backoff_seconds': 1,
-            'reason': 'Transient validation error' if is_safe_method else 'Avoid duplicate writes'
-        },
-        404: {
-            'action': 'retry',
-            'max_retries': 2 if is_safe_method else 1,
-            'backoff_seconds': 2,
-            'reason': 'Eventual consistency delay' if is_safe_method else 'Possible race condition'
-        },
-        405: {
-            'action': 'fail_immediately',
-            'max_retries': 0,
-            'backoff_seconds': 0,
-            'reason': 'Programming error (wrong HTTP method)'
-        },
-        409: {
-            'action': 'retry',
-            'max_retries': 1,
-            'backoff_seconds': 1,
-            'reason': 'Conflict - resource may resolve'
-        },
-        429: {
-            'action': 'retry',
-            'max_retries': 3,
-            'backoff_seconds': 5,
-            'reason': 'Rate limit - exponential backoff'
-        },
-        500: {
-            'action': 'retry',
-            'max_retries': 3,
-            'backoff_seconds': 2,
-            'reason': 'Server error - may recover'
-        },
-        502: {
-            'action': 'retry',
-            'max_retries': 2,
-            'backoff_seconds': 3,
-            'reason': 'Bad gateway - temporary'
-        },
-        503: {
-            'action': 'retry',
-            'max_retries': 4,
-            'backoff_seconds': 3,
-            'reason': 'Service temporarily unavailable'
-        },
-        504: {
-            'action': 'retry',
-            'max_retries': 2,
-            'backoff_seconds': 5,
-            'reason': 'Gateway timeout - slow response'
-        }
-    }
-    
-    # Return specific strategy or generic retry
-    return strategies.get(
-        error_code,
-        {
-            'action': 'retry',
-            'max_retries': 2,
-            'backoff_seconds': 1,
-            'reason': 'Generic retry strategy'
-        }
-    )
-
-
-def extract_error_codes(responses: Dict[str, Any]) -> List[int]:
-    """
-    Extract error status codes from Swagger responses.
-    
-    Args:
-        responses: Responses object from Swagger operation
-    
-    Returns:
-        list: List of error status codes (400+)
-    """
-    error_codes = []
-    
-    for status_code, response_spec in responses.items():
-        try:
-            code = int(status_code)
-            if code >= 400:
-                error_codes.append(code)
-        except ValueError:
-            # Skip 'default' and other non-numeric status codes
-            continue
-    
-    return sorted(error_codes)
-
-
-def generate_playbook(swagger_spec: Dict[str, Any]) -> Dict[str, Any]:
-    """
-    Generate playbook with default strategies for all operations.
-    
-    Args:
-        swagger_spec: Parsed Swagger specification
-    
-    Returns:
-        dict: Playbook with procedures for each (tool, error_code)
-    """
-    print(f"\n📝 Generating playbook procedures...")
-    
-    procedures = []
-    paths = swagger_spec.get('paths', {})
-    
-    for path, methods in paths.items():
-        for method, spec in methods.items():
-            # Skip non-operation keys
-            if method not in ['get', 'post', 'put', 'delete', 'patch', 'head', 'options']:
-                continue
-            
-            operation_id = spec.get('operationId')
-            if not operation_id:
-                continue
-            
-            summary = spec.get('summary', 'No summary')
-            responses = spec.get('responses', {})
-            error_codes = extract_error_codes(responses)
-            
-            if not error_codes:
-                print(f"   ⚠️  {operation_id}: No error codes documented in Swagger")
-                # Add common errors anyway (400, 404, 500)
-                error_codes = [400, 404, 500]
-            
-            # Generate procedure for each error code
-            for error_code in error_codes:
-                error_description = responses.get(str(error_code), {}).get('description', 'No description')
-                strategy = get_default_strategy(error_code, method)
-                
-                procedure = {
-                    'tool': operation_id,
-                    'error_code': str(error_code),
-                    'error_description': error_description,
-                    'action': strategy['action'],
-                    'max_retries': strategy['max_retries'],
-                    'backoff_seconds': strategy['backoff_seconds'],
-                    'reason': strategy['reason'],
-                    'http_method': method.upper(),
-                    'api_path': path
-                }
-                
-                procedures.append(procedure)
-                
-                action_str = f"{strategy['action']} (retries={strategy['max_retries']})"
-                print(f"   ✅ {operation_id} + {error_code}: {action_str}")
-    
-    # Create playbook structure
-    playbook = {
-        '_metadata': {
-            'generated_from': swagger_spec.get('info', {}).get('title', 'Unknown API'),
-            'api_version': swagger_spec.get('info', {}).get('version', 'Unknown'),
-            'generated_on': '2025-11-26',
-            'total_procedures': len(procedures),
-            'description': 'Auto-generated playbook with default retry strategies based on HTTP status codes and methods'
-        },
-        'procedures': procedures
-    }
-    
-    return playbook
-
-
-def save_playbook(playbook: Dict[str, Any], output_file: str) -> None:
-    """
-    Save playbook to JSON file.
-    
-    Args:
-        playbook: Generated playbook dict
-        output_file: Path to output JSON file
-    """
-    output_path = Path(output_file)
-    output_path.parent.mkdir(parents=True, exist_ok=True)
-    
-    with open(output_path, 'w', encoding='utf-8') as f:
-        json.dump(playbook, f, indent=2, ensure_ascii=False)
-    
-    print(f"\n✅ Successfully saved playbook to {output_file}")
-    print(f"   Total procedures: {playbook['_metadata']['total_procedures']}")
-    
-    # Print summary statistics
-    actions_count = {}
-    for proc in playbook['procedures']:
-        action = proc['action']
-        actions_count[action] = actions_count.get(action, 0) + 1
-    
-    print(f"\n📊 Strategy Distribution:")
-    for action, count in sorted(actions_count.items()):
-        print(f"   - {action}: {count} procedures")
-
-
-def generate_playbook_variations(base_playbook: Dict[str, Any], output_dir: str) -> None:
-    """
-    Generate additional playbook variations (aggressive, conservative).
-    
-    Args:
-        base_playbook: Base playbook with default strategies
-        output_dir: Directory to save variation files
-    """
-    print(f"\n📝 Generating playbook variations...")
-    
-    output_path = Path(output_dir)
-    output_path.mkdir(parents=True, exist_ok=True)
-    
-    # Aggressive playbook: Max retries, longer backoff
-    aggressive = {
-        '_metadata': {
-            **base_playbook['_metadata'],
-            'variant': 'aggressive',
-            'description': 'Aggressive retry strategy - maximizes success rate at cost of latency'
-        },
-        'procedures': []
-    }
-    
-    for proc in base_playbook['procedures']:
-        aggressive_proc = proc.copy()
-        if proc['action'] == 'retry':
-            aggressive_proc['max_retries'] = min(proc['max_retries'] + 2, 5)
-            aggressive_proc['backoff_seconds'] = proc['backoff_seconds'] + 1
-        aggressive['procedures'].append(aggressive_proc)
-    
-    aggressive_file = output_path / 'playbook_petstore_aggressive.json'
-    with open(aggressive_file, 'w', encoding='utf-8') as f:
-        json.dump(aggressive, f, indent=2, ensure_ascii=False)
-    print(f"   ✅ Saved: {aggressive_file}")
-    
-    # Conservative playbook: Min retries, shorter backoff
-    conservative = {
-        '_metadata': {
-            **base_playbook['_metadata'],
-            'variant': 'conservative',
-            'description': 'Conservative retry strategy - minimizes latency at cost of success rate'
-        },
-        'procedures': []
-    }
-    
-    for proc in base_playbook['procedures']:
-        conservative_proc = proc.copy()
-        if proc['action'] == 'retry' and proc['max_retries'] > 0:
-            conservative_proc['max_retries'] = max(proc['max_retries'] - 1, 0)
-            conservative_proc['backoff_seconds'] = max(proc['backoff_seconds'] - 1, 0)
-        conservative['procedures'].append(conservative_proc)
-    
-    conservative_file = output_path / 'playbook_petstore_conservative.json'
-    with open(conservative_file, 'w', encoding='utf-8') as f:
-        json.dump(conservative, f, indent=2, ensure_ascii=False)
-    print(f"   ✅ Saved: {conservative_file}")
-    
-    # No playbook: All failures immediately (for comparison)
-    no_playbook = {
-        '_metadata': {
-            **base_playbook['_metadata'],
-            'variant': 'no_retries',
-            'description': 'Baseline - no retries, fail immediately (for comparison)'
-        },
-        'procedures': []
-    }
-    
-    for proc in base_playbook['procedures']:
-        no_retry_proc = proc.copy()
-        no_retry_proc['action'] = 'fail_immediately'
-        no_retry_proc['max_retries'] = 0
-        no_retry_proc['backoff_seconds'] = 0
-        no_playbook['procedures'].append(no_retry_proc)
-    
-    no_playbook_file = output_path / 'playbook_petstore_no_retries.json'
-    with open(no_playbook_file, 'w', encoding='utf-8') as f:
-        json.dump(no_playbook, f, indent=2, ensure_ascii=False)
-    print(f"   ✅ Saved: {no_playbook_file}")
-
-
-def main():
-    """Main entry point for the script."""
-    parser = argparse.ArgumentParser(
-        description='Generate default playbook from OpenAPI/Swagger specification',
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-        epilog='''
-Examples:
-    # Generate default playbook
-    python scripts/generate_playbook_from_swagger.py \\
-        --swagger-url https://petstore.swagger.io/v2/swagger.json \\
-        --output data/playbook_petstore_default.json
-    
-    # Generate with variations
-    python scripts/generate_playbook_from_swagger.py \\
-        --swagger-url https://petstore.swagger.io/v2/swagger.json \\
-        --output data/playbook_petstore_default.json \\
-        --generate-variations
-        '''
-    )
-    
-    parser.add_argument(
-        '--swagger-url',
-        type=str,
-        required=True,
-        help='URL to Swagger/OpenAPI JSON specification'
-    )
-    
-    parser.add_argument(
-        '--output',
-        type=str,
-        required=True,
-        help='Output JSON file path (e.g., data/playbook_petstore_default.json)'
-    )
-    
-    parser.add_argument(
-        '--generate-variations',
-        action='store_true',
-        help='Generate additional playbook variations (aggressive, conservative, no_retries)'
-    )
-    
-    args = parser.parse_args()
-    
-    try:
-        # Step 1: Download Swagger spec
-        swagger_spec = fetch_swagger_spec(args.swagger_url)
-        
-        # Step 2: Generate playbook
-        playbook = generate_playbook(swagger_spec)
-        
-        # Step 3: Save playbook
-        save_playbook(playbook, args.output)
-        
-        # Step 4: Generate variations if requested
-        if args.generate_variations:
-            output_dir = Path(args.output).parent
-            generate_playbook_variations(playbook, str(output_dir))
-        
-        print(f"\n🎉 SUCCESS!")
-        print(f"   Playbook ready to use with OrderAgent")
-        print(f"\n   Next step: Integrate with chaos_agent_petstore.py")
-        
-    except Exception as e:
-        print(f"\n❌ FAILED: {e}")
-        import traceback
-        traceback.print_exc()
-        exit(1)
-
-
-if __name__ == "__main__":
-    main()
-
-
-
-================================================================================
-FILE: scripts\generate_playbook_from_swagger_v2.py
 ================================================================================
 
 """
@@ -10668,56 +12018,34 @@ FILE: scripts\run_agent_comparison.py
 """
 run_agent_comparison.py - Agent Comparison with Phase 5 Dashboard Integration
 =============================================================================
-
-**FINAL VERSION v5 - COMPLETE FORMAT FIX**
-Fixed: Both CSV and JSON formats now match Phase 5 exactly
-
-**CSV Format**:
-experiment_id,agent_type,outcome,duration_s,inconsistencies_count,strategies_used,seed,failure_rate
-
-**JSON Format**:
-{
-  "0.0": {
-    "failure_rate": 0.0,
-    "n_experiments": 100,
-    "baseline": {"n_runs": 100, ...},
-    "playbook": {"n_runs": 100, ...}
-  }
-}
-
-**Usage**:
-    poetry run python scripts/run_agent_comparison.py \
-        --agent-a playbook_simulated \
-        --agent-b order_agent_llm \
-        --failure-rates 0.0 0.10 0.20 \
-        --experiments-per-rate 100
-    
-    python scripts/generate_dashboard.py --latest
+FINAL VERSION v5.1 - With API Rate Limit Handling
 """
 
-from pathlib import Path
-import json
-import csv
-import asyncio
 import sys
 import argparse
-from datetime import datetime
+import asyncio
+import json
+import csv
+import time
+from pathlib import Path
 from typing import List, Dict, Literal, Optional
 from collections import defaultdict
+from datetime import datetime
 
-# Add src to path
-src_path = Path(__file__).parent.parent / ""
-if str(src_path) not in sys.path:
-    sys.path.insert(0, str(src_path))
+# ==============================================================================
+# SETUP PATHS
+# ==============================================================================
+project_root = Path(__file__).resolve().parent.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
 
-# Phase 6 agent
+from config.config_loader import load_config
+from agents.petstore_agent import PetstoreAgent
 from agents.order_agent_llm import (
     initialize_order_agent_llm,
     process_order_simple,
     PlaybookStorage
 )
-
-# Shared chaos injection
 from tools.simulated_apis import (
     call_simulated_inventory_api,
     call_simulated_payments_api,
@@ -10746,6 +12074,7 @@ class BaselineAgent:
         """Process order WITHOUT retries."""
         steps = ["inventory", "payment", "shipment", "erp"]
         steps_completed = []
+        self.workflow_status = "unknown"
         
         for i, step in enumerate(steps):
             chaos_config = ChaosConfig(
@@ -10907,7 +12236,7 @@ class OrderAgentLLMWrapper:
 # ================================
 
 def create_agent(
-    agent_type: Literal["baseline", "playbook_simulated", "order_agent_llm"],
+    agent_type: Literal["baseline", "playbook_simulated", "order_agent_llm", "petstore_llm"],
     playbook_path: Optional[str] = None
 ):
     """Create agent instance."""
@@ -10915,33 +12244,53 @@ def create_agent(
         return BaselineAgent()
     elif agent_type == "playbook_simulated":
         return PlaybookSimulatedAgent()
-    else:  # order_agent_llm
-        if playbook_path is None:
-            playbook_path = "data/playbook_phase6.json"
+    elif agent_type == "petstore_agent":
+        return PetstoreAgent(playbook_path=playbook_path)
+    else:
         return OrderAgentLLMWrapper(playbook_path=playbook_path)
 
-
 # ================================
-# EXPERIMENT EXECUTION
+# EXPERIMENT EXECUTION (MEJORADO)
 # ================================
 
-async def run_experiment(
+async def run_experiment_safe(
     experiment_id: str,
     agent: any,
     agent_name: str,
     failure_rate: float,
     seed: int
 ) -> Dict:
-    """Run single experiment."""
+    """Run single experiment with error handling for 429s."""
     import time
     start_time = time.time()
     
-    result = await agent.process_order(
-        order_id=f"exp_{experiment_id}",
-        failure_rate=failure_rate,
-        seed=seed
-    )
-    
+    try:
+        # Intentamos ejecutar el agente
+        result = await agent.process_order(
+            order_id=f"exp_{experiment_id}",
+            failure_rate=failure_rate,
+            seed=seed
+        )
+        
+        # ✅ DEBUG: Imprimir qué devolvió exactamente el agente
+        print(f"    🔍 DEBUG RESULT: Status='{result['status']}', FailedAt='{result.get('failed_at')}'")
+
+        outcome = result["status"]
+        steps = len(result["steps_completed"])
+        failed_at = result.get("failed_at", "")
+        
+    except Exception as e:
+        # Capturamos crash del runner (ej. API Error)
+        print(f"  🔥 CRASH: {str(e)[:100]}...")
+        outcome = "failure"
+        steps = 0
+        failed_at = "runner_crash"
+        
+        # Si es Rate Limit, forzamos una pausa larga
+        if "429" in str(e) or "quota" in str(e).lower():
+            print("  ⏳ Quota exceeded. Cooling down for 60s...")
+            await asyncio.sleep(60)
+
     duration_ms = (time.time() - start_time) * 1000
     
     return {
@@ -10949,12 +12298,11 @@ async def run_experiment(
         "agent": agent_name,
         "failure_rate": failure_rate,
         "seed": seed,
-        "outcome": result["status"],
-        "steps_completed": len(result["steps_completed"]),
-        "failed_at": result.get("failed_at", ""),
+        "outcome": outcome,
+        "steps_completed": steps,
+        "failed_at": failed_at,
         "duration_ms": round(duration_ms, 2)
     }
-
 
 # ================================
 # PHASE 5 FORMAT CONVERSION
@@ -10967,24 +12315,25 @@ def save_phase5_format(
 ) -> None:
     """Save results in Phase 5 format matching generate_dashboard.py expectations."""
     
-    # 1. Save raw_results.csv with EXACT format from Phase 5
+    # 1. Save raw_results.csv
     csv_path = output_dir / "raw_results.csv"
     with open(csv_path, "w", newline="") as f:
         fieldnames = [
-            "experiment_id",
-            "agent_type",
-            "outcome",
-            "duration_s",
-            "inconsistencies_count",
-            "strategies_used",
-            "seed",
-            "failure_rate"
+            "experiment_id", "agent_type", "outcome", "duration_s", 
+            "inconsistencies_count", "strategies_used", "seed", "failure_rate"
         ]
         writer = csv.DictWriter(f, fieldnames=fieldnames)
         writer.writeheader()
         
         for exp in experiments:
-            agent_type = agent_names.get(exp["agent"], exp["agent"])
+            # Determinación correcta del tipo de agente para la comparación A/B
+            if exp["experiment_id"].startswith("A-"):
+                agent_type = "baseline"
+            elif exp["experiment_id"].startswith("B-"):
+                agent_type = "playbook"
+            else:
+                agent_type = agent_names.get(exp["agent"], exp["agent"])
+
             prefix = "BASE" if agent_type == "baseline" else "PLAY"
             exp_id = f"{prefix}-{exp['seed']}"
             
@@ -10999,15 +12348,7 @@ def save_phase5_format(
                 "failure_rate": exp["failure_rate"]
             })
     
-    # 2. Calculate aggregated metrics with CORRECT STRUCTURE
-    # Structure: {
-    #   "0.0": {
-    #     "failure_rate": 0.0,
-    #     "n_experiments": 100,
-    #     "baseline": {"n_runs": 100, ...},
-    #     "playbook": {"n_runs": 100, ...}
-    #   }
-    # }
+    # 2. Calculate aggregated metrics
     by_rate = defaultdict(lambda: {
         "failure_rate": None,
         "n_experiments": 0,
@@ -11015,76 +12356,75 @@ def save_phase5_format(
         "playbook": None
     })
     
-    # Group experiments by failure_rate
     rate_groups = defaultdict(list)
     for exp in experiments:
         rate_groups[exp["failure_rate"]].append(exp)
     
     for rate, rate_exps in rate_groups.items():
         rate_str = str(rate)
-        
-        # Set failure_rate and n_experiments at rate level
         by_rate[rate_str]["failure_rate"] = rate
-        by_rate[rate_str]["n_experiments"] = len(rate_exps)
+        by_rate[rate_str]["n_experiments"] = len(rate_exps) // 2
         
-        # Group by agent within this rate
         agent_groups = defaultdict(list)
         for exp in rate_exps:
-            agent_phase5 = agent_names.get(exp["agent"], exp["agent"])
-            agent_groups[agent_phase5].append(exp)
+            if exp["experiment_id"].startswith("A-"):
+                atype = "baseline"
+            elif exp["experiment_id"].startswith("B-"):
+                atype = "playbook"
+            else:
+                atype = "unknown"
+            agent_groups[atype].append(exp)
         
-        # Calculate metrics for each agent
-        for agent_name, agent_exps in agent_groups.items():
+        for atype in ["baseline", "playbook"]:
+            agent_exps = agent_groups.get(atype, [])
+            if not agent_exps:
+                # Default safe values
+                by_rate[rate_str][atype] = {
+                    "n_runs": 0,
+                    "success_rate": {"mean": 0.0, "std": 0.0},
+                    "duration_s": {"mean": 0.0, "std": 0.0},
+                    "inconsistencies": {"mean": 0.0, "std": 0.0}
+                }
+                continue
+
             successes = sum(1 for e in agent_exps if e["outcome"] == "success")
             latencies = [float(e["duration_ms"]) for e in agent_exps]
+            avg_duration = sum(latencies) / len(latencies) / 1000 if latencies else 0.0
             
-            by_rate[rate_str][agent_name] = {
-                "n_runs": len(agent_exps),  # CORRECT: "n_runs" not "total_experiments"
-                "success_rate": {
-                    "mean": successes / len(agent_exps),
-                    "std": 0.0
-                },
-                "duration_s": {
-                    "mean": sum(latencies) / len(latencies) / 1000,
-                    "std": 0.0
-                },
-                "inconsistencies": {
-                    "mean": 0,
-                    "std": 0.0
-                }
+            by_rate[rate_str][atype] = {
+                "n_runs": len(agent_exps),
+                "success_rate": {"mean": successes / len(agent_exps), "std": 0.0},
+                "duration_s": {"mean": avg_duration, "std": 0.0},
+                "inconsistencies": {"mean": 0, "std": 0.0}
             }
     
-    # 3. Save aggregated_metrics.json
     json_path = output_dir / "aggregated_metrics.json"
-    phase5_json = dict(by_rate)
-    
     with open(json_path, "w") as f:
-        json.dump(phase5_json, f, indent=2)
+        json.dump(dict(by_rate), f, indent=2)
     
-    print(f"\n✅ Phase 5 format files created:")
-    print(f"  - {csv_path}")
-    print(f"  - {json_path}")
-    print(f"\n📋 JSON Structure (matching Phase 5):")
-    print(f"  {{")
-    print(f"    \"0.0\": {{")
-    print(f"      \"failure_rate\": 0.0,")
-    print(f"      \"n_experiments\": 100,")
-    print(f"      \"baseline\": {{\"n_runs\": 100, ...}},")
-    print(f"      \"playbook\": {{\"n_runs\": 100, ...}}")
-    print(f"    }}")
-    print(f"  }}")
-
+    print(f"\n✅ Results saved to {output_dir}")
 
 # ================================
 # MAIN COMPARISON LOGIC
 # ================================
 
 async def run_comparison(args) -> bool:
-    """Run agent comparison experiments."""
     print("\n" + "="*70)
     print("AGENT COMPARISON - PARAMETRIC EXPERIMENTS")
     print("="*70)
     
+    # 1. CARGAR CONFIGURACIÓN
+    config = load_config() # Carga dev_config.yaml o prod_config.yaml según ENV
+    
+    # 2. DETERMINAR SEMILLA (Prioridad: CLI > YAML > Hardcoded 42)
+    if args.seed is not None:
+        base_seed = args.seed
+        source = "CLI"
+    else:
+        # Intenta leer del yaml, si falla usa 42
+        base_seed = config.get('experiment', {}).get('default_seed', 42)
+        source = "YAML"
+
     print(f"\nConfiguration:")
     print(f"  Agent A: {args.agent_a}")
     if args.playbook_a:
@@ -11105,40 +12445,54 @@ async def run_comparison(args) -> bool:
         return False
     
     print("\n[2/4] Running experiments...")
-    print("-" * 70)
     
     all_results = []
-    base_seed = 42
+
+    # Configuración de seguridad para API Rate Limits
+    SAFE_DELAY_SECONDS = 5  # Pausa entre experimentos para recargar quota
     
     for rate in args.failure_rates:
         print(f"\n📊 Failure rate: {rate:.0%}")
-        print("-" * 70)
         
+        # --- AGENT A LOOP ---
         print(f"\n  Agent A ({args.agent_a}):")
         for i in range(args.experiments_per_rate):
             seed = base_seed + i
             exp_id = f"A-{rate:.2f}-{i+1:03d}"
             
-            result = await run_experiment(exp_id, agent_a, args.agent_a, rate, seed)
+            # Run safe
+            result = await run_experiment_safe(exp_id, agent_a, args.agent_a, rate, seed)
             all_results.append(result)
             
-            if (i + 1) % 10 == 0 or (i + 1) == args.experiments_per_rate:
-                successes = sum(1 for r in all_results[-10:] if r["outcome"] == "success")
-                print(f"    Progress: {i+1}/{args.experiments_per_rate} ({successes}/10 recent success)")
+            success_icon = "✅" if result["outcome"] == "success" else "❌"
+            print(f"    Run {i+1}: {success_icon} ({result['duration_ms']}ms)")
+            
+            # 🛑 THROTTLING: Pausa obligatoria para evitar 429
+            if i < args.experiments_per_rate - 1:
+                await asyncio.sleep(SAFE_DELAY_SECONDS)
         
+        # Pausa extra entre agentes
+        await asyncio.sleep(SAFE_DELAY_SECONDS)
+
+        # --- AGENT B LOOP ---
         print(f"\n  Agent B ({args.agent_b}):")
         for i in range(args.experiments_per_rate):
             seed = base_seed + i
             exp_id = f"B-{rate:.2f}-{i+1:03d}"
             
-            result = await run_experiment(exp_id, agent_b, args.agent_b, rate, seed)
+            # Run safe
+            result = await run_experiment_safe(exp_id, agent_b, args.agent_b, rate, seed)
             all_results.append(result)
             
-            if (i + 1) % 10 == 0 or (i + 1) == args.experiments_per_rate:
-                successes = sum(1 for r in all_results[-10:] if r["outcome"] == "success")
-                print(f"    Progress: {i+1}/{args.experiments_per_rate} ({successes}/10 recent success)")
+            success_icon = "✅" if result["outcome"] == "success" else "❌"
+            print(f"    Run {i+1}: {success_icon} ({result['duration_ms']}ms)")
+            
+            # 🛑 THROTTLING
+            if i < args.experiments_per_rate - 1:
+                await asyncio.sleep(SAFE_DELAY_SECONDS)
         
         base_seed += args.experiments_per_rate
+        await asyncio.sleep(SAFE_DELAY_SECONDS) # Pausa entre rates
     
     print("\n[3/4] Calculating success rates...")
     print("-" * 70)
@@ -11165,18 +12519,12 @@ async def run_comparison(args) -> bool:
         rate_b = success_rates[args.agent_b][rate]
         delta = rate_b - rate_a
         
-        print(f"{rate:>13.0%} | {rate_a:>19.1%} | {rate_b:>19.1%} | {delta:>+9.1%}")
-    
+        print(f"{rate:>13.0%} | {rate_a:>19.1%} | {rate_b:>19.1%} | {delta:>+9.1%}")    
     output_dir = Path("results") / "parametric_experiments" / f"run_{datetime.now().strftime('%Y%m%d_%H%M%S')}"
     output_dir.mkdir(parents=True, exist_ok=True)
     
     print("\n[4/4] Saving results...")
-    
-    agent_names = {
-        args.agent_a: "baseline",
-        args.agent_b: "playbook"
-    }
-    
+    agent_names = { args.agent_a: "baseline", args.agent_b: "playbook" }
     save_phase5_format(all_results, output_dir, agent_names)
     
     print("\n" + "="*70)
@@ -11201,68 +12549,221 @@ async def run_comparison(args) -> bool:
 # ================================
 
 def parse_args():
-    """Parse command line arguments."""
-    parser = argparse.ArgumentParser(
-        description="Compare 2 agents with configurable chaos parameters"
-    )
-    
-    parser.add_argument(
-        "--agent-a",
-        type=str,
-        required=True,
-        choices=["baseline", "playbook_simulated", "order_agent_llm"],
-        help="First agent to compare"
-    )
-    
-    parser.add_argument(
-        "--agent-b",
-        type=str,
-        required=True,
-        choices=["baseline", "playbook_simulated", "order_agent_llm"],
-        help="Second agent to compare"
-    )
-    
-    parser.add_argument(
-        "--playbook-a",
-        type=str,
-        default=None,
-        help="Playbook path for agent A (only for order_agent_llm)"
-    )
-    
-    parser.add_argument(
-        "--playbook-b",
-        type=str,
-        default=None,
-        help="Playbook path for agent B (only for order_agent_llm)"
-    )
-    
-    parser.add_argument(
-        "--failure-rates",
-        type=float,
-        nargs="+",
-        required=True,
-        help="List of failure rates to test (e.g., 0.0 0.10 0.20)"
-    )
-    
-    parser.add_argument(
-        "--experiments-per-rate",
-        type=int,
-        default=100,
-        help="Number of experiments per failure rate (default: 100)"
-    )
-    
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--agent-a", type=str, required=True)
+    parser.add_argument("--agent-b", type=str, required=True)
+    parser.add_argument("--playbook-a", type=str, default=None)
+    parser.add_argument("--playbook-b", type=str, default=None)
+    parser.add_argument("--failure-rates", type=float, nargs="+", required=True)
+    parser.add_argument("--experiments-per-rate", type=int, default=100)
+    parser.add_argument("--seed",type=int,default=None,help="Base seed for reproducibility (overrides config.yaml)")
     return parser.parse_args()
-
-
-# ================================
-# MAIN ENTRY POINT
-# ================================
 
 if __name__ == "__main__":
     args = parse_args()
-    success = asyncio.run(run_comparison(args))
-    exit(0 if success else 1)
+    asyncio.run(run_comparison(args))
 
+
+================================================================================
+FILE: scripts\run_showcase.py
+================================================================================
+
+import argparse
+import json
+import subprocess
+import sys
+import os
+import platform
+import time
+import threading
+import queue
+import shutil
+import webbrowser
+from pathlib import Path
+
+# Intentar importar librerías opcionales
+try:
+    from rich.console import Console
+    from rich.panel import Panel
+    from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TimeElapsedColumn
+    console = Console(force_terminal=True)
+    HAS_RICH = True
+except ImportError:
+    HAS_RICH = False
+
+# Librería para simular teclas (Opcional, para el truco del preview)
+try:
+    import pyautogui
+    HAS_PYAUTOGUI = True
+except ImportError:
+    HAS_PYAUTOGUI = False
+
+def print_step(title, style="bold blue"):
+    if HAS_RICH:
+        console.print(Panel(title, style=style, expand=False))
+    else:
+        print(f"\n{'='*10} {title} {'='*10}\n")
+
+def get_latest_run_dir(base_path: Path):
+    if not base_path.exists(): return None
+    dirs = sorted([d for d in base_path.iterdir() if d.is_dir() and d.name.startswith('run_')])
+    return dirs[-1] if dirs else None
+
+def open_markdown_in_vscode(path: Path):
+    """Abre Markdown en VS Code y opcionalmente activa el Preview."""
+    if not path.exists(): return
+    
+    print(f"📄 Opening Report in VS Code: {path.name}...")
+    
+    if shutil.which("code"):
+        try:
+            # Abre el archivo en VS Code
+            subprocess.run(["code", "-r", str(path)], shell=True, check=True)
+            
+            # TRUCO DE MAGIA (Si tienes pyautogui instalado)
+            # Espera un poco a que VS Code tenga el foco y pulsa el atajo de Preview
+            if HAS_PYAUTOGUI:
+                time.sleep(1.5) # Esperamos a que la ventana cargue
+                # Detectar sistema para el atajo correcto
+                if platform.system() == 'Darwin': # Mac
+                    pyautogui.hotkey('command', 'shift', 'v')
+                else: # Windows / Linux
+                    pyautogui.hotkey('ctrl', 'shift', 'v')
+                print("   (Auto-triggered Preview Mode 🪄)")
+            return
+        except: pass
+    
+    open_file_default(path)
+
+def open_dashboard_in_browser(path: Path):
+    """Muestra el link Y abre el navegador del sistema."""
+    uri = path.absolute().as_uri()
+    
+    print(f"🌐 Launching Dashboard in default browser...")
+    try:
+        webbrowser.open(uri)
+    except Exception as e:
+        print(f"❌ Could not launch browser: {e}")
+
+def open_file_default(path: Path):
+    try:
+        if platform.system() == 'Darwin': subprocess.call(('open', str(path)))
+        elif platform.system() == 'Windows': os.startfile(str(path))
+        else: subprocess.call(('xdg-open', str(path)))
+    except: pass
+
+def enqueue_output(out_stream, q):
+    for line in iter(out_stream.readline, ''):
+        q.put(line)
+    out_stream.close()
+
+def run_command(script_path, args, description):
+    cmd = [sys.executable, script_path] + args
+    env = os.environ.copy()
+    env["PYTHONIOENCODING"] = "utf-8"
+
+    print(f"⚙️  Launching: {script_path} {' '.join(args)}")
+    
+    process = subprocess.Popen(
+        cmd,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT,
+        text=True,
+        bufsize=1,
+        universal_newlines=True,
+        env=env,
+        encoding='utf-8',
+        errors='replace'
+    )
+
+    q = queue.Queue()
+    t = threading.Thread(target=enqueue_output, args=(process.stdout, q))
+    t.daemon = True
+    t.start()
+
+    if HAS_RICH:
+        with Progress(
+            SpinnerColumn("earth"),    
+            TextColumn("[bold blue]{task.description}"),
+            BarColumn(bar_width=None, pulse_style="yellow"),
+            TimeElapsedColumn(),       
+            console=console,
+            transient=True
+        ) as progress:
+            task = progress.add_task(f"[yellow]Running {description}...", total=None)
+            while True:
+                alive = process.poll() is None
+                while True:
+                    try:
+                        line = q.get_nowait()
+                        clean_line = line.rstrip()
+                        if clean_line:
+                            progress.console.print(f"  │ {clean_line}", style="dim")
+                    except queue.Empty:
+                        break
+                if not alive and q.empty(): break
+                time.sleep(0.05)
+    else:
+        # Fallback simple
+        while True:
+            alive = process.poll() is None
+            while True:
+                try:
+                    line = q.get_nowait()
+                    print(f"  │ {line.rstrip()}")
+                except queue.Empty:
+                    break
+            if not alive and q.empty(): break
+            time.sleep(0.1)
+
+    if process.returncode != 0:
+        print(f"❌ Critical error in {description}. Code: {process.returncode}")
+        sys.exit(1)
+    
+    print(f"✅ {description} completed.\n")
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--config", required=True)
+    args = parser.parse_args()
+
+    config_path = Path(args.config)
+    with open(config_path, 'r', encoding='utf-8') as f:
+        scenario = json.load(f)
+
+    print_step(f"🎬 SCENARIO: {scenario.get('title', 'Untitled')}", "bold magenta")
+    
+    for step in scenario['steps']:
+        print_step(f"Step: {step['name']}", "bold cyan")
+        run_command(step['script'], step['args'], step['name'])
+        time.sleep(1) 
+
+    if 'auto_open' in scenario:
+        print_step("🚀 Launching Results", "bold green")
+        results_base = Path("results/parametric_experiments")
+        latest = get_latest_run_dir(results_base)
+        
+        if latest:
+            print(f"📍 Results found at: {latest.name}")
+            
+            for f_name in scenario['auto_open']:
+                file_path = latest / f_name
+                
+                if f_name.endswith('.md'):
+                    open_markdown_in_vscode(file_path)
+                    # Pequeña pausa para asegurar que VS Code procese antes de abrir el navegador
+                    time.sleep(3) 
+                
+                elif f_name.endswith('.html'):
+                    open_dashboard_in_browser(file_path)
+                    
+                else:
+                    open_file_default(file_path)
+        else:
+             print("⚠️ Results directory not found.")
+
+if __name__ == "__main__":
+    main()
 
 
 ================================================================================
