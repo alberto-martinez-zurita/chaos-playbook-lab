@@ -1,0 +1,30 @@
+{
+  "name": "Petstore Resilience Suite",
+  "description": "Validación de comportamiento del agente bajo condiciones normales y adversas",
+  "test_cases": [
+    {
+      "id": "TC-001-HAPPY-PATH",
+      "description": "Compra estándar sin errores",
+      "input": "Order-101",
+      "chaos_config": { "rate": 0.0, "seed": 42 },
+      "expected": {
+        "status": "success",
+        "min_steps": 4,
+        "max_latency_ms": 5000,
+        "must_call": ["place_order", "update_pet_status"]
+      }
+    },
+    {
+      "id": "TC-002-RESILIENCE-503",
+      "description": "Recuperación ante Servicio No Disponible",
+      "input": "Order-102",
+      "chaos_config": { "rate": 0.2, "seed": 42 },
+      "expected": {
+        "status": "success",
+        "min_steps": 4,
+        "must_call": ["lookup_playbook"],
+        "forbidden_outcome": "failure"
+      }
+    }
+  ]
+}

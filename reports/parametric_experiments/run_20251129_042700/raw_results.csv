@@ -1,0 +1,17 @@
+experiment_id,agent_type,outcome,duration_ms,steps_completed,failed_at,inconsistencies_count,retries,seed,failure_rate
+BASE-0.0-0,baseline,success,440.66762924194336,4,,0,0,42,0.0
+PLAY-0.0-0,playbook,success,436.10143661499023,4,,0,0,42,0.0
+BASE-0.01-0,baseline,success,433.20155143737793,4,,0,0,1042,0.01
+PLAY-0.01-0,playbook,success,432.68394470214844,4,,0,0,1042,0.01
+BASE-0.03-0,baseline,success,435.28199195861816,4,,0,0,2042,0.03
+PLAY-0.03-0,playbook,success,435.0438117980957,4,,0,0,2042,0.03
+BASE-0.05-0,baseline,success,434.3287944793701,4,,0,0,3042,0.05
+PLAY-0.05-0,playbook,success,432.0039749145508,4,,0,0,3042,0.05
+BASE-0.1-0,baseline,failure,0.9999275207519531,0,inventory,0,0,4042,0.1
+PLAY-0.1-0,playbook,success,432.47270584106445,4,,0,1,4042,0.1
+BASE-0.15-0,baseline,success,438.95769119262695,4,,0,0,5042,0.15
+PLAY-0.15-0,playbook,success,433.44783782958984,4,,0,0,5042,0.15
+BASE-0.2-0,baseline,failure,217.26632118225098,2,erp,1,0,6042,0.2
+PLAY-0.2-0,playbook,success,433.5365295410156,4,,0,1,6042,0.2
+BASE-0.25-0,baseline,success,438.3859634399414,4,,0,0,7042,0.25
+PLAY-0.25-0,playbook,success,435.2235794067383,4,,0,0,7042,0.25

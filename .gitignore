@@ -21,5 +21,3 @@ htmlcov/
 Thumbs.db
 .ruff_cache
 docs
-parametric_experiments
-standard_experiments

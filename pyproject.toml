@@ -1,10 +1,10 @@
 [tool.poetry]
 name = "chaos-playbook-engine"
 version = "0.1.0"
-description = "Chaos Engineering + RAG for Resilient Order Agents"
+description = "A production-grade chaos engineering framework for AI agents"
 authors = ["Alberto Martinez <albertomz@gmail.com>"]
 readme = "README.md"
-packages = [{include = "chaos_playbook_engine", from = "src"}]
+packages = [{include = "chaos_engine", from = "src"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"

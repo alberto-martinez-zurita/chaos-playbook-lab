@@ -1,0 +1,274 @@
+{
+  "0.0": {
+    "failure_rate": 0.0,
+    "n_experiments": 1,
+    "baseline": {
+      "n_runs": 1,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 0.44066762924194336,
+        "std": 0.0
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    },
+    "playbook": {
+      "n_runs": 1,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 0.43610143661499023,
+        "std": 0.0
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.01": {
+    "failure_rate": 0.01,
+    "n_experiments": 1,
+    "baseline": {
+      "n_runs": 1,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 0.43320155143737793,
+        "std": 0.0
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    },
+    "playbook": {
+      "n_runs": 1,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 0.43268394470214844,
+        "std": 0.0
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.03": {
+    "failure_rate": 0.03,
+    "n_experiments": 1,
+    "baseline": {
+      "n_runs": 1,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 0.43528199195861816,
+        "std": 0.0
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    },
+    "playbook": {
+      "n_runs": 1,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 0.4350438117980957,
+        "std": 0.0
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.05": {
+    "failure_rate": 0.05,
+    "n_experiments": 1,
+    "baseline": {
+      "n_runs": 1,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 0.4343287944793701,
+        "std": 0.0
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    },
+    "playbook": {
+      "n_runs": 1,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 0.4320039749145508,
+        "std": 0.0
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.1": {
+    "failure_rate": 0.1,
+    "n_experiments": 1,
+    "baseline": {
+      "n_runs": 1,
+      "success_rate": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 0.0009999275207519531,
+        "std": 0.0
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    },
+    "playbook": {
+      "n_runs": 1,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 0.43247270584106445,
+        "std": 0.0
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.15": {
+    "failure_rate": 0.15,
+    "n_experiments": 1,
+    "baseline": {
+      "n_runs": 1,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 0.43895769119262695,
+        "std": 0.0
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    },
+    "playbook": {
+      "n_runs": 1,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 0.43344783782958984,
+        "std": 0.0
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.2": {
+    "failure_rate": 0.2,
+    "n_experiments": 1,
+    "baseline": {
+      "n_runs": 1,
+      "success_rate": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 0.21726632118225098,
+        "std": 0.0
+      },
+      "inconsistencies": {
+        "mean": 1.0,
+        "std": 0.0
+      }
+    },
+    "playbook": {
+      "n_runs": 1,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 0.4335365295410156,
+        "std": 0.0
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.25": {
+    "failure_rate": 0.25,
+    "n_experiments": 1,
+    "baseline": {
+      "n_runs": 1,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 0.4383859634399414,
+        "std": 0.0
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    },
+    "playbook": {
+      "n_runs": 1,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 0.4352235794067383,
+        "std": 0.0
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  }
+}
