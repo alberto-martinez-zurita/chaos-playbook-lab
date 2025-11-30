@@ -1,16 +1,19 @@
 # 🚀 Chaos Playbook Engine: The Resilience Laboratory
-
 > **"Don't just survive the storm. Learn from it."**
 
-[![Status](https://img.shields.io/badge/Status-Phase%205%20Complete%20✅-brightgreen)](https://github.com/google/adk-python)
+[![Status](https://img.shields.io/badge/Status-Phase%206%20Complete%20✅-brightgreen)](https://github.com/google/adk-python)
 [![Google ADK](https://img.shields.io/badge/Framework-Google%20ADK%20v1.18+-blue)](https://google.github.io/adk-docs/)
 [![Quality](https://img.shields.io/badge/Code%20Quality-CLEAR%20Level%205%20(Elite)-purple)](https://github.com/google/adk-samples)
 [![Coverage](https://img.shields.io/badge/Test%20Coverage-92%25-green)](https://github.com/google/adk-python)
 [![Experiments](https://img.shields.io/badge/Validated%20Runs-14%2C000-orange)](https://github.com/google/adk-samples)
 
+<img src="chaos_playbook_engine.png" style="max-width: 800px; height: auto;">
+
 **Chaos Playbook Engine** is an **AgentOps Laboratory** that systematically injects chaos into AI agents to discover failure modes and synthesize **RAG-based recovery playbooks**.
 
 We moved beyond "prompt engineering" to **Parametric Engineering**. By running **1,000 controlled experiments** across 9 failure rates, we proved that agents equipped with our Playbook Engine achieve **98% reliability** in production environments where standard agents fail.
+
+
 
 ---
 
@@ -28,7 +31,7 @@ We didn't just build an agent; we proved a thesis. Under realistic production ch
 
 ---
 
-## ⚡ Quick Start (The "Polong" Test)
+## ⚡ Quick Start
 
 Run the full parametric simulation in under 2 minutes. No Cloud credentials required (Mock Mode).
 
@@ -69,14 +72,14 @@ open reports/parametric_experiments/run_*/dashboard.html
 
 We believe in transparency and rigor. Explore the full project details:
 
-  * 📖 **[Project Narrative (The Pitch)](./docs/CAPSTONE_NARRATIVE.md)**: The business case, ROI analysis, and problem statement.
-  * 🏗️ **[System Architecture](./docs/ARCHITECTURE.md)**: Deep dive into the Hybrid Deterministic/Probabilistic engine, `src-layout`, and design patterns.
-  * 🏛️ **[Decision Records (ADRs)](./docs/ADR.md)**: The engineering trade-offs behind our architecture (Why JSON? Why Streaming Aggregation?).
-  * 🔬 **[Scientific Report](./docs/SCIENTIFIC_REPORT.md)**: The empirical evidence from 14,000 parametric experiments (p \< 0.01).
-  * 🔮 **[Innovation Roadmap](./docs/INNOVATION.md)**: Our vision for Prompt Science, PlaybookOps, and Digital Twins.
-  * 📘 **[User Guide](./docs/USER_GUIDE.md)**: Detailed instructions for configuring chaos scenarios and interpreting dashboards.
-  * 🛡️ **[CLEAR Audit Report](./docs/PROJECT_REPORT.md)**: A detailed audit of the code quality, SRE practices, and GreenOps compliance (Level 5 Elite).
-  * 💻 **[Code Wiki](./docs/CODE_WIKI.md)**: A developer-centric guide to the codebase structure, classes, and extension points.
+  * 📖 **[Project Narrative (The Pitch)](https://github.com/alberto-martinez-zurita/chaos-playbook-lab/docs/CAPSTONE_NARRATIVE.md)**: The business case, ROI analysis, and problem statement.
+  * 🏗️ **[System Architecture](https://github.com/alberto-martinez-zurita/chaos-playbook-lab/docs/ARCHITECTURE.md)**: Deep dive into the Hybrid Deterministic/Probabilistic engine, `src-layout`, and design patterns.
+  * 🏛️ **[Decision Records (ADRs)](https://github.com/alberto-martinez-zurita/chaos-playbook-lab/docs/ADR.md)**: The engineering trade-offs behind our architecture (Why JSON? Why Streaming Aggregation?).
+  * 🔬 **[Scientific Report](https://github.com/alberto-martinez-zurita/chaos-playbook-lab/docs/SCIENTIFIC_REPORT.md)**: The empirical evidence from 14,000 parametric experiments (p \< 0.01).
+  * 🔮 **[Innovation Roadmap](https://github.com/alberto-martinez-zurita/chaos-playbook-lab/docs/INNOVATION.md)**: Our vision for Prompt Science, PlaybookOps, and Digital Twins.
+  * 📘 **[User Guide](https://github.com/alberto-martinez-zurita/chaos-playbook-lab/docs/USER_GUIDE.md)**: Detailed instructions for configuring chaos scenarios and interpreting dashboards.
+  * 🛡️ **[CLEAR Audit Report](https://github.com/alberto-martinez-zurita/chaos-playbook-lab/docs/PROJECT_REPORT.md)**: A detailed audit of the code quality, SRE practices, and GreenOps compliance (Level 5 Elite).
+  * 💻 **[Code Wiki](https://github.com/alberto-martinez-zurita/chaos-playbook-lab/docs/CODE_WIKI.md)**: A developer-centric guide to the codebase structure, classes, and extension points.
 
 -----
 
