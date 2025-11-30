@@ -1,5 +1,3 @@
-# ARCHITECTURE.md
-
 # 🏗️ System Architecture: Chaos Playbook Engine
 
 > **Architecting for Resilience: A Hybrid Deterministic/Probabilistic Engine**

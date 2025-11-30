@@ -3,9 +3,6 @@ agent:
   model: gemini-2.5-flash-lite
 runner:
   type: InMemoryRunner
-session_service:
-  type: DatabaseSessionService
-  db_url: sqlite:///local_sessions.db
+mock_mode: True
 experiment:
   default_seed: 42
-assets_dir: ./assets

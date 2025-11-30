@@ -1,5 +1,3 @@
-# CONTRIBUTING.md
-
 # 🤝 Join the Chaos Playbook Engine Lab
 
 > **"Help us build the immune system for the Agentic Web."**
@@ -36,7 +34,7 @@ We use a modern, standards-compliant Python stack. You can be up and running in 
 
 ```bash
 # 1. Clone the Lab
-git clone https://github.com/your-repo/chaos-playbook-engine.git
+git clone https://github.com/alberto-martinez-zurita/chaos-playbook-engine.git
 cd chaos-playbook-engine
 
 # 2. Install Dependencies (Poetry handles virtualenvs automatically)
@@ -47,14 +45,20 @@ poetry install
 cp .env.example .env
 # Edit .env to add GOOGLE_API_KEY=...
 
-# 4. Run the Chaos Simulation (Validates your setup)
+# 4. Run the Chaos Simulation
 poetry run python cli/run_simulation.py \
+  --failure-rates 0.0 0.1 \
+  --experiments-per-rate 5 \
+  --verbose
+
+# 5. Run the Chaos Experiment
+poetry run python cli/run_comparison.py \
   --failure-rates 0.0 0.1 \
   --experiments-per-rate 5 \
   --verbose
 ```
 
-> **Note:** The simulation runs in `Mock Mode` by default if no API key is present, ensuring you can contribute without incurring costs .
+> **Note:** The simulation and comparison runs in `Mock Mode` by default. For simulation no API key is required. For comparison API Key is required.
 
 -----
 
@@ -69,7 +73,7 @@ We follow the strict `src-layout` pattern to separate **Logic** from **Execution
 | **`assets/`** | **The Knowledge.** Data, playbooks, and scenarios. | `playbooks/training.json`, `knowledge_base/` |
 | **`config/`** | **The Controls.** Environment settings. | `dev.yaml`, `prod.yaml` |
 | **`tests/`** | **The Guardrails.** Pytest suites. | `unit/`, `integration/` |
-
+| **`docs/`** | **The Documentation.** Arquitecture, ADRs and User Guide. | `docs/` |
 -----
 
 ## 🛡️ Quality Standards (The Elite Code)
@@ -121,7 +125,7 @@ We have ambitious plans (See `INNOVATION.md`). Pick a Horizon and start building
 ## 📝 How to Submit a PR
 
 1.  **Fork & Branch:** `git checkout -b feat/my-awesome-feature`.
-2.  **Test:** Ensure `poetry run pytest` passes (100+ tests).
+2.  **Test:** Ensure `poetry run pytest` passes (20+ tests).
 3.  **Validate:** Run a small simulation (`cli/run_simulation.py`) to ensure no regression in resilience.
 4.  **Document:** Update `README.md` or `INNOVATION.md` if you changed the architecture.
 

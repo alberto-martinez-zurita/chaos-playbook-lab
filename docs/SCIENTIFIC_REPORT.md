@@ -1,5 +1,3 @@
-# SCIENTIFIC_REPORT.md
-
 # 🔬 Parametric Resilience: Empirical Analysis of RAG-Driven Playbooks in Stochastic Environments
 
 **Status:** Peer-Review Ready (Phase 5 + 6 Validated)

@@ -48,7 +48,7 @@ async def run_experiment_safe(
     # 2. INYECCIÓN CRÍTICA: Crear las dependencias
     # A. Crear el Proxy BASE (el que realmente simula el caos)
     chaos_proxy_instance = ChaosProxy(
-        failure_rate=failure_rate, seed=seed, mock_mode=config.get('mock_mode', False), verbose=verbose
+        failure_rate=failure_rate, seed=seed, mock_mode=config.get('mock_mode', True), verbose=verbose
     )
 
     # ✅ B. INYECTAR EL CIRCUIT BREAKER ALREDEDOR DEL PROXY (Pilar IV)

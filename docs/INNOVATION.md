@@ -1,5 +1,3 @@
-# INNOVATION.md
-
 # 🔮 Innovation Roadmap: The Era of Automated Resilience
 
 > **"We are moving from hand-crafted error handling to brute-force resilience discovery."**

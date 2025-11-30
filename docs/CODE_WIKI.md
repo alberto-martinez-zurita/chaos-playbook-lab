@@ -1,5 +1,3 @@
-# CODE\_WIKI.md
-
 # 🏛️ Chaos Playbook Engine: Architectural Wiki
 
 > **Living Documentation of Resilience Engineering**

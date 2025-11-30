@@ -1,5 +1,3 @@
-# Capstone_Pitch_Final.md
-
 ## 🚀 Chaos Playbook Engine: Breeding Resilient Enterprise Agents
 
 ### A. The "Killer" Hook (30s Read)
