@@ -8,3 +8,4 @@ session_service:
   db_url: sqlite:///local_sessions.db
 experiment:
   default_seed: 42
+assets_dir: ./assets

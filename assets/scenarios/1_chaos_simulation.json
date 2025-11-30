@@ -6,14 +6,14 @@
       "script": "cli/run_simulation.py",
       "args": [
         "--failure-rates", "0.0", "0.01", "0.03", "0.05", "0.10", "0.15", "0.20",
-        "--experiments-per-rate", "100",
+        "--experiments-per-rate", "1000",
         "--seed", "42",
         "--verbose"
       ]
     },
     {
       "name": "2. Generating Visualizations",
-      "script": "cli/plot_parametric_results.py",
+      "script": "cli/generate_parametric_plots.py",
       "args": ["--latest"]
     },
     {

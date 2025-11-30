@@ -8,7 +8,7 @@ packages = [{include = "chaos_engine", from = "src"}]
 
 [tool.poetry.dependencies]
 python = "^3.11"
-google-adk = "^1.18.0"
+google-adk = {extras = ["eval"], version = "^1.19.0"}
 pydantic-settings = "^2.0.0"
 python-dotenv = "^1.0.0"
 matplotlib = "^3.10.7"

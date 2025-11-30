@@ -1,0 +1,7 @@
+experiment_id,agent_type,outcome,duration_ms,steps_completed,failed_at,inconsistencies_count,retries,seed,failure_rate
+BASE-0.0-0,baseline,success,435.79602241516113,4,,0,0,42,0.0
+BASE-0.0-1,baseline,success,429.98290061950684,4,,0,0,43,0.0
+BASE-0.0-2,baseline,success,438.6894702911377,4,,0,0,44,0.0
+BASE-0.0-3,baseline,success,432.61218070983887,4,,0,0,45,0.0
+BASE-0.0-4,baseline,success,434.5066547393799,4,,0,0,46,0.0
+BASE-0.0-5,baseline,success,434.88097190856934,4,,0,0,47,0.0

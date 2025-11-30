@@ -6,8 +6,11 @@ import random
 import httpx
 import json
 import logging
-from typing import Dict, Any
+import time
+from typing import Dict, Any, Optional
 from pathlib import Path
+
+import math
 
 class ChaosProxy:
     def __init__(self, failure_rate: float, seed: int, mock_mode: bool = False, verbose: bool = False):
@@ -18,6 +21,7 @@ class ChaosProxy:
         self.logger = logging.getLogger("ChaosProxy")
         self.base_url = "https://petstore3.swagger.io/api/v3"
         self.error_codes = self._load_error_codes()
+        self.base_delay = 1.0
 
     def _load_error_codes(self) -> Dict[str, str]:
         """Load HTTP error definitions from knowledge base."""
@@ -41,7 +45,33 @@ class ChaosProxy:
             self.logger.warning(f"⚠️ Error loading http_error_codes.json: {e}")
             return {"500": "Internal Server Error (Fallback)", "503": "Service Unavailable (Fallback)"}
 
+    # ✅ NUEVO MÉTODO: Calcular Backoff con Jitter (Pilar IV)
+    def calculate_jittered_backoff(self, seconds: float) -> float:
+        """
+        Calcula el tiempo de espera con Jitter (aleatoriedad).
+        Usa el generador del proxy para mantener el determinismo del test.
+        """
+        # Añade un offset aleatorio de hasta el 50% del tiempo base.
+        jitter_factor = 0.5  
+        random_offset = self.rng.random() * seconds * jitter_factor
+        
+        # El backoff final es el tiempo base + el offset aleatorio.
+        jittered_delay = seconds + random_offset
+        return jittered_delay
+
     async def send_request(self, method: str, endpoint: str, params: dict = None, json_body: dict = None) -> Dict[str, Any]:
+        """
+        Proxy inteligente: 
+        1. Decide si inyectar caos.
+        2. Aplica Zero-Trust (Validación).
+        3. Llama a la API real.
+        """
+        
+        # ✅ PILAR V: SEGURIDAD (Validación de Esquema - Zero-Trust)
+        if json_body and not isinstance(json_body.get('id'), int) and 'id' in json_body:
+             self.logger.error("❌ SEGURIDAD: Esquema inválido detectado (ID no es entero).")
+             return {"status": "error", "code": 400, "message": "Input validation failed: ID must be integer."}
+
         # 1. Chaos Check
         if self.rng.random() < self.failure_rate:
             keys = list(self.error_codes.keys())

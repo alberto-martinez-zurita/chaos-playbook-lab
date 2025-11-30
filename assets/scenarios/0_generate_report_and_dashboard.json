@@ -3,7 +3,7 @@
   "steps": [
     {
       "name": "2. Generating Visualizations",
-      "script": "cli/plot_parametric_results.py",
+      "script": "cli/generate_parametric_plots.py",
       "args": ["--latest"]
     },
     {

@@ -101,13 +101,13 @@ Create visualization graphs from the raw data.
 **For the latest run:**
 
 ```bash
-poetry run python scripts/plot_parametric_results.py --latest
+poetry run python scripts/generate_parametric_plots.py --latest
 ```
 
 **For a specific run:**
 
 ```bash
-poetry run python scripts/plot_parametric_results.py --run-dir run_20251126_143430
+poetry run python scripts/generate_parametric_plots.py --run-dir run_20251126_143430
 ```
 
   * **Output:** A `\plots` subdirectory containing `.png` visualizations.

@@ -10,13 +10,13 @@ import asyncio
 from typing import Any, Dict, Optional
 from google.adk.models.google_llm import Gemini
 from google.genai import types
-from core.chaos_proxy import ChaosProxy
-from core.playbook_manager import PlaybookManager
+from chaos_engine.chaos.proxy import ChaosProxy 
+from chaos_engine.core.playbook_manager import PlaybookManager
 from dotenv import load_dotenv
-  
+
 load_dotenv()
 
-chaos_proxy = ChaosProxy(failure_rate=0.1,mock_mode=False) 
+chaos_proxy = ChaosProxy(failure_rate=0.1, seed=42, mock_mode=False)
  
 #load previous playbook to resume
 playbook = PlaybookManager("data/playbook_training.json")

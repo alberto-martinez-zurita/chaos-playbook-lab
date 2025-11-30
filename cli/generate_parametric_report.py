@@ -402,7 +402,7 @@ def main():
         import subprocess
         subprocess.run([
             sys.executable, 
-            "scripts/plot_parametric_results.py",
+            "cli/generate_parametric_plots.py",
             "--run-dir", run_dir.name
         ], check=True)
         print()

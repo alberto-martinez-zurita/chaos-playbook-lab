@@ -44,9 +44,13 @@ class ChaosConfig:
     max_delay_seconds: int = 2
     seed: Optional[int] = None
     verbose: bool = False  # ✅ NEW: Default OFF
-
+    
     # Private: random instance for deterministic behavior
     _random_instance: random.Random = field(default_factory=random.Random, init=False, repr=False)
+
+    def get_assets_dir(self) -> str:
+        """Get the assets directory path."""
+        return "assets"
 
     def __post_init__(self):
         """Initialize random instance after dataclass creation."""

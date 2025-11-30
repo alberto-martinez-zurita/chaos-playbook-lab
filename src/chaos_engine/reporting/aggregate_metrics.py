@@ -28,11 +28,20 @@ Usage:
 import json
 import math
 from typing import Any, Dict, List
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
-from experiments.ab_test_runner import ExperimentResult
+@dataclass
+class ExperimentResult:
+    """
+    Estructura de datos para representar el resultado de un experimento.
+    Definida localmente para evitar dependencias circulares o rutas rotas.
+    """
+    outcome: str
+    total_duration_s: float
+    inconsistencies: List[str] = field(default_factory=list)
+    playbook_strategies_used: List[str] = field(default_factory=list)
 
-
+# -------------------------------------------------------------------------
 @dataclass
 class MetricsSummary:
     """Summary statistics for a set of experiments."""
