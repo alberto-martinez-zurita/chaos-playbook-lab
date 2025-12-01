@@ -1,6 +1,6 @@
 # Parametric Experiment Report
 
-**Generated:** 2025-11-30 00:53:38
+**Generated:** 2025-12-01 07:33:43
 
 **Experiment Run:** `run_20251129_231224`
 
@@ -45,6 +45,62 @@ This parametric study evaluated the **Chaos Playbook Engine** across 7 failure r
 3. Data Inconsistencies (count of validation errors)
 
 **Chaos Injection:** Simulated API failures (timeouts, errors) injected at configured rates.
+
+---
+
+## Visualizations
+
+### Success Rate Comparison
+
+Comparison of success rates between baseline and playbook agents across failure rates.
+
+<img src="plots/success_rate_comparison.png" alt="Success Rate Comparison" width="800"/>
+
+### Duration Comparison
+
+Average execution duration with standard deviation error bars.
+
+<img src="plots/duration_comparison.png" alt="Duration Comparison" width="800"/>
+
+### Inconsistencies Analysis
+
+Data inconsistencies observed across different failure rates.
+
+<img src="plots/inconsistencies_comparison.png" alt="Inconsistencies Analysis" width="800"/>
+
+---
+
+## Statistical Analysis
+
+### Reliability Analysis
+
+Success rate improvement across chaos levels:
+
+| Failure Rate | Baseline Success | Playbook Success | Improvement | Effect Size |
+|--------------|------------------|------------------|-------------|-------------|
+| 0% | 100.0% | 90.0% | -10.0% | Small |
+| 1% | 95.0% | 85.0% | -10.0% | Small |
+| 3% | 90.0% | 85.0% | -5.0% | Small |
+| 5% | 75.0% | 90.0% | +15.0% | Small |
+| 10% | 60.0% | 90.0% | +30.0% | Medium |
+| 15% | 30.0% | 85.0% | +55.0% | Large |
+| 20% | 35.0% | 65.0% | +30.0% | Medium |
+
+### Latency Analysis
+
+Execution duration trade-offs:
+
+| Failure Rate | Baseline Duration | Playbook Duration | Overhead | Overhead % |
+|--------------|-------------------|-------------------|----------|-----------|
+| 0% | 3.59s | 3.40s | +-0.19s | +-5.4% |
+| 1% | 3.53s | 3.36s | +-0.17s | +-4.7% |
+| 3% | 3.43s | 3.40s | +-0.03s | +-0.8% |
+| 5% | 3.49s | 3.86s | +0.37s | +10.7% |
+| 10% | 3.19s | 4.94s | +1.75s | +54.8% |
+| 15% | 3.33s | 7.25s | +3.92s | +117.7% |
+| 20% | 3.43s | 5.98s | +2.54s | +74.0% |
+
+**Interpretation:** Playbook agent consistently takes longer due to retry logic and RAG-powered strategy retrieval. This is an expected trade-off for increased reliability.
 
 ---
 
@@ -148,68 +204,6 @@ This parametric study evaluated the **Chaos Playbook Engine** across 7 failure r
 
 ---
 
-## Statistical Analysis
-
-### Reliability Analysis
-
-Success rate improvement across chaos levels:
-
-| Failure Rate | Baseline Success | Playbook Success | Improvement | Effect Size |
-|--------------|------------------|------------------|-------------|-------------|
-| 0% | 100.0% | 90.0% | -10.0% | Small |
-| 1% | 95.0% | 85.0% | -10.0% | Small |
-| 3% | 90.0% | 85.0% | -5.0% | Small |
-| 5% | 75.0% | 90.0% | +15.0% | Small |
-| 10% | 60.0% | 90.0% | +30.0% | Medium |
-| 15% | 30.0% | 85.0% | +55.0% | Large |
-| 20% | 35.0% | 65.0% | +30.0% | Medium |
-
-### Latency Analysis
-
-Execution duration trade-offs:
-
-| Failure Rate | Baseline Duration | Playbook Duration | Overhead | Overhead % |
-|--------------|-------------------|-------------------|----------|-----------|
-| 0% | 3.59s | 3.40s | +-0.19s | +-5.4% |
-| 1% | 3.53s | 3.36s | +-0.17s | +-4.7% |
-| 3% | 3.43s | 3.40s | +-0.03s | +-0.8% |
-| 5% | 3.49s | 3.86s | +0.37s | +10.7% |
-| 10% | 3.19s | 4.94s | +1.75s | +54.8% |
-| 15% | 3.33s | 7.25s | +3.92s | +117.7% |
-| 20% | 3.43s | 5.98s | +2.54s | +74.0% |
-
-**Interpretation:** Playbook agent consistently takes longer due to retry logic and RAG-powered strategy retrieval. This is an expected trade-off for increased reliability.
-
----
-
-## Visualizations
-
-### Success Rate Comparison
-
-Comparison of success rates between baseline and playbook agents across failure rates.
-
-<img src="plots/success_rate_comparison.png" alt="Success Rate Comparison" width="800"/>
-
-### Duration Comparison
-
-Average execution duration with standard deviation error bars.
-
-<img src="plots/duration_comparison.png" alt="Duration Comparison" width="800"/>
-
-### Inconsistencies Analysis
-
-Data inconsistencies observed across different failure rates.
-
-<img src="plots/inconsistencies_comparison.png" alt="Inconsistencies Analysis" width="800"/>
-
-### Side-by-Side Agent Comparison
-
-Bar chart comparing agent performance at each failure rate.
-
-<img src="plots/agent_comparison_bars.png" alt="Side-by-Side Agent Comparison" width="800"/>
-
----
-
 ## Conclusions and Recommendations
 
 ### Key Takeaways
@@ -237,9 +231,11 @@ Bar chart comparing agent performance at each failure rate.
 
 ## Appendix
 
-**Raw Data:** `raw_results.csv`
+**Raw Data:** [`raw_results.csv`](./raw_results.csv)
 
-**Aggregated Metrics:** `aggregated_metrics.json`
+**Aggregated Metrics:** [`aggregated_metrics.json`](./aggregated_metrics.json)
 
-**Plots Directory:** `plots/`
+**Plots Directory:** [`plots/`](./plots/)
+
+**Dashboard:** [`dashboard.html`](./dashboard.html)
 
