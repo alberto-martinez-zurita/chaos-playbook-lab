@@ -186,7 +186,7 @@ class PetstoreAgent:
             - CRITICAL: You MUST explicitly provide `status='sold'`.
 
             ==============================================
-            🛑 ERROR HANDLING (CONDITIONAL CHAOS RESPONSE)
+             ERROR HANDLING (CONDITIONAL CHAOS RESPONSE)
             ==============================================
             If AND ONLY IF the last API tool call (Steps 1-4) returns an error status:
             1. IMMEDIATELY call `lookup_playbook(tool_name, error_code)`.
@@ -203,11 +203,11 @@ class PetstoreAgent:
             DO NOT add conversational text.
             Output EXACTLY this structure:
 
-            {
+            
             "selected_pet_id": <integer_id>,
             "completed": true,
             "error": null
-            }
+            
             """,
             tools=self.get_tool_list()
         )

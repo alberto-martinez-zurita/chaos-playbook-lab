@@ -14,6 +14,19 @@ import os
 from pathlib import Path
 from unittest.mock import patch
 
+import pytest
+from unittest.mock import AsyncMock, patch
+from google.adk.evaluation.agent_evaluator import AgentEvaluator
+from dotenv import load_dotenv
+import sys
+import os
+
+load_dotenv()
+
+# CAMBIO 1: La ruta del patch ahora incluye 'chaos_engine'
+
+
+
 # Asegurar que encontramos el código fuente
 project_root = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(project_root / "src"))
@@ -24,7 +37,7 @@ import chaos_engine.agents.order_agent # Importar para asegurar registro
 
 # Configurar logging para que se vea la tabla
 logging.basicConfig(level=logging.INFO)
-
+@pytest.mark.asyncio
 async def main():
     print("\n" + "="*80)
     print("🚀 GOOGLE ADK FRAMEWORK SHOWCASE: PETSTORE EVALUATION")
