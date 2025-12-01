@@ -1,7 +1,7 @@
 # 🏛️ Chaos Playbook Engine: Architectural Wiki
 
 > **Living Documentation of Resilience Engineering**
-> *Based on CLEAR Framework Level 5 (Elite) Standards*
+> *Based on Google ADK & Reliability Engineering Standards*
 
 Welcome to the project's digital brain. This wiki breaks down the architecture, design patterns, and internal logic of the Chaos Engine. It is designed to provide a deep understanding of *why* the system is robust, modular, and efficient.
 
@@ -129,7 +129,7 @@ Middleware that intercepts tool calls and injects simulated failures (503, 429, 
 | `_should_fail` | `rate: float` | `bool` | Deterministically decides whether to fail using `random.Random(seed)`. |
 | `calculate_jittered_backoff`| `attempt: int` | `float` | Calculates exponential wait time with random noise. |
 
-> **💎 CLEAR DNA (Quality):**
+> **💎 Engineering Standards:**
 >
 >   * **🛡️ Pillar IV (SRE):** Implements **Jittered Backoff**. Instead of waiting fixed times, it adds randomness to prevent the "Thundering Herd" problem (synchronized retry avalanches) in distributed systems.
 >   * **🛡️ Pillar V (Security):** Performs **Zero Trust** input validation, ensuring critical parameters (like IDs) are of the correct type before processing.
@@ -237,7 +237,7 @@ The newest addition to the suite. It integrates the Google ADK `AgentEvaluator` 
 
 > **💎 Software Quality:**
 > * **🛡️ Pillar IV (Reliability Testing):** Implements **Semantic Evaluation**. Unlike simple pass/fail tests, this runner uses an LLM-as-a-Judge approach (via ADK) to verify the *quality* of the agent's decision-making process.
-> * **🚀 Innovation (Phase 6):** This class represents the shift from *deterministic* testing (Phase 5) to *probabilistic* evaluation, essential for validating the reasoning capabilities of Gemini 2.0.
+> * **🚀 Innovation (Phase 6):** This class represents the shift from *deterministic* simulated testing to *probabilistic* evaluation, essential for validating the reasoning capabilities of Gemini 2.0.
 
 -----
 
@@ -252,7 +252,7 @@ The RAG (Retrieval-Augmented Generation) component. Loads recovery strategies fr
 
   * `get_best_procedure(error_type: str)`: Searches for the most relevant strategy by keyword.
 
-> **💎 CLEAR DNA (Quality):**
+> **💎 Engineering Standards:**
 >
 >   * **🧠 Pillar I (Cognitivo):** Decouples **recovery logic** (JSON data) from **execution logic** (Python code). This allows updating resilience strategies without redeploying the agent code.
 

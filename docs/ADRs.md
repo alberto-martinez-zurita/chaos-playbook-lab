@@ -7,7 +7,7 @@
 
 ## ADR-001: The Hybrid Engine Strategy (Deterministic Core vs LLM Brain)
 
-  * **Status:** ✅ Accepted & Validated (Phase 5)
+  * **Status:** ✅ Accepted & Validated
   * **Context:**
     We needed to build an agent system that could be **scientifically validated** (N=1000 experiments) but also capable of **complex reasoning** in production.
       * *Problem:* Pure LLM agents are non-deterministic, slow, and expensive to test at scale. Pure script-based agents are brittle and cannot adapt to novel errors.
@@ -20,13 +20,13 @@
   * **Consequences:**
       * 🟢 **Positive Impact:** Enabled running 14,000 experiments in \<10 hours with 100% reproducibility.
       * 🟠 **Trade-off/Cost:** Increases code complexity by requiring a strict interface between the Python Core and the LLM Agent.
-  * **Compliance:** [Hybrid Deterministic + Probabilistic Architecture](https://www.google.com/search?q=ARCHITECTURE.md%231-high-level-design-the-hybrid-engine-strategy)
+  * **Compliance:** Hybrid Deterministic + Probabilistic Architecture
 
 -----
 
 ## ADR-002: `src-layout` & Dependency Injection
 
-  * **Status:** ✅ Accepted & Validated (Phase 5)
+  * **Status:** ✅ Accepted & Validated
   * **Context:**
     To support massive parametric testing, we needed to swap real network calls with simulated chaos proxies seamlessly.
       * *Problem:* Standard import patterns often lead to coupled code where `Agent` classes instantiate `HTTPClient` directly, making mocking difficult.
@@ -39,13 +39,13 @@
   * **Consequences:**
       * 🟢 **Positive Impact:** Allowed us to wrap the `ChaosProxy` inside a `CircuitBreakerProxy` and inject the stack into the Agent without changing Agent code.
       * 🟠 **Trade-off/Cost:** Requires more boilerplate code in the entry points (`cli/run_comparison.py`) to wire up the dependencies.
-  * **Compliance:** [CLEAR Pillar III: Modularity & DI](https://www.google.com/search?q=PROJECT_REPORT.md%232-micro-audit-critical-files)
+  * **Standard:** Separation of Concerns (SoC)
 
 -----
 
 ## ADR-003: Resilience-as-Middleware (The Proxy Pattern)
 
-  * **Status:** ✅ Accepted & Validated (Phase 5)
+  * **Status:** ✅ Accepted & Validated
   * **Context:**
     Agents need to be resilient, but polluting business logic with `try/except` blocks makes code unreadable and hard to maintain.
   * **Decision:**
@@ -54,15 +54,15 @@
       * ❌ **In-Agent Retry Logic:** Writing retry loops inside `PetstoreAgent`. *Reason:* Violates Single Responsibility Principle. Hard to reuse across different agents.
       * ❌ **Decorator-based Retries:** Using `@retry` decorators. *Reason:* Static configuration doesn't allow dynamic chaos injection or adaptive backoff strategies.
   * **Consequences:**
-      * 🟢 **Positive Impact:** Achieved **SRE Compliance (CLEAR Pillar IV)**. Circuit Breakers protect downstream services automatically.
+      * 🟢 **Positive Impact:** Achieved **Resilience Best Practice**. Circuit Breakers protect downstream services automatically.
       * 🟠 **Trade-off/Cost:** Debugging stack traces involves traversing multiple proxy layers.
-  * **Compliance:** [CLEAR Pillar IV: SRE & Reliability](https://www.google.com/search?q=PROJECT_REPORT.md%232-micro-audit-critical-files)
+  * **Standard:** SRE & Reliability
 
 -----
 
 ## ADR-004: GreenOps Streaming Aggregation
 
-  * **Status:** ✅ Accepted & Validated (Phase 5)
+  * **Status:** ✅ Accepted & Validated
   * **Context:**
     Running parametric tests involves thousands of iterations. Loading 14,000 result objects into memory to calculate a mean causes OOM (Out of Memory) errors on standard hardware.
   * **Decision:**
@@ -73,13 +73,13 @@
   * **Consequences:**
       * 🟢 **Positive Impact:** Memory usage remains **O(1)** (constant) even when scaling from 1,000 to 1,000,000 experiments.
       * 🟠 **Trade-off/Cost:** Implementing streaming variance/standard deviation algorithms (Welford's algorithm) is more complex than `numpy.std()`.
-  * **Compliance:** [CLEAR Pillar VI: GreenOps](https://www.google.com/search?q=PROJECT_REPORT.md%232-micro-audit-critical-files)
+  * **Standard:** Resource Efficiency (GreenOps)
 
 -----
 
 ## ADR-005: JSON-Based RAG (The "Boring Solution")
 
-  * **Status:** ✅ Accepted & Validated (Phase 5)
+  * **Status:** ✅ Accepted & Validated
   * **Context:**
     We needed a way for the Agent to retrieve recovery strategies based on error types (e.g., "503 Service Unavailable").
   * **Decision:**
@@ -90,13 +90,13 @@
   * **Consequences:**
       * 🟢 **Positive Impact:** Ultra-low latency retrieval (\<10ms) essential for high-throughput simulation. Zero external dependencies.
       * 🟠 **Trade-off/Cost:** Limited to keyword matching. Cannot handle semantic nuance (e.g., "Connection Reset" vs "Network Error") without manual aliases. (Addressed in Phase 8 Roadmap).
-  * **Compliance:** [PlaybookStorage Implementation](https://www.google.com/search?q=CODE_WIKI.md%23class-playbookstorage)
+  * **Compliance:** PlaybookStorage Implementation
 
 -----
 
 ## ADR-006: Parametric Testing Methodology
 
-  * **Status:** ✅ Accepted & Validated (Phase 5)
+  * **Status:** ✅ Accepted & Validated
   * **Context:**
     "It works on my machine" is not acceptable for enterprise software. We needed statistical proof of reliability.
   * **Decision:**
@@ -107,4 +107,4 @@
   * **Consequences:**
       * 🟢 **Positive Impact:** Generated the datasets required for the **Scientific Report**, proving statistical significance ($p < 0.01$).
       * 🟠 **Trade-off/Cost:** High compute time (approx. 55 mins for full suite). Mitigated by `InMemoryRunner` speed.
-  * **Compliance:** [Scientific Report Methodology](https://www.google.com/search?q=SCIENTIFIC_REPORT.md%23b-methodology-the-parametric-laboratory)
+  * **Compliance:** Scientific Report Methodology
