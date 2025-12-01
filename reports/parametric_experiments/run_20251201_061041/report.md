@@ -1,21 +1,21 @@
 # Parametric Experiment Report
 
-**Generated:** 2025-12-01 06:08:33
+**Generated:** 2025-12-01 07:16:42
 
-**Experiment Run:** `run_20251129_144331`
+**Experiment Run:** `run_20251201_061041`
 
 ---
 
 ## Executive Summary
 
-This parametric study evaluated the **Chaos Playbook Engine** across 7 failure rates (0% to 20%) with 1000 experiment pairs per rate, totaling **14000 individual runs**.
+This parametric study evaluated the **Chaos Playbook Engine** across 7 failure rates (0% to 20%) with 20 experiment pairs per rate, totaling **280 individual runs**.
 
 ### Key Findings
 
 **🎯 Primary Result:** Under maximum chaos conditions (20% failure rate):
-- **Baseline Agent**: 37% success rate
-- **Playbook Agent**: 97% success rate
-- **Improvement**: **+60 percentage points** (160.8% relative improvement)
+- **Baseline Agent**: 35% success rate
+- **Playbook Agent**: 80% success rate
+- **Improvement**: **+45 percentage points** (128.6% relative improvement)
 
 **✅ Hypothesis Validation:** The RAG-powered Playbook Agent demonstrates **significantly higher resilience** under chaos conditions compared to the baseline agent.
 
@@ -31,9 +31,9 @@ This parametric study evaluated the **Chaos Playbook Engine** across 7 failure r
 
 **Failure Rates Tested:** 0%, 1%, 3%, 5%, 10%, 15%, 20%
 
-**Experiments per Rate:** 1000 pairs (baseline + playbook)
+**Experiments per Rate:** 20 pairs (baseline + playbook)
 
-**Total Runs:** 14000
+**Total Runs:** 280
 
 **Agents Under Test:**
 - **Baseline Agent**: Simple agent with no retry logic (accepts first failure)
@@ -78,13 +78,13 @@ Success rate improvement across chaos levels:
 
 | Failure Rate | Baseline Success | Playbook Success | Improvement | Effect Size |
 |--------------|------------------|------------------|-------------|-------------|
-| 0% | 100.0% | 100.0% | +0.0% | Small |
-| 1% | 95.4% | 100.0% | +4.6% | Small |
-| 3% | 88.9% | 100.0% | +11.1% | Small |
-| 5% | 80.9% | 100.0% | +19.1% | Small |
-| 10% | 61.1% | 99.8% | +38.7% | Medium |
-| 15% | 50.3% | 98.5% | +48.2% | Medium |
-| 20% | 37.2% | 97.0% | +59.8% | Large |
+| 0% | 85.0% | 80.0% | -5.0% | Small |
+| 1% | 70.0% | 85.0% | +15.0% | Small |
+| 3% | 75.0% | 85.0% | +10.0% | Small |
+| 5% | 80.0% | 85.0% | +5.0% | Small |
+| 10% | 65.0% | 60.0% | -5.0% | Small |
+| 15% | 45.0% | 80.0% | +35.0% | Medium |
+| 20% | 35.0% | 80.0% | +45.0% | Medium |
 
 ### Latency Analysis
 
@@ -92,13 +92,13 @@ Execution duration trade-offs:
 
 | Failure Rate | Baseline Duration | Playbook Duration | Overhead | Overhead % |
 |--------------|-------------------|-------------------|----------|-----------|
-| 0% | 0.44s | 0.44s | +0.00s | +0.0% |
-| 1% | 0.42s | 0.44s | +0.01s | +2.8% |
-| 3% | 0.41s | 0.44s | +0.03s | +7.6% |
-| 5% | 0.38s | 0.44s | +0.05s | +14.1% |
-| 10% | 0.32s | 0.44s | +0.11s | +34.1% |
-| 15% | 0.29s | 0.43s | +0.14s | +49.5% |
-| 20% | 0.25s | 0.43s | +0.18s | +74.4% |
+| 0% | 3.74s | 3.43s | +-0.31s | +-8.3% |
+| 1% | 3.60s | 4.00s | +0.40s | +11.1% |
+| 3% | 3.56s | 3.73s | +0.17s | +4.7% |
+| 5% | 3.80s | 4.28s | +0.47s | +12.4% |
+| 10% | 3.66s | 3.57s | +-0.09s | +-2.4% |
+| 15% | 3.91s | 5.48s | +1.57s | +40.0% |
+| 20% | 3.82s | 7.05s | +3.23s | +84.5% |
 
 **Interpretation:** Playbook agent consistently takes longer due to retry logic and RAG-powered strategy retrieval. This is an expected trade-off for increased reliability.
 
@@ -108,99 +108,99 @@ Execution duration trade-offs:
 
 ### Failure Rate: 0%
 
-**Experiments:** 1000 pairs (2000 total runs)
+**Experiments:** 20 pairs (40 total runs)
 
 | Metric | Baseline Agent | Playbook Agent | Delta |
 |--------|----------------|----------------|-------|
-| **Success Rate** | 100.0% | 100.0% | **+0.0%** |
-| **Avg Duration** | 0.44s ± 0.00s | 0.44s ± 0.00s | +0.00s |
-| **Avg Inconsistencies** | 0.00 | 0.00 | +0.00 |
+| **Success Rate** | 85.0% | 80.0% | **-5.0%** |
+| **Avg Duration** | 3.74s ± 0.00s | 3.43s ± 0.00s | -0.31s |
+| **Avg Inconsistencies** | 0.15 | 0.00 | -0.15 |
 
-⚖️ **Both agents perform equally** in success rate.
+⚠️ **Baseline outperforms** by 5.0 percentage points in success rate.
 
 ---
 
 ### Failure Rate: 1%
 
-**Experiments:** 1000 pairs (2000 total runs)
+**Experiments:** 20 pairs (40 total runs)
 
 | Metric | Baseline Agent | Playbook Agent | Delta |
 |--------|----------------|----------------|-------|
-| **Success Rate** | 95.4% | 100.0% | **+4.6%** |
-| **Avg Duration** | 0.42s ± 0.00s | 0.44s ± 0.00s | +0.01s |
-| **Avg Inconsistencies** | 0.03 | 0.00 | -0.03 |
+| **Success Rate** | 70.0% | 85.0% | **+15.0%** |
+| **Avg Duration** | 3.60s ± 0.00s | 4.00s ± 0.00s | +0.40s |
+| **Avg Inconsistencies** | 0.00 | 0.00 | +0.00 |
 
-✅ **Playbook outperforms** by 4.6 percentage points in success rate.
+✅ **Playbook outperforms** by 15.0 percentage points in success rate.
 
 ---
 
 ### Failure Rate: 3%
 
-**Experiments:** 1000 pairs (2000 total runs)
+**Experiments:** 20 pairs (40 total runs)
 
 | Metric | Baseline Agent | Playbook Agent | Delta |
 |--------|----------------|----------------|-------|
-| **Success Rate** | 88.9% | 100.0% | **+11.1%** |
-| **Avg Duration** | 0.41s ± 0.00s | 0.44s ± 0.00s | +0.03s |
-| **Avg Inconsistencies** | 0.06 | 0.00 | -0.06 |
+| **Success Rate** | 75.0% | 85.0% | **+10.0%** |
+| **Avg Duration** | 3.56s ± 0.00s | 3.73s ± 0.00s | +0.17s |
+| **Avg Inconsistencies** | 0.05 | 0.05 | +0.00 |
 
-✅ **Playbook outperforms** by 11.1 percentage points in success rate.
+✅ **Playbook outperforms** by 10.0 percentage points in success rate.
 
 ---
 
 ### Failure Rate: 5%
 
-**Experiments:** 1000 pairs (2000 total runs)
+**Experiments:** 20 pairs (40 total runs)
 
 | Metric | Baseline Agent | Playbook Agent | Delta |
 |--------|----------------|----------------|-------|
-| **Success Rate** | 80.9% | 100.0% | **+19.1%** |
-| **Avg Duration** | 0.38s ± 0.00s | 0.44s ± 0.00s | +0.05s |
-| **Avg Inconsistencies** | 0.09 | 0.00 | -0.09 |
+| **Success Rate** | 80.0% | 85.0% | **+5.0%** |
+| **Avg Duration** | 3.80s ± 0.00s | 4.28s ± 0.00s | +0.47s |
+| **Avg Inconsistencies** | 0.05 | 0.05 | +0.00 |
 
-✅ **Playbook outperforms** by 19.1 percentage points in success rate.
+✅ **Playbook outperforms** by 5.0 percentage points in success rate.
 
 ---
 
 ### Failure Rate: 10%
 
-**Experiments:** 1000 pairs (2000 total runs)
+**Experiments:** 20 pairs (40 total runs)
 
 | Metric | Baseline Agent | Playbook Agent | Delta |
 |--------|----------------|----------------|-------|
-| **Success Rate** | 61.1% | 99.8% | **+38.7%** |
-| **Avg Duration** | 0.32s ± 0.00s | 0.44s ± 0.00s | +0.11s |
-| **Avg Inconsistencies** | 0.17 | 0.00 | -0.17 |
+| **Success Rate** | 65.0% | 60.0% | **-5.0%** |
+| **Avg Duration** | 3.66s ± 0.00s | 3.57s ± 0.00s | -0.09s |
+| **Avg Inconsistencies** | 0.00 | 0.05 | +0.05 |
 
-✅ **Playbook outperforms** by 38.7 percentage points in success rate.
+⚠️ **Baseline outperforms** by 5.0 percentage points in success rate.
 
 ---
 
 ### Failure Rate: 15%
 
-**Experiments:** 1000 pairs (2000 total runs)
+**Experiments:** 20 pairs (40 total runs)
 
 | Metric | Baseline Agent | Playbook Agent | Delta |
 |--------|----------------|----------------|-------|
-| **Success Rate** | 50.3% | 98.5% | **+48.2%** |
-| **Avg Duration** | 0.29s ± 0.00s | 0.43s ± 0.00s | +0.14s |
-| **Avg Inconsistencies** | 0.20 | 0.01 | -0.19 |
+| **Success Rate** | 45.0% | 80.0% | **+35.0%** |
+| **Avg Duration** | 3.91s ± 0.00s | 5.48s ± 0.00s | +1.57s |
+| **Avg Inconsistencies** | 0.15 | 0.05 | -0.10 |
 
-✅ **Playbook outperforms** by 48.2 percentage points in success rate.
+✅ **Playbook outperforms** by 35.0 percentage points in success rate.
 
 ---
 
 ### Failure Rate: 20%
 
-**Experiments:** 1000 pairs (2000 total runs)
+**Experiments:** 20 pairs (40 total runs)
 
 | Metric | Baseline Agent | Playbook Agent | Delta |
 |--------|----------------|----------------|-------|
-| **Success Rate** | 37.2% | 97.0% | **+59.8%** |
-| **Avg Duration** | 0.25s ± 0.00s | 0.43s ± 0.00s | +0.18s |
-| **Avg Inconsistencies** | 0.24 | 0.01 | -0.23 |
+| **Success Rate** | 35.0% | 80.0% | **+45.0%** |
+| **Avg Duration** | 3.82s ± 0.00s | 7.05s ± 0.00s | +3.23s |
+| **Avg Inconsistencies** | 0.10 | 0.05 | -0.05 |
 
-✅ **Playbook outperforms** by 59.8 percentage points in success rate.
+✅ **Playbook outperforms** by 45.0 percentage points in success rate.
 
 ---
 
@@ -208,7 +208,7 @@ Execution duration trade-offs:
 
 ### Key Takeaways
 
-1. **RAG-Powered Resilience Works**: Under chaos conditions, the Playbook Agent achieves an average **30.2% improvement** in success rate compared to baseline.
+1. **RAG-Powered Resilience Works**: Under chaos conditions, the Playbook Agent achieves an average **14.3% improvement** in success rate compared to baseline.
 
 2. **Latency-Reliability Trade-off**: The Playbook Agent incurs 2-3x latency overhead, which is acceptable for high-reliability requirements but may not suit latency-sensitive applications.
 
