@@ -72,7 +72,7 @@ A failed transaction is bad; a corrupted one is worse. We measured "Inconsistenc
 
 ## D. Results: Architectural Validation
 
-In Phase 6, we refactored the system to adhere to **CLEAR Framework Level 5** standards, introducing Dependency Injection (DI) and Circuit Breakers. We ran a validation batch (`run_20251129_231224`, N=280) to ensure architectural purity did not compromise resilience.
+In Phase 6, we refactored the system to adhere to **Strict Production Readiness (Level 5)** standards, introducing Dependency Injection (DI) and Circuit Breakers. We ran a validation batch (`run_20251129_231224`, N=280) to ensure architectural purity did not compromise resilience.
 
 | Metric | Simulation | Real Experiment | Deviation |
 | :--- | :--- | :--- | :--- |
