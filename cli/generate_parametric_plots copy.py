@@ -97,6 +97,43 @@ def extract_data(metrics: Dict) -> Tuple[List, List, List, List, List, List]:
         playbook_inconsistencies
     )
 
+
+def plot_success_rate(failure_rates: List, baseline: List, playbook: List, output_dir: Path):
+    """Plot success rate comparison."""
+    fig, ax = plt.subplots(figsize=(10, 6))
+    
+    # Convert to percentages
+    failure_rates_pct = [r * 100 for r in failure_rates]
+    baseline_pct = [s * 100 for s in baseline]
+    playbook_pct = [s * 100 for s in playbook]
+    
+    # Plot lines with markers
+    ax.plot(failure_rates_pct, baseline_pct, 
+            marker='o', linewidth=2, markersize=8, 
+            label='Baseline Agent', color='#FF6B6B', alpha=0.8)
+    ax.plot(failure_rates_pct, playbook_pct, 
+            marker='s', linewidth=2, markersize=8, 
+            label='Playbook Agent', color='#4ECDC4', alpha=0.8)
+    
+    # Styling
+    ax.set_xlabel('Failure Rate (%)', fontweight='bold')
+    ax.set_ylabel('Success Rate (%)', fontweight='bold')
+    ax.set_title('Success Rate vs Failure Rate: Baseline vs Playbook', 
+                 fontweight='bold', pad=20)
+    ax.legend(loc='best', frameon=True, shadow=True)
+    ax.grid(True, alpha=0.3)
+    ax.set_ylim([0, 105])
+    
+    # Add horizontal reference line at 100%
+    ax.axhline(y=100, color='gray', linestyle='--', alpha=0.5, linewidth=1)
+    
+    plt.tight_layout()
+    plt.savefig(output_dir / 'success_rate_comparison.png', dpi=300, bbox_inches='tight')
+    plt.close()
+    
+    print(f"  ✅ Generated: success_rate_comparison.png")
+
+
 def plot_duration(failure_rates: List, 
                   baseline: List, baseline_std: List,
                   playbook: List, playbook_std: List,
@@ -204,10 +241,10 @@ def plot_agent_comparison(failure_rates: List,
     ax.axhline(y=100, color='gray', linestyle='--', alpha=0.5, linewidth=1)
     
     plt.tight_layout()
-    plt.savefig(output_dir / 'success_rate_comparison.png', dpi=300, bbox_inches='tight')
+    plt.savefig(output_dir / 'agent_comparison_bars.png', dpi=300, bbox_inches='tight')
     plt.close()
     
-    print(f"  ✅ Generated: success_rate_comparison.png")
+    print(f"  ✅ Generated: agent_comparison_bars.png")
 
 
 def generate_all_plots(metrics_path: Path, output_dir: Path):
@@ -229,7 +266,7 @@ def generate_all_plots(metrics_path: Path, output_dir: Path):
     
     # Generate plots
     print("Generating plots...")
-
+    plot_success_rate(failure_rates, baseline_success, playbook_success, output_dir)
     plot_duration(failure_rates, 
                   baseline_duration, baseline_duration_std,
                   playbook_duration, playbook_duration_std,

@@ -192,9 +192,7 @@ def generate_visualizations_section(plots_dir: Path) -> str:
         ("duration_comparison.png", "Duration Comparison", 
          "Average execution duration with standard deviation error bars."),
         ("inconsistencies_comparison.png", "Inconsistencies Analysis", 
-         "Data inconsistencies observed across different failure rates."),
-        ("agent_comparison_bars.png", "Side-by-Side Agent Comparison", 
-         "Bar chart comparing agent performance at each failure rate.")
+         "Data inconsistencies observed across different failure rates.")
     ]
     
     for plot_file, title, description in plots:
@@ -302,16 +300,17 @@ def generate_report(metrics_path: Path, output_path: Path, plots_dir: Path):
     
     report += generate_executive_summary(metrics, n_experiments)
     report += generate_methodology(metrics, n_experiments)
-    report += generate_detailed_results(metrics)
-    report += generate_statistical_analysis(metrics)
     report += generate_visualizations_section(plots_dir)
+    report += generate_statistical_analysis(metrics)
+    report += generate_detailed_results(metrics)
     report += generate_conclusions(metrics)
     
     report += "## Appendix\n\n"
-    report += f"**Raw Data:** `raw_results.csv`\n\n"
-    report += f"**Aggregated Metrics:** `aggregated_metrics.json`\n\n"
-    report += f"**Plots Directory:** `plots/`\n\n"
-    
+    report += f"**Raw Data:** [`raw_results.csv`](./raw_results.csv)\n\n"
+    report += f"**Aggregated Metrics:** [`aggregated_metrics.json`](./aggregated_metrics.json)\n\n"
+    report += f"**Plots Directory:** [`plots/`](./plots/)\n\n"
+    report += f"**Dashboard:** [`dashboard.html`](./dashboard.html)\n\n"
+
     # Write report
     with open(output_path, 'w', encoding='utf-8') as f:
         f.write(report)

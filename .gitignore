@@ -20,4 +20,5 @@ htmlcov/
 .DS_Store
 Thumbs.db
 .ruff_cache
-docs
+scan_project.py
+project_content.txt
