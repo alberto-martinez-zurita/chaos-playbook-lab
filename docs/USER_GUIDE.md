@@ -70,33 +70,81 @@ python cli/run_comparison.py \
   --failure-rates 0.2 \
   --experiments-per-rate 10
 ```
+-----
+
+Aquí tienes la versión revisada y corregida de la sección **"4. Visualizing Results"** para tu `USER_GUIDE.md`.
+
+Me he asegurado de que explique con precisión las responsabilidades de los tres scripts de reporte (`generate_report.py`, `generate_plots.py`, `generate_dashboard.py`) tal como se detalla en tu `EXPERIMENTS_GUIDE.md`, en lugar de la versión simplificada anterior.
 
 -----
 
 ## 4\. Visualizing Results (The Dashboard)
 
-Every simulation generates a self-contained HTML dashboard. You don't need a server to view it.
+Once you have raw data from your experiments, the Chaos Playbook Engine offers a suite of reporting tools to transform CSV logs into actionable insights. These scripts are located in `cli/` and handle different aspects of data visualization.
 
-### Finding the Dashboard
+### A. Creating Custom Plots (`generate_plots.py`)
 
-Navigate to the `reports/` directory. Each run has its own folder:
-`reports/parametric_experiments/run_YYYYMMDD_HHMMSS/dashboard.html`
+If you need specific charts for a presentation or paper (e.g., just the "Success Rate" curve without the rest), use this script. It uses Plotly to generate interactive HTML files for individual metrics.
 
-### Interpreting the Charts
-
-1.  **Success Rate Curve:** Look for the gap between the red line (Baseline) and green line (Playbook). A widening gap indicates higher resilience value.
-2.  **Latency Overhead:** This shows the "cost" of resilience. Expect the Playbook line to be higher (retries take time).
-3.  **Consistency:** Bars show data corruption events. The Playbook bars should be near zero.
-
-### Regenerating Reports
-
-If you need to re-generate the HTML from existing data:
+**Use this when:** You want to customize or regenerate specific charts without re-calculating statistics.
 
 ```bash
-python cli/generate_report.py --latest
-# OR
-python cli/generate_report.py --run-dir run_20251129_144331
+# Generate all standard plots for a run
+python cli/generate_plots.py --run-dir reports/parametric_experiments/run_20251129_144331
+
+# Generate only the Success Rate chart
+python cli/generate_plots.py --run-dir ... --plot-type success_rate
 ```
+
+**Key Charts Produced:**
+
+  * `plot_success_rate.png`: The resilience curve (Baseline vs. Playbook).
+  * `plot_latency.png`: Execution time analysis with error bars.
+  * `plot_consistency.png`: Data integrity violation rates.
+
+
+### B. Generating a Full Scientific Report (`generate_report.py`)
+
+This is the master script for end-to-end reporting. It orchestrates data aggregation, statistical analysis, and visualization in one go.
+
+**Use this when:** You have just finished a large simulation and want the complete "Scientific Report" package.
+
+```bash
+# Generate report for the most recent run
+python cli/generate_report.py --latest
+
+# Generate report for a specific run directory
+python cli/generate_report.py --run-dir reports/parametric_experiments/run_20251129_144331
+```
+
+**What it does:**
+
+1.  **Aggregates Data:** Reads `raw_results.csv` and computes mean, standard deviation, and confidence intervals for every failure rate.
+2.  **Generates JSON:** Saves statistical summaries to `aggregated_metrics.json`.
+3.  **Creates Visuals:** Calls the plotting engine to generate the HTML dashboard.
+
+
+### C. Building the Interactive Dashboard (`generate_dashboard.py`)
+
+This script assembles all generated plots and metrics into a single, self-contained HTML file (`dashboard.html`). It creates the "Control Center" view that you see in the README.
+
+**Use this when:** You have the plots and JSON metrics but need to bundle them into a shareable artifact.
+
+```bash
+python cli/generate_dashboard.py --run-dir reports/parametric_experiments/run_20251129_144331
+```
+
+**The Output:**
+
+  * A single file: `dashboard.html`.
+  * Contains embedded interactive charts (zoom, pan, hover).
+  * Includes summary tables of the "Killer Metrics" (ROI, Consistency Improvement).
+  * **Zero-dependency:** You can email this file to a stakeholder, and it will open in any browser.
+
+-----
+
+**Summary of Workflow:**
+Typically, you only need to run `run_simulation.py` (which auto-triggers reporting) or `generate_report.py` (to manually rebuild). The other scripts (`generate_plots`, `generate_dashboard`) are modular components available for advanced users who need granular control over the visualization pipeline.
 
 -----
 
@@ -114,8 +162,6 @@ agent:
   model: gemini-2.5-flash-lite  # Change LLM here
 runner:
   type: InMemoryRunner         # Best for simulations
-session_service:
-  type: DatabaseSessionService # Persist logs if needed
 ```
 
 ### `assets/playbooks/`

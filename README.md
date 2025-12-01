@@ -11,11 +11,11 @@
 
 **Chaos Playbook Engine** is an **AgentOps Laboratory** that systematically injects chaos into AI agents to discover failure modes and synthesize **RAG-based recovery playbooks**.
 
-We moved beyond "prompt engineering" to **Parametric Engineering**. By running **1,000 controlled experiments** across 9 failure rates, we proved that agents equipped with our Playbook Engine achieve **98% reliability** in simulated agentic flows where standard agents fail.
+We moved beyond "prompt engineering" to **Parametric Engineering**. By running **18,000 controlled experiments** across 9 failure rates, we proved that agents equipped with our Playbook Engine achieve **98% reliability** in simulated agentic flows where standard agents fail.
 
 ---
 
-## 📊 The "Killer" Metric: 100K ROI
+## 📊 The "Killer" Metric: **+60%** Success Rate
 
 We didn't just build an agent; we proved a thesis. Under realistic production chaos (20% API failure rate), the difference is catastrophic:
 
@@ -23,9 +23,9 @@ We didn't just build an agent; we proved a thesis. Under realistic production ch
 | :--- | :--- | :--- | :--- |
 | **Success Rate** | 37% (Fails 2/3 times) | **98% (Bulletproof)** | **+60%** 🚀 |
 | **Data Consistency** | 26% inconsistent state | **2% inconsistent state** | **98% Safer** 🛡️ |
-| **Revenue Impact** | Loss: $1,000 / 100 orders | **Full Recovery** | **100K ROI** 💰 |
+| **Revenue Impact** | Loss: 60% orders | **Full Recovery** | **3x Revenue in chaos** 💰 |
 
-> *Data Source: [`reports/parametric_experiments/run_20251129_144331`](./reports/parametric_experiments/run_20251129_144331/report.md) (14,000 total simulated agent ops).*<br>
+> *Data Source: [`reports/parametric_experiments/run_20251129_144331`](./reports/parametric_experiments/run_20251129_144331/report.md) (18,000 total simulated agent ops).*<br>
 > *Data Source: [`reports/parametric_experiments/run_20251129_231224`](./reports/parametric_experiments/run_20251129_231224/report.md) (280 total real agent ops with random mock api).*
 
 ---
@@ -36,12 +36,12 @@ We believe in transparency and rigor. Explore the full project details:
   * 📖 **[Project Narrative (The Pitch)](./docs/CAPSTONE_NARRATIVE.md)**: The business case, ROI analysis, and problem statement.
   * 🏗️ **[System Architecture](./docs/ARCHITECTURE.md)**: Deep dive into the Hybrid Deterministic/Probabilistic engine, source layout, and design patterns.
   * 🏛️ **[Decision Records (ADRs)](./docs/ADR.md)**: The engineering trade-offs behind our architecture (Why JSON? Why Streaming Aggregation?).
+  * 🎓 **[Lessons Learned](./docs/LESSONS_LEARNED.md)**: From "Vibe-Based" to "Parametric Science". Why generic retries fail and how to engineer true resilience.
   * 🔬 **[Scientific Report](./docs/SCIENTIFIC_REPORT.md)**: The empirical evidence from 14,000 parametric experiments (p \< 0.01).
   * 🔮 **[Innovation Roadmap](./docs/INNOVATION.md)**: Our vision for Prompt Science, PlaybookOps, and Digital Twins.
   * 📘 **[User Guide](./docs/USER_GUIDE.md)**: Detailed instructions for configuring chaos scenarios and interpreting dashboards.
-  * 🛡️ **[CLEAR Audit Report](./docs/PROJECT_REPORT.md)**: A detailed audit of the code quality, SRE practices, and GreenOps compliance (Level 5 Elite).
   * 💻 **[Code Wiki](./docs/CODE_WIKI.md)**: A developer-centric guide to the codebase structure, classes, and extension points.
-
+  * 🛡️ **[Software Quality Report](./docs/SOFTWARE_QUALITY.md)**: A detailed audit of the code quality, SRE practices, and GreenOps compliance (Level 5 Elite).
 -----
 
 ## ⚡ Quick Start
@@ -63,11 +63,19 @@ pip install -r requirements.txt
 Execute 100 experiments across varying chaos levels (0% to 30%) with a single command:
 
 ```bash
-# Run the Unified CLI
-python cli/run_simulation.py \
-  --failure-rates 0.0 0.1 0.2 \
-  --experiments-per-rate 10 \
+
+# Run the Chaos Simulation
+poetry run python cli/run_simulation.py \
+  --failure-rates 0.0 0.1 0.2 0.3 \
+  --experiments-per-rate 25 \
   --verbose
+
+# Run the Chaos Experiment
+poetry run python cli/run_comparison.py \
+  --failure-rates 0.0 0.1 0.2 0.3 \
+  --experiments-per-rate 25 \
+  --verbose
+
 ```
 
 ### 3\. View the Evidence

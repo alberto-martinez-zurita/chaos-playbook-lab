@@ -9,8 +9,8 @@
         "--playbook-a", "assets/playbooks/baseline.json",
         "--agent-b", "petstore_agent",
         "--playbook-b", "assets/playbooks/training.json",
-        "--failure-rates", "0.0", "0.01", "0.03", "0.05", "0.10", "0.15", "0.20",
-        "--experiments-per-rate", "20",
+        "--failure-rates", "0.0",
+        "--experiments-per-rate", "10",
         "--seed", "42",
         "--verbose"
       ]

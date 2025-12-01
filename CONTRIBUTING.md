@@ -20,7 +20,7 @@ By contributing, you are helping to solve the hardest problem in Agentic AI: **R
 
 -----
 
-## ⚡ Development Setup (The "Polong" Test)
+## ⚡ Development Setup
 
 We use a modern, standards-compliant Python stack. You can be up and running in **2 minutes**.
 

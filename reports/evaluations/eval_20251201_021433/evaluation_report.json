@@ -1,0 +1,46 @@
+{
+  "timestamp": "20251201_021433",
+  "suite": "assets/evaluations/test_suite.json",
+  "playbook": "assets/playbooks/training.json",
+  "summary": {
+    "total": 2,
+    "passed": 2,
+    "failed": 0
+  },
+  "results": [
+    {
+      "case_id": "TC-001-HAPPY-PATH",
+      "passed": true,
+      "reason": "Passed all assertions",
+      "duration": 4.15242338180542,
+      "metrics": {
+        "status": "success",
+        "steps_completed": [
+          "place_order",
+          "get_inventory",
+          "update_pet_status",
+          "find_pets_by_status"
+        ],
+        "failed_at": "unknown",
+        "duration_ms": 4151.4246463775635
+      }
+    },
+    {
+      "case_id": "TC-002-RESILIENCE-503",
+      "passed": true,
+      "reason": "Passed all assertions",
+      "duration": 32.139291524887085,
+      "metrics": {
+        "status": "success",
+        "steps_completed": [
+          "place_order",
+          "get_inventory",
+          "update_pet_status",
+          "find_pets_by_status"
+        ],
+        "failed_at": "unknown",
+        "duration_ms": 32137.197971343994
+      }
+    }
+  ]
+}

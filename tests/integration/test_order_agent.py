@@ -2,11 +2,14 @@ import pytest
 from unittest.mock import AsyncMock, patch
 from google.adk.evaluation.agent_evaluator import AgentEvaluator
 from dotenv import load_dotenv
+import sys
+import os
 
 load_dotenv()
 
+# CAMBIO 1: La ruta del patch ahora incluye 'chaos_engine'
 @pytest.mark.asyncio
-@patch('agents.order_agent.chaos_proxy.send_request')
+@patch('src.chaos_engine.agents.order_agent.chaos_proxy.send_request')
 async def test_agent_evaluation(mock_send_request):
     """Mock ChaosProxy.send_request → 100% success"""
     
@@ -28,10 +31,9 @@ async def test_agent_evaluation(mock_send_request):
     mock_send_request.side_effect = mock_success
 
     result = await AgentEvaluator.evaluate(
-        agent_module="agents.order_agent",
-        eval_dataset_file_path_or_dir="tests/test_cases.json"
+        agent_module="src.chaos_engine.agents.order_agent", 
+        eval_dataset_file_path_or_dir="tests/integration/test_cases.json"
     )
-
     
     
    
