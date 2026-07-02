@@ -1,10 +1,8 @@
 # References
 
-> **Note to co-author / reviewer.** Bibliography verified 2026-05-18 via
-> automated audit (44/44 entries resolved to real works; arXiv IDs and DOIs
-> attached where applicable). Concurrent-work references [38]–[41] checked
-> against arXiv abs pages; protocol specs [32][33] checked against canonical
-> URLs; model technical reports [26]–[31] checked against vendor releases.
+> All 44 entries were verified against primary sources on 2026-05-18 (arXiv
+> abstract pages for [38]–[41], canonical protocol URLs for [32][33], vendor
+> releases for the model reports [26]–[31]).
 
 ## Chaos engineering and fault injection
 

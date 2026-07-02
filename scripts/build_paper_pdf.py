@@ -8,8 +8,8 @@ Pipeline:
 
 Outputs:
   paper/paper.combined.md   — the concatenated markdown (debug)
-  paper/paper.html          — self-contained HTML (debug)
-  paper/paper.pdf           — final PDF
+  paper/mapping-llm-agent-reliability-under-chaos.html — self-contained HTML
+  paper/mapping-llm-agent-reliability-under-chaos.pdf  — final PDF
 """
 from __future__ import annotations
 
@@ -34,6 +34,7 @@ SECTIONS = [
 
 TITLE_BLOCK = """---
 abstract-title: ""
+pagetitle: "Mapping LLM-agent reliability under chaos: a cross-architecture study of structured recovery playbooks"
 ---
 """
 
@@ -90,7 +91,36 @@ p.date {
   text-align: center;
   font-size: 9.5pt;
   color: #666;
+  margin: 0.2em 0 0.2em 0;
+}
+
+p.affil {
+  text-align: center;
+  font-size: 10pt;
+  font-style: italic;
+  color: #555;
+  margin: 0 0 0.5em 0;
+}
+
+p.availability {
+  text-align: center;
+  font-size: 9pt;
+  color: #666;
   margin: 0.2em 0 0.6em 0;
+}
+
+/* arXiv-style vertical stamp on the left margin of page 1 */
+.sidestamp {
+  position: absolute;
+  top: 240mm;
+  left: 0;
+  transform: rotate(-90deg);
+  transform-origin: left top;
+  font-family: "Helvetica Neue", "Inter", "Segoe UI", Arial, sans-serif;
+  font-size: 8.5pt;
+  letter-spacing: 0.06em;
+  color: #777;
+  white-space: nowrap;
 }
 
 /* Horizontal rule after title block — the "bar" academic papers use */
@@ -257,7 +287,7 @@ def main() -> int:
     css_path = PAPER / "paper.css"
     css_path.write_text(CSS, encoding="utf-8")
 
-    html_path = PAPER / "paper.html"
+    html_path = PAPER / "mapping-llm-agent-reliability-under-chaos.html"
     cmd = [
         "pandoc",
         str(combined_path),
@@ -273,18 +303,28 @@ def main() -> int:
     subprocess.run(cmd, check=True, cwd=PAPER)
     print(f"Wrote {html_path}")
 
-    pdf_path = PAPER / "paper.pdf"
+    pdf_path = PAPER / "mapping-llm-agent-reliability-under-chaos.pdf"
+    pdf_tmp = PAPER / ".build_tmp.pdf"
     file_url = "file:///" + str(html_path).replace("\\", "/").lstrip("/")
     cmd2 = [
         chrome,
         "--headless=new",
         "--disable-gpu",
         "--no-pdf-header-footer",
-        f"--print-to-pdf={pdf_path}",
+        f"--print-to-pdf={pdf_tmp}",
         file_url,
     ]
     print("Running browser:", " ".join(cmd2))
     subprocess.run(cmd2, check=True)
+    if not pdf_tmp.exists() or pdf_tmp.stat().st_size < 100_000:
+        print("ERROR: browser did not produce a valid PDF", file=sys.stderr)
+        return 1
+    try:
+        os.replace(pdf_tmp, pdf_path)  # atomic; raises loudly if target is locked
+    except OSError as e:
+        print(f"ERROR: could not replace {pdf_path} — is it open in a viewer? ({e})",
+              file=sys.stderr)
+        return 1
     print(f"Wrote {pdf_path}")
     return 0
 

@@ -15,8 +15,8 @@ We treat **chaos engineering as a scientific instrument**: a deterministic, seed
 | Artifact | Path |
 |---|---|
 | Sections (Markdown sources) | [`paper/00-abstract.md`](paper/00-abstract.md) … [`paper/07-references.md`](paper/07-references.md) |
-| Single-file HTML (self-contained) | `paper/paper.html` |
-| PDF | `paper/paper.pdf` |
+| Single-file HTML (self-contained) | `paper/mapping-llm-agent-reliability-under-chaos.html` |
+| PDF | [`paper/mapping-llm-agent-reliability-under-chaos.pdf`](paper/mapping-llm-agent-reliability-under-chaos.pdf) |
 | Figures (SVG + PNG) | `paper/figures/` |
 | Tables (generated Markdown) | `paper/tables/` |
 

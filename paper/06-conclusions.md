@@ -39,3 +39,7 @@ The experimental campaign behind this paper is closed: ten local-roster cells ar
 The result we find most interesting is not that the playbook works — it is that the *shape* of where it works is non-trivial. Recovery scaffolding extracts the most reliability from the band of models *just below* the frontier, not from the largest models money can buy. For a practitioner who does not have a research budget, this is the band where the playbook is worth measuring.
 
 The chaos rig and the playbook prompts are released as open source under the same repository as this paper. The 128.0 K-run dataset is released as raw CSVs under `experiments/` (plus 800 appendix traces from the excluded model, see §3.6). Reproducing every figure in this paper from those CSVs is one shell command. We hope the rig is useful, the dataset is more useful, and the methodology is the most useful of the three.
+
+## Acknowledgements
+
+An earlier prototype of this instrument — the *Chaos Playbook Engine* — won **first place in the Enterprise Agents track** of the Google × Kaggle *AI Agents Intensive* capstone competition (December 2025; 4,477 entries in the track among 11,500+ submissions overall). The prototype is open source at <https://github.com/alberto-martinez-zurita/chaos-playbook-engine>. The present study re-architected that prototype into the deterministic, protocol-agnostic A/B rig described in §3 and ran an entirely new experimental campaign; no result from the prototype is reused in this paper.

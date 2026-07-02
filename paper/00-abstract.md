@@ -6,9 +6,15 @@
 
 <hr />
 
-<p class="author">Alberto Martínez Zurita, Alessandro Russo</p>
+<div class="sidestamp">Chaos Playbook Lab &middot; Working Paper 1 &middot; v1.0 &middot; 2 July 2026</div>
 
-<p class="date">Working draft · 2026-05-19</p>
+<p class="author">Alberto Martínez Zurita &middot; Alessandro Russo</p>
+
+<p class="affil">Chaos Playbook Lab</p>
+
+<p class="date">First version: 19 May 2026 &nbsp;·&nbsp; This version: 2 July 2026 (v1.0)</p>
+
+<p class="availability">Code, dataset and figures: <a href="https://github.com/alberto-martinez-zurita/chaos-playbook-lab">github.com/alberto-martinez-zurita/chaos-playbook-lab</a></p>
 
 ---
 

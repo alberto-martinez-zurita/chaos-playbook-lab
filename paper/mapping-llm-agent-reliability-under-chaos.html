@@ -4,7 +4,8 @@
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>paper.combined</title>
+  <title>Mapping LLM-agent reliability under chaos: a cross-architecture
+study of structured recovery playbooks</title>
   <style>
 
 span.smallcaps{font-variant: small-caps;}
@@ -21,7 +22,7 @@ vertical-align: middle;
 }
 .display.math{display: block; text-align: center; margin: 0.5rem auto;}
 </style>
-  <style type="text/css">@page {size: A4;margin: 22mm 18mm 22mm 18mm;@bottom-center { content: counter(page); font-size: 9pt; color: #555; }}html, body {font-family: "Charter", "Georgia", "Times New Roman", serif;font-size: 10.5pt;line-height: 1.45;color: #111;max-width: 100%;}h1, h2, h3, h4 {font-family: "Helvetica Neue", "Inter", "Segoe UI", Arial, sans-serif;color: #111;page-break-after: avoid;}h1:first-of-type {font-size: 19pt;line-height: 1.25;margin: 0.4em 0 0.4em 0;text-align: center;font-weight: 700;letter-spacing: -0.005em;border: none;padding: 0;}p.subtitle {text-align: center;font-size: 10.5pt;font-style: italic;color: #555;margin: 0.2em 0 1.4em 0;}p.author {text-align: center;font-size: 11.5pt;color: #111;margin: 0.4em 0 0.2em 0;font-family: "Helvetica Neue", "Inter", "Segoe UI", Arial, sans-serif;}p.date {text-align: center;font-size: 9.5pt;color: #666;margin: 0.2em 0 0.6em 0;}hr {border: none;border-top: 0.6pt solid #888;margin: 0.4em 18% 1.4em 18%;}h1:nth-of-type(2) {font-size: 11pt;text-align: center;font-weight: 700;margin: 2.2em 0 0.8em 0;border: none;text-transform: none;letter-spacing: 0.04em;}h1:nth-of-type(2) ~ p {font-size: 10pt;margin: 0 8% 0.8em 8%;text-align: justify;}h1:nth-of-type(2) ~ h1 ~ p {font-size: 10.5pt;margin: 0 0 0.8em 0;}h1 { font-size: 14.5pt; margin-top: 2.4em; border-bottom: 0.4pt solid #d8dade; padding-bottom: 0.25em; }h2 { font-size: 12.5pt; margin-top: 1em; }h3 { font-size: 11pt; margin-top: 0.8em; }p { text-align: justify; hyphens: auto; }code, pre {font-family: "JetBrains Mono", "Consolas", "Menlo", monospace;font-size: 9.5pt;}pre {background: #f6f7f8;border: 1px solid #e3e6ea;border-radius: 3px;padding: 8px 10px;overflow-x: auto;white-space: pre-wrap;}code { background: #f1f3f4; padding: 0 2px; border-radius: 2px; }pre code { background: transparent; padding: 0; }table {border-collapse: collapse;width: 100%;margin: 0.5em 0 1em 0;font-size: 9.5pt;}th, td {border-top: 1px solid #ccc;border-bottom: 1px solid #ccc;padding: 4px 8px;vertical-align: top;word-break: normal;overflow-wrap: anywhere;}td code, th code { word-break: break-word; }.table-runtime table { font-size: 8.5pt; }.table-runtime table th:nth-child(3),.table-runtime table td:nth-child(3),.table-runtime table th:nth-child(6),.table-runtime table td:nth-child(6) { white-space: nowrap; }.table-excluded table th:nth-child(1),.table-excluded table td:nth-child(1),.table-excluded table th:nth-child(2),.table-excluded table td:nth-child(2),.table-excluded table th:nth-child(3),.table-excluded table td:nth-child(3) { white-space: nowrap; }th { background: #f4f6f8; text-align: left; font-weight: 600; }figure { margin: 0.6em 0 1em 0; text-align: center; }img { max-width: 100%; height: auto; }figcaption { font-size: 9.5pt; color: #555; margin-top: 0.3em; }blockquote {border-left: 3px solid #d0d7de;margin: 0.6em 0;padding: 0.2em 0.8em;color: #444;background: #fafbfc;}a { color: #1f6feb; text-decoration: none; }h1 + p, h2 + p { margin-top: 0.4em; }hr {border: none;border-top: 1px solid #e5e7eb;margin: 1em 0;}</style>
+  <style type="text/css">@page {size: A4;margin: 22mm 18mm 22mm 18mm;@bottom-center { content: counter(page); font-size: 9pt; color: #555; }}html, body {font-family: "Charter", "Georgia", "Times New Roman", serif;font-size: 10.5pt;line-height: 1.45;color: #111;max-width: 100%;}h1, h2, h3, h4 {font-family: "Helvetica Neue", "Inter", "Segoe UI", Arial, sans-serif;color: #111;page-break-after: avoid;}h1:first-of-type {font-size: 19pt;line-height: 1.25;margin: 0.4em 0 0.4em 0;text-align: center;font-weight: 700;letter-spacing: -0.005em;border: none;padding: 0;}p.subtitle {text-align: center;font-size: 10.5pt;font-style: italic;color: #555;margin: 0.2em 0 1.4em 0;}p.author {text-align: center;font-size: 11.5pt;color: #111;margin: 0.4em 0 0.2em 0;font-family: "Helvetica Neue", "Inter", "Segoe UI", Arial, sans-serif;}p.date {text-align: center;font-size: 9.5pt;color: #666;margin: 0.2em 0 0.2em 0;}p.affil {text-align: center;font-size: 10pt;font-style: italic;color: #555;margin: 0 0 0.5em 0;}p.availability {text-align: center;font-size: 9pt;color: #666;margin: 0.2em 0 0.6em 0;}.sidestamp {position: absolute;top: 240mm;left: 0;transform: rotate(-90deg);transform-origin: left top;font-family: "Helvetica Neue", "Inter", "Segoe UI", Arial, sans-serif;font-size: 8.5pt;letter-spacing: 0.06em;color: #777;white-space: nowrap;}hr {border: none;border-top: 0.6pt solid #888;margin: 0.4em 18% 1.4em 18%;}h1:nth-of-type(2) {font-size: 11pt;text-align: center;font-weight: 700;margin: 2.2em 0 0.8em 0;border: none;text-transform: none;letter-spacing: 0.04em;}h1:nth-of-type(2) ~ p {font-size: 10pt;margin: 0 8% 0.8em 8%;text-align: justify;}h1:nth-of-type(2) ~ h1 ~ p {font-size: 10.5pt;margin: 0 0 0.8em 0;}h1 { font-size: 14.5pt; margin-top: 2.4em; border-bottom: 0.4pt solid #d8dade; padding-bottom: 0.25em; }h2 { font-size: 12.5pt; margin-top: 1em; }h3 { font-size: 11pt; margin-top: 0.8em; }p { text-align: justify; hyphens: auto; }code, pre {font-family: "JetBrains Mono", "Consolas", "Menlo", monospace;font-size: 9.5pt;}pre {background: #f6f7f8;border: 1px solid #e3e6ea;border-radius: 3px;padding: 8px 10px;overflow-x: auto;white-space: pre-wrap;}code { background: #f1f3f4; padding: 0 2px; border-radius: 2px; }pre code { background: transparent; padding: 0; }table {border-collapse: collapse;width: 100%;margin: 0.5em 0 1em 0;font-size: 9.5pt;}th, td {border-top: 1px solid #ccc;border-bottom: 1px solid #ccc;padding: 4px 8px;vertical-align: top;word-break: normal;overflow-wrap: anywhere;}td code, th code { word-break: break-word; }.table-runtime table { font-size: 8.5pt; }.table-runtime table th:nth-child(3),.table-runtime table td:nth-child(3),.table-runtime table th:nth-child(6),.table-runtime table td:nth-child(6) { white-space: nowrap; }.table-excluded table th:nth-child(1),.table-excluded table td:nth-child(1),.table-excluded table th:nth-child(2),.table-excluded table td:nth-child(2),.table-excluded table th:nth-child(3),.table-excluded table td:nth-child(3) { white-space: nowrap; }th { background: #f4f6f8; text-align: left; font-weight: 600; }figure { margin: 0.6em 0 1em 0; text-align: center; }img { max-width: 100%; height: auto; }figcaption { font-size: 9.5pt; color: #555; margin-top: 0.3em; }blockquote {border-left: 3px solid #d0d7de;margin: 0.6em 0;padding: 0.2em 0.8em;color: #444;background: #fafbfc;}a { color: #1f6feb; text-decoration: none; }h1 + p, h2 + p { margin-top: 0.4em; }hr {border: none;border-top: 1px solid #e5e7eb;margin: 1em 0;}</style>
 </head>
 <body>
 <hr />
@@ -33,9 +34,15 @@ structured recovery playbooks</h1>
 
 <hr />
 
-<p class="author">Alberto Martínez Zurita, Alessandro Russo</p>
+<div class="sidestamp">Chaos Playbook Lab · Working Paper 1 · v1.0 · 2 July 2026</div>
 
-<p class="date">Working draft · 2026-05-19</p>
+<p class="author">Alberto Martínez Zurita · Alessandro Russo</p>
+
+<p class="affil">Chaos Playbook Lab</p>
+
+<p class="date">First version: 19 May 2026  ·  This version: 2 July 2026 (v1.0)</p>
+
+<p class="availability">Code, dataset and figures: <a href="https://github.com/alberto-martinez-zurita/chaos-playbook-lab">github.com/alberto-martinez-zurita/chaos-playbook-lab</a></p>
 
 <hr />
 <h1 id="abstract">Abstract</h1>
@@ -941,7 +948,7 @@ magnitude in total parameters and three architecture families.</p>
 <ul>
 <li><strong>Dense Transformer</strong>: qwen3.5 0.8 B, qwen3.5 2 B,
 qwen3.5 4 B, qwen3.5 9 B, a community-distilled qwen3.5 9 B variant,
-Ministral 14 B (with reasoning).</li>
+Ministral 14 B (with reasoning) [30].</li>
 <li><strong>Hybrid Mamba2-Transformer</strong>: NVIDIA Nemotron 3 Nano 4
 B (with reasoning by default) — pruned and distilled from Nemotron Nano
 9 B v2 via the Nemotron Elastic framework [29].</li>
@@ -1109,9 +1116,9 @@ at chaos = 10 % therefore reflects a <em>structural rescue</em> (the
 playbook supplies missing format scaffolding) rather than purely
 <em>chaos rescue</em>. We retain the data point because the gap profile
 across rates is still informative, but flag the caveat throughout.</p>
-<p><strong>Excluded model (<code>gpt_oss_20b</code>).</strong> At chaos
-≥ 0.25 the model enters a <code>?????</code>-loop mode collapse — a
-language-model-level decoder failure qualitatively distinct from the
+<p><strong>Excluded model (<code>gpt_oss_20b</code>) [31].</strong> At
+chaos ≥ 0.25 the model enters a <code>?????</code>-loop mode collapse —
+a language-model-level decoder failure qualitatively distinct from the
 trajectory failures of the active roster. Rates 0.00–0.20 (800 runs) are
 preserved as appendix evidence under
 <code>experiments/gpt_oss_20b/</code>; we do not analyse this model
@@ -2250,14 +2257,21 @@ traces from the excluded model, see §3.6). Reproducing every figure in
 this paper from those CSVs is one shell command. We hope the rig is
 useful, the dataset is more useful, and the methodology is the most
 useful of the three.</p>
+<h2 id="acknowledgements">Acknowledgements</h2>
+<p>An earlier prototype of this instrument — the <em>Chaos Playbook
+Engine</em> — won <strong>first place in the Enterprise Agents
+track</strong> of the Google × Kaggle <em>AI Agents Intensive</em>
+capstone competition (December 2025; 4,477 entries in the track among
+11,500+ submissions overall). The prototype is open source at <a href="https://github.com/alberto-martinez-zurita/chaos-playbook-engine">https://github.com/alberto-martinez-zurita/chaos-playbook-engine</a>.
+The present study re-architected that prototype into the deterministic,
+protocol-agnostic A/B rig described in §3 and ran an entirely new
+experimental campaign; no result from the prototype is reused in this
+paper.</p>
 <h1 id="references">References</h1>
 <blockquote>
-<p><strong>Note to co-author / reviewer.</strong> Bibliography verified
-2026-05-18 via automated audit (44/44 entries resolved to real works;
-arXiv IDs and DOIs attached where applicable). Concurrent-work
-references [38]–[41] checked against arXiv abs pages; protocol specs
-[32][33] checked against canonical URLs; model technical reports
-[26]–[31] checked against vendor releases.</p>
+<p>All 44 entries were verified against primary sources on 2026-05-18
+(arXiv abstract pages for [38]–[41], canonical protocol URLs for
+[32][33], vendor releases for the model reports [26]–[31]).</p>
 </blockquote>
 <h2 id="chaos-engineering-and-fault-injection">Chaos engineering and
 fault injection</h2>

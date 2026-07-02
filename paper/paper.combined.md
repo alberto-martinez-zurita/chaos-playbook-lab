@@ -1,5 +1,6 @@
 ---
 abstract-title: ""
+pagetitle: "Mapping LLM-agent reliability under chaos: a cross-architecture study of structured recovery playbooks"
 ---
 
 
@@ -11,9 +12,15 @@ abstract-title: ""
 
 <hr />
 
-<p class="author">Alberto Martínez Zurita, Alessandro Russo</p>
+<div class="sidestamp">Chaos Playbook Lab &middot; Working Paper 1 &middot; v1.0 &middot; 2 July 2026</div>
 
-<p class="date">Working draft · 2026-05-19</p>
+<p class="author">Alberto Martínez Zurita &middot; Alessandro Russo</p>
+
+<p class="affil">Chaos Playbook Lab</p>
+
+<p class="date">First version: 19 May 2026 &nbsp;·&nbsp; This version: 2 July 2026 (v1.0)</p>
+
+<p class="availability">Code, dataset and figures: <a href="https://github.com/alberto-martinez-zurita/chaos-playbook-lab">github.com/alberto-martinez-zurita/chaos-playbook-lab</a></p>
 
 ---
 
@@ -284,7 +291,7 @@ The active roster comprises eleven models spanning three orders of magnitude in 
 
 In short:
 
-- **Dense Transformer**: qwen3.5 0.8 B, qwen3.5 2 B, qwen3.5 4 B, qwen3.5 9 B, a community-distilled qwen3.5 9 B variant, Ministral 14 B (with reasoning).
+- **Dense Transformer**: qwen3.5 0.8 B, qwen3.5 2 B, qwen3.5 4 B, qwen3.5 9 B, a community-distilled qwen3.5 9 B variant, Ministral 14 B (with reasoning) [30].
 - **Hybrid Mamba2-Transformer**: NVIDIA Nemotron 3 Nano 4 B (with reasoning by default) — pruned and distilled from Nemotron Nano 9 B v2 via the Nemotron Elastic framework [29].
 - **MatFormer**: Gemma 4 E2B (~2 B active of 5.4 B total) and Gemma 4 E4B (~4 B active of 7.5 B total).
 - **MoE**: Gemma 4 26 B (4 B active of 26 B total) and GLM 4.5 (32 B active of 355 B total).
@@ -333,7 +340,7 @@ Per-model model identifier, runtime, protocols swept, and sample size. Quantisat
 
 **Structural rescue (qwen3.5 2 B).** Its `nopb` arm scores 0 % at chaos = 0 % because the model cannot emit valid structured output without the playbook prompt. The +56 pp gap at chaos = 10 % therefore reflects a *structural rescue* (the playbook supplies missing format scaffolding) rather than purely *chaos rescue*. We retain the data point because the gap profile across rates is still informative, but flag the caveat throughout.
 
-**Excluded model (`gpt_oss_20b`).** At chaos ≥ 0.25 the model enters a `?????`-loop mode collapse — a language-model-level decoder failure qualitatively distinct from the trajectory failures of the active roster. Rates 0.00–0.20 (800 runs) are preserved as appendix evidence under `experiments/gpt_oss_20b/`; we do not analyse this model further:
+**Excluded model (`gpt_oss_20b`) [31].** At chaos ≥ 0.25 the model enters a `?????`-loop mode collapse — a language-model-level decoder failure qualitatively distinct from the trajectory failures of the active roster. Rates 0.00–0.20 (800 runs) are preserved as appendix evidence under `experiments/gpt_oss_20b/`; we do not analyse this model further:
 
 ::: {.table-excluded}
 
@@ -672,14 +679,16 @@ The result we find most interesting is not that the playbook works — it is tha
 
 The chaos rig and the playbook prompts are released as open source under the same repository as this paper. The 128.0 K-run dataset is released as raw CSVs under `experiments/` (plus 800 appendix traces from the excluded model, see §3.6). Reproducing every figure in this paper from those CSVs is one shell command. We hope the rig is useful, the dataset is more useful, and the methodology is the most useful of the three.
 
+## Acknowledgements
+
+An earlier prototype of this instrument — the *Chaos Playbook Engine* — won **first place in the Enterprise Agents track** of the Google × Kaggle *AI Agents Intensive* capstone competition (December 2025; 4,477 entries in the track among 11,500+ submissions overall). The prototype is open source at <https://github.com/alberto-martinez-zurita/chaos-playbook-engine>. The present study re-architected that prototype into the deterministic, protocol-agnostic A/B rig described in §3 and ran an entirely new experimental campaign; no result from the prototype is reused in this paper.
+
 
 # References
 
-> **Note to co-author / reviewer.** Bibliography verified 2026-05-18 via
-> automated audit (44/44 entries resolved to real works; arXiv IDs and DOIs
-> attached where applicable). Concurrent-work references [38]–[41] checked
-> against arXiv abs pages; protocol specs [32][33] checked against canonical
-> URLs; model technical reports [26]–[31] checked against vendor releases.
+> All 44 entries were verified against primary sources on 2026-05-18 (arXiv
+> abstract pages for [38]–[41], canonical protocol URLs for [32][33], vendor
+> releases for the model reports [26]–[31]).
 
 ## Chaos engineering and fault injection
 

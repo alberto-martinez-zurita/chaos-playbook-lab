@@ -51,7 +51,36 @@ p.date {
   text-align: center;
   font-size: 9.5pt;
   color: #666;
+  margin: 0.2em 0 0.2em 0;
+}
+
+p.affil {
+  text-align: center;
+  font-size: 10pt;
+  font-style: italic;
+  color: #555;
+  margin: 0 0 0.5em 0;
+}
+
+p.availability {
+  text-align: center;
+  font-size: 9pt;
+  color: #666;
   margin: 0.2em 0 0.6em 0;
+}
+
+/* arXiv-style vertical stamp on the left margin of page 1 */
+.sidestamp {
+  position: absolute;
+  top: 240mm;
+  left: 0;
+  transform: rotate(-90deg);
+  transform-origin: left top;
+  font-family: "Helvetica Neue", "Inter", "Segoe UI", Arial, sans-serif;
+  font-size: 8.5pt;
+  letter-spacing: 0.06em;
+  color: #777;
+  white-space: nowrap;
 }
 
 /* Horizontal rule after title block — the "bar" academic papers use */
