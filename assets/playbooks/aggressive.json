@@ -1,0 +1,59 @@
+{
+  "_metadata": {
+    "description": "Aggressive Playbook - Maximum retries, long waits. Never gives up on transient errors."
+  },
+  "find_product": {
+    "400": { "strategy": "fail_fast", "config": {} },
+    "401": { "strategy": "fail_fast", "config": {} },
+    "403": { "strategy": "fail_fast", "config": {} },
+    "404": { "strategy": "retry_linear_backoff", "config": { "delay": 2.0, "max_retries": 5 } },
+    "408": { "strategy": "retry_exponential_backoff", "config": { "base_delay": 0.5, "max_retries": 8 } },
+    "429": { "strategy": "wait_and_retry", "config": { "wait_seconds": 10, "max_retries": 5 } },
+    "500": { "strategy": "retry_exponential_backoff", "config": { "base_delay": 0.5, "max_retries": 8 } },
+    "502": { "strategy": "retry_exponential_backoff", "config": { "base_delay": 0.5, "max_retries": 8 } },
+    "503": { "strategy": "retry_exponential_backoff", "config": { "base_delay": 0.5, "max_retries": 8 } },
+    "504": { "strategy": "retry_exponential_backoff", "config": { "base_delay": 1.0, "max_retries": 8 } }
+  },
+  "check_inventory": {
+    "400": { "strategy": "fail_fast", "config": {} },
+    "401": { "strategy": "fail_fast", "config": {} },
+    "403": { "strategy": "fail_fast", "config": {} },
+    "408": { "strategy": "retry_exponential_backoff", "config": { "base_delay": 0.5, "max_retries": 8 } },
+    "429": { "strategy": "wait_and_retry", "config": { "wait_seconds": 8, "max_retries": 5 } },
+    "500": { "strategy": "retry_exponential_backoff", "config": { "base_delay": 0.5, "max_retries": 8 } },
+    "502": { "strategy": "retry_exponential_backoff", "config": { "base_delay": 0.5, "max_retries": 8 } },
+    "503": { "strategy": "retry_exponential_backoff", "config": { "base_delay": 0.5, "max_retries": 8 } },
+    "504": { "strategy": "retry_exponential_backoff", "config": { "base_delay": 0.5, "max_retries": 8 } }
+  },
+  "place_order": {
+    "400": { "strategy": "fail_fast", "config": {} },
+    "401": { "strategy": "fail_fast", "config": {} },
+    "403": { "strategy": "fail_fast", "config": {} },
+    "404": { "strategy": "fail_fast", "config": {} },
+    "422": { "strategy": "fail_fast", "config": {} },
+    "408": { "strategy": "retry_exponential_backoff", "config": { "base_delay": 1.0, "max_retries": 6 } },
+    "429": { "strategy": "wait_and_retry", "config": { "wait_seconds": 10, "max_retries": 6 } },
+    "500": { "strategy": "retry_exponential_backoff", "config": { "base_delay": 1.0, "max_retries": 6 } },
+    "502": { "strategy": "retry_exponential_backoff", "config": { "base_delay": 1.0, "max_retries": 6 } },
+    "503": { "strategy": "retry_exponential_backoff", "config": { "base_delay": 1.0, "max_retries": 6 } },
+    "504": { "strategy": "retry_exponential_backoff", "config": { "base_delay": 1.5, "max_retries": 6 } }
+  },
+  "confirm_order": {
+    "400": { "strategy": "fail_fast", "config": {} },
+    "401": { "strategy": "fail_fast", "config": {} },
+    "403": { "strategy": "fail_fast", "config": {} },
+    "404": { "strategy": "retry_linear_backoff", "config": { "delay": 2.0, "max_retries": 6 } },
+    "405": { "strategy": "fail_fast", "config": {} },
+    "408": { "strategy": "retry_exponential_backoff", "config": { "base_delay": 0.5, "max_retries": 8 } },
+    "429": { "strategy": "wait_and_retry", "config": { "wait_seconds": 8, "max_retries": 5 } },
+    "500": { "strategy": "retry_exponential_backoff", "config": { "base_delay": 0.5, "max_retries": 8 } },
+    "502": { "strategy": "retry_exponential_backoff", "config": { "base_delay": 0.5, "max_retries": 8 } },
+    "503": { "strategy": "retry_exponential_backoff", "config": { "base_delay": 0.5, "max_retries": 8 } },
+    "504": { "strategy": "retry_exponential_backoff", "config": { "base_delay": 0.5, "max_retries": 8 } }
+  },
+  "default": {
+    "strategy": "retry_exponential_backoff",
+    "reasoning": "Unknown error. Retry aggressively before giving up.",
+    "config": { "base_delay": 1.0, "max_retries": 5 }
+  }
+}

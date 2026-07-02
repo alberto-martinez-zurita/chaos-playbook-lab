@@ -1,0 +1,49 @@
+# ============================================================================
+# CHAOS AGENT CONFIGURATION
+# ============================================================================
+
+chaos_agent:
+  # OpenAPI spec location (URL or local file path)
+  openapi_spec_url: "https://petstore3.swagger.io/api/v3/openapi.json"
+  
+  # Default chaos settings
+  default_failure_rate: 0.3
+  default_seed: 42
+  
+  # Error code weights (for weighted random selection)
+  error_weights:
+    "400": 40
+    "404": 30
+    "422": 20
+    "500": 10
+  
+  # Mock data generation settings
+  mock_success_enabled: true
+  mock_list_size: 5
+
+
+# ============================================================================
+# EXPERIMENT CONFIGURATION
+# ============================================================================
+
+experiment:
+  name: "chaos-playbook-phase3"
+  description: "Testing playbook-based error handling"
+  version: "v10"
+  iterations: 100
+  playbook_path: "playbooks/playbook_petstore_default.json"
+  output_dir: "output/experiments"
+  log_level: "INFO"
+
+
+# ============================================================================
+# ORDER AGENT CONFIGURATION
+# ============================================================================
+
+order_agent:
+  max_retries: 3
+  backoff_seconds: 2
+  operation_timeout: 30
+  total_timeout: 300
+  enable_logging: true
+  verbose: false

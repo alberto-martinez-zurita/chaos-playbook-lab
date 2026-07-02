@@ -1,0 +1,48 @@
+# Nvidia Nemotron 3 Nano 4B — local (LM Studio)
+# Small dense reasoning model for cross-model comparison (Fig 4).
+
+name: nemotron_nano_4b
+description: >
+  Nvidia Nemotron 3 Nano 4B on LM Studio (localhost:1234).
+  HTTP protocol. Small dense model from Nvidia.
+created: 2026-04-22
+generation: cross_model_4b
+
+model:
+  id: nvidia/nemotron-3-nano-4b
+  tag: nemotron-nano-4b
+  provider: local
+  runtime: LM Studio (localhost:1234)
+  has_thinking: true
+  sleep_between_rates_s: 30
+  notes: 4B dense model from Nvidia with reasoning. Smallest model in cross-model comparison.
+
+per_request_params:
+  temperature: 0.2
+  seed: 2026
+
+trace: true
+
+protocols: [http]
+
+failure_rates: [0.0, 0.01, 0.02, 0.03, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30]
+experiments_per_rate: 200  # progressive: N=50 -> 100 -> 200 (post-bugfix 2026-04-30, re-included after bug fix per user request)
+
+seed: 2026
+simulate_delays: false
+
+# Auto-generated tags for paper roster (2026-05-02)
+tags:
+  family: nemotron3
+  architecture: hybrid_mamba2_transformer
+  total_params: 4B
+  active_params: 4B
+  reasoning: true
+  provider: nvidia
+  region: usa
+  runtime: local
+roles:
+  - cross_model
+  - dense_axis
+  - reasoning_axis
+  - iso_4b_active

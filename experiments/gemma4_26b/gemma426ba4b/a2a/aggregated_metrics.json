@@ -1,0 +1,36 @@
+{
+  "0.3": {
+    "failure_rate": 0.3,
+    "n_experiments": 200,
+    "a2a-gemma426ba4b-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.865,
+        "std": 0.024164
+      },
+      "duration_s": {
+        "mean": 26.637165393829342,
+        "std": 26.024108
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    },
+    "a2a-gemma426ba4b-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 24.653720227479912,
+        "std": 11.300052
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  }
+}

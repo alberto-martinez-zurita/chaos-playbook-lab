@@ -1,0 +1,30 @@
+{
+  "name": "live_capture",
+  "description": "Captured from Prometheus at 2026-03-15T16:20:04.541901+00:00. 54 total injections, success rate 17.5%.",
+  "source": "prometheus://http://localhost:9090",
+  "captured_at": "2026-03-15T16:20:04.541901+00:00",
+  "failure_distribution": {
+    "504": 0.25925925925925924,
+    "503": 0.25925925925925924,
+    "500": 0.12962962962962962,
+    "408": 0.2037037037037037,
+    "502": 0.07407407407407407,
+    "429": 0.07407407407407407
+  },
+  "failure_timeline": [],
+  "strategy_profile": {
+    "fail_fast": 53,
+    "retry_exponential_backoff": 22,
+    "retry_linear_backoff": 54,
+    "wait_and_retry": 1
+  },
+  "metrics_snapshot": {
+    "experiments_total": 40,
+    "success_rate": 0.175,
+    "circuit_breaker_state": 1,
+    "current_failure_rate": 0.2,
+    "duration_p50": NaN,
+    "duration_p95": NaN,
+    "duration_p99": NaN
+  }
+}

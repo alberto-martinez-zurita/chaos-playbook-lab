@@ -1,0 +1,36 @@
+{
+  "0.3": {
+    "failure_rate": 0.3,
+    "n_experiments": 200,
+    "http-gemma426ba4b-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.385,
+        "std": 0.034407
+      },
+      "duration_s": {
+        "mean": 13.938112344741826,
+        "std": 14.666672
+      },
+      "inconsistencies": {
+        "mean": 0.27499999999999997,
+        "std": 0.446514
+      }
+    },
+    "http-gemma426ba4b-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.935,
+        "std": 0.017432
+      },
+      "duration_s": {
+        "mean": 37.047963943481435,
+        "std": 39.600884
+      },
+      "inconsistencies": {
+        "mean": 0.04499999999999999,
+        "std": 0.207304
+      }
+    }
+  }
+}

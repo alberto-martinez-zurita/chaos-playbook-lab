@@ -1,0 +1,35 @@
+# Model Registry — canonical model definitions for chaos experiments.
+#
+# Each key is a model tag used in experiment.yaml (`model: ministral-14b`).
+# All fields match ModelConfig in src/chaos_engine/experiments/config.py.
+
+glm45:
+  id: glm-4.5
+  provider: zhipuai
+  runtime: "cloud (z.ai API, Coding Plan MAX)"
+  has_thinking: true
+  sleep_between_rates_s: 5
+
+gemma426ba4b:
+  id: gemma-4-26b-a4b-it
+  provider: local
+  runtime: "LM Studio (localhost:1234, Q4_K_M quantization)"
+  has_thinking: false
+  sleep_between_rates_s: 60
+  notes: "RTX 4070 Ti 16GB. No thinking/reasoning mode available."
+
+ministral-14b:
+  id: mistralai/ministral-3-14b-reasoning
+  provider: local
+  runtime: "LM Studio (localhost:1234)"
+  has_thinking: true
+  sleep_between_rates_s: 30
+  notes: "14B parameter reasoning model with thinking mode."
+
+qwen35-9b:
+  id: qwen/qwen3.5-9b
+  provider: local
+  runtime: "LM Studio (localhost:1234)"
+  has_thinking: false
+  sleep_between_rates_s: 30
+  notes: "9B parameter model, no thinking/reasoning mode."

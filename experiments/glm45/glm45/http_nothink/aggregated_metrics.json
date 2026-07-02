@@ -1,0 +1,36 @@
+{
+  "0.3": {
+    "failure_rate": 0.3,
+    "n_experiments": 600,
+    "http-glm45-nothink-nopb": {
+      "n_runs": 600,
+      "success_rate": {
+        "mean": 0.55,
+        "std": 0.02031
+      },
+      "duration_s": {
+        "mean": 14.245271500349043,
+        "std": 20.542125
+      },
+      "inconsistencies": {
+        "mean": 0.15666666666666654,
+        "std": 0.363486
+      }
+    },
+    "http-glm45-nothink-pb": {
+      "n_runs": 600,
+      "success_rate": {
+        "mean": 0.9133333333333333,
+        "std": 0.011486
+      },
+      "duration_s": {
+        "mean": 20.53232641577719,
+        "std": 16.587743
+      },
+      "inconsistencies": {
+        "mean": 0.053333333333333406,
+        "std": 0.224697
+      }
+    }
+  }
+}

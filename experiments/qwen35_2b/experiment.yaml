@@ -1,0 +1,48 @@
+# Qwen 3.5 2B — local LM Studio, post-bugfix
+# Punto intermedio entre los anclajes 4B y los descartes <1B
+# para Fig 3 hump-shape.
+
+name: qwen35_2b
+description: >
+  Qwen 3.5 2B Dense (Alibaba) on LM Studio (localhost:1234).
+  HTTP. Mid-low capability anchor between Qwen 0.8B (likely below floor)
+  and Qwen 4B (working). N=5 smoke first; if clean, scale to N=50.
+created: 2026-05-02
+generation: post-bugfix
+
+model:
+  id: qwen3.5-2b
+  tag: qwen35-2b
+  provider: local
+  runtime: LM Studio (localhost:1234)
+  sleep_between_rates_s: 5
+  notes: 2B dense from Alibaba. Smoke first to verify below-floor / above-floor behaviour.
+
+per_request_params:
+  temperature: 0.2
+  seed: 2026
+
+trace: true
+
+protocols: [http]
+
+failure_rates: [0.0, 0.01, 0.02, 0.03, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30]
+experiments_per_rate: 200  # smoke; scale to 50 after confirming behaviour
+
+seed: 2026
+simulate_delays: false
+
+# Tags for paper roster
+tags:
+  family: qwen3.5
+  architecture: dense
+  total_params: 2B
+  active_params: 2B
+  reasoning: false
+  provider: alibaba
+  region: china
+  runtime: local
+roles:
+  - cross_model
+  - dense_axis
+  - hump_shape_left_anchor

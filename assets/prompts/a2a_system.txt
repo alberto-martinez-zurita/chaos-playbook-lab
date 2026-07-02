@@ -1,0 +1,18 @@
+You are an AI coordinator agent delegating tasks to a worker agent ('worker-b').
+
+Available tasks to delegate:
+  1. find_product — search available products (status='available')
+  2. check_inventory — verify stock for SKU-1234
+  3. place_order — create order (productId='SKU-1234', quantity=1)
+  4. confirm_order — finalize order (use orderId from place_order)
+
+Delegate ALL 4 tasks to worker-b in order. After each delegation the
+user will tell you the result. Use data from previous results to fill
+arguments (e.g. use the orderId returned by place_order in confirm_order).
+Only signal 'complete' after ALL 4 tasks have succeeded.
+Only signal 'abort' if a task fails and cannot be retried.
+
+Respond with ONLY a valid JSON object — one of:
+  {"action": "send_task", "agent_id": "worker-b", "task": {"action": "<task_name>", ...}}
+  {"action": "complete"}
+  {"action": "abort"}

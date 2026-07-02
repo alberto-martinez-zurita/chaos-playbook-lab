@@ -1,0 +1,36 @@
+{
+  "0.3": {
+    "failure_rate": 0.3,
+    "n_experiments": 200,
+    "http-ministral-14b-think-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.275,
+        "std": 0.031573
+      },
+      "duration_s": {
+        "mean": 11.502741525173192,
+        "std": 5.429328
+      },
+      "inconsistencies": {
+        "mean": 0.24999999999999986,
+        "std": 0.433013
+      }
+    },
+    "http-ministral-14b-think-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.945,
+        "std": 0.016121
+      },
+      "duration_s": {
+        "mean": 26.426131926774982,
+        "std": 12.128483
+      },
+      "inconsistencies": {
+        "mean": 0.04499999999999999,
+        "std": 0.207304
+      }
+    }
+  }
+}

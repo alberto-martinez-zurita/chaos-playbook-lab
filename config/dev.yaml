@@ -1,0 +1,8 @@
+environment: dev
+agent:
+  model: gemini-2.5-flash-lite
+runner:
+  type: InMemoryRunner
+mock_mode: True
+experiment:
+  default_seed: 42

@@ -1,0 +1,36 @@
+{
+  "0.3": {
+    "failure_rate": 0.3,
+    "n_experiments": 200,
+    "http-qwen35-0_8b-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 0.1961794674396514,
+        "std": 0.401928
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    },
+    "http-qwen35-0_8b-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 0.14149362444877603,
+        "std": 0.102403
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  }
+}

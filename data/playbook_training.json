@@ -1,0 +1,20 @@
+{
+  "get_inventory": {
+    "500": {
+      "strategy": "retry_exponential_backoff",
+      "reasoning": "The get_inventory API returned a 500 error, indicating a server-side issue. A retry with exponential backoff is appropriate to handle transient server problems.",
+      "config": {
+        "base_delay": 1,
+        "factor": 2,
+        "max_retries": 5
+      }
+    }
+  },
+  "find_pets_by_status": {
+    "200": {
+      "strategy": "fail_fast",
+      "reasoning": "No available pets found. This is a valid scenario, not an error, so no retry is needed. The system should inform the user.",
+      "config": {}
+    }
+  }
+}

@@ -1,0 +1,46 @@
+# Qwen 3.5 9B — local (LM Studio)
+# Cross-protocol experiments with a small local model.
+
+name: qwen35_9b
+description: >
+  Qwen 3.5 9B on LM Studio (localhost:1234). All 3 protocols,
+  no thinking mode. Tests whether a small 9B model can handle chaos tasks.
+created: 2026-04-16
+generation: cross_model
+
+model:
+  id: qwen/qwen3.5-9b
+  tag: qwen35-9b
+  provider: local
+  runtime: LM Studio (localhost:1234)
+  sleep_between_rates_s: 30
+  notes: 9B parameter model, no thinking/reasoning mode.
+
+per_request_params:
+  temperature: 0.2
+  seed: 2026
+
+trace: true
+
+protocols: [http]
+
+failure_rates: [0.0, 0.01, 0.02, 0.03, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30]
+experiments_per_rate: 200  # progressive: N=50 -> 100 -> 200 (post-bugfix 2026-04-30)
+
+seed: 2026
+simulate_delays: false
+
+# Auto-generated tags for paper roster (2026-05-02)
+tags:
+  family: qwen3.5
+  architecture: dense
+  total_params: 9B
+  active_params: 9B
+  reasoning: false
+  provider: alibaba
+  region: china
+  runtime: local
+roles:
+  - cross_model
+  - dense_axis
+  - distillation_baseline

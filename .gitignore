@@ -1,0 +1,51 @@
+__pycache__/
+*.py[cod]
+.Python
+build/
+dist/
+*.egg-info/
+.venv/
+venv/
+.vscode/
+.idea/
+.pytest_cache/
+.coverage
+htmlcov/
+.mypy_cache/
+.env
+.env.example
+.env.local
+!data/*.example.json
+*.log
+.DS_Store
+Thumbs.db
+.ruff_cache
+scan_project.py
+project_content.txt
+.claude/
+.*-mailbox/
+.hypothesis/
+research/.hypothesis/
+research/.cache/
+docs/
+reports/
+
+# Private provenance / local artifacts — never publish
+CHANGES_FROM_*.md
+STATUS.md
+null
+
+# Dataset: the raw CSVs and per-turn traces ARE published (the paper releases them).
+# Excluded below: only failed / aborted / superseded experiment data.
+experiments/_*/
+experiments/glm51/
+scripts/*glm51*
+experiments/*/logs/
+experiments/*/reports/
+*.retired_*
+*.original_*
+# Superseded pre-top-up nested copies (GLM 4.5)
+experiments/glm45/glm45/a2a_think/a2a_think/
+experiments/glm45/glm45/a2a_nothink/a2a_nothink/
+experiments/glm45/glm45/mcp_think/mcp_think/
+experiments/glm45/glm45/mcp_nothink/mcp_nothink/

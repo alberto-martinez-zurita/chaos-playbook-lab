@@ -1,0 +1,60 @@
+{
+  "window_start": "2026-05-07T23:02:22",
+  "window_end": "2026-05-07T23:04:30",
+  "actions": [
+    {
+      "name": "qwen35_4b",
+      "csv_active": "experiments\\qwen35_4b\\qwen35-4b\\http\\rate_0.00.csv",
+      "csv_retired": "experiments\\qwen35_4b\\qwen35-4b\\http\\rate_0.00.retired_2026-05-07_contention.csv",
+      "csv_original": "experiments\\qwen35_4b\\qwen35-4b\\http\\rate_0.00.original_2026-05-07_pre_cleanup.csv",
+      "trace_active": "experiments\\qwen35_4b\\qwen35-4b\\http\\trace.jsonl",
+      "trace_retired": "experiments\\qwen35_4b\\qwen35-4b\\http\\trace.retired_2026-05-07_contention.jsonl",
+      "trace_original": "experiments\\qwen35_4b\\qwen35-4b\\http\\trace.original_2026-05-07_pre_cleanup.jsonl",
+      "hashes": {
+        "csv_active": "a076c65f5ae87ef182eec75f64febe672fb560a543f24180a6539df486fb8f9e",
+        "csv_retired": "bf373b70ed81ef428900741a88491632ff10d19d4422316261b485dc8e10a551",
+        "csv_original": "542f0244babba14c2880e5f3dfc6830e5b9ea166e6793a0fe8a49e480a4ee201",
+        "trace_active": "9af587c4186a71f12ff6ff0b977adf1e03298bebb8bfaf47e64ee7e35c1933ad",
+        "trace_retired": "d1884a17395c62795cd951f7a1121dd06b542dbae721f47d7c5f7a8a8001d698",
+        "trace_original": "2a9c7db746060aa29cf7a34704da5eb0dcfa105706c72e985cf0f4caff310904"
+      },
+      "csv_rows_active": 398,
+      "csv_rows_retired": 2,
+      "trace_events_active": 18498,
+      "trace_events_retired": 10,
+      "csv_ids_excluded": [
+        "http-qwen35-4b-nopb-0.0-100",
+        "http-qwen35-4b-nopb-0.0-101"
+      ],
+      "trace_only_ids_filtered": []
+    },
+    {
+      "name": "nemotron_nano_4b",
+      "csv_active": "experiments\\nemotron_nano_4b\\nemotron-nano-4b\\http_think\\rate_0.02.csv",
+      "csv_retired": "experiments\\nemotron_nano_4b\\nemotron-nano-4b\\http_think\\rate_0.02.retired_2026-05-07_contention.csv",
+      "csv_original": "experiments\\nemotron_nano_4b\\nemotron-nano-4b\\http_think\\rate_0.02.original_2026-05-07_pre_cleanup.csv",
+      "trace_active": "experiments\\nemotron_nano_4b\\nemotron-nano-4b\\http_think\\trace.jsonl",
+      "trace_retired": "experiments\\nemotron_nano_4b\\nemotron-nano-4b\\http_think\\trace.retired_2026-05-07_contention.jsonl",
+      "trace_original": "experiments\\nemotron_nano_4b\\nemotron-nano-4b\\http_think\\trace.original_2026-05-07_pre_cleanup.jsonl",
+      "hashes": {
+        "csv_active": "6e858288f3f562d5c12a54c5c5cc300c4a30a9331fab98015396c7e9d0730ca9",
+        "csv_retired": "1c1dcebf73e3084d98fa19669bdc4cbb5fcf7a7aedc7d27a9b2109bef5271767",
+        "csv_original": "2b4e163905b7ff4c7595040b0668d935fd0a7e053fde3d8e824d7526fdfb2869",
+        "trace_active": "d47a115a4e8cdecca7cd97c465d36dbd2e19ffd17ce93214c6a1d0ce30060472",
+        "trace_retired": "463213e0a995b4822bede8e17f848a918981b7b0e1359ce9151f72267f9836ad",
+        "trace_original": "71f6b05ca6d93e3900db8c0e5ac42129e689e062c83a4a4e675ff3243fad40ef"
+      },
+      "csv_rows_active": 396,
+      "csv_rows_retired": 2,
+      "trace_events_active": 15633,
+      "trace_events_retired": 23,
+      "csv_ids_excluded": [
+        "http-nemotron-nano-4b-think-nopb-0.02-186",
+        "http-nemotron-nano-4b-think-nopb-0.02-187"
+      ],
+      "trace_only_ids_filtered": [
+        "http-nemotron-nano-4b-think-nopb-0.02-188"
+      ]
+    }
+  ]
+}

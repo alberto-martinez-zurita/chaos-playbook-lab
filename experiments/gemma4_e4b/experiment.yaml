@@ -1,0 +1,48 @@
+# Google Gemma 4 E4B — local (LM Studio)
+# Small dense model — N=200, paired with Nemotron 4B for the cross-model
+# comparison at the 4B-class scale.
+
+name: gemma4_e4b
+description: >
+  Google Gemma 4 E4B on LM Studio (localhost:1234). HTTP protocol.
+  4B dense model without reasoning. Exploratory run to compare with
+  Nemotron 4B (4B dense with reasoning) at same parameter count.
+created: 2026-04-22
+generation: cross_model_4b
+
+model:
+  id: google/gemma-4-e4b
+  tag: gemma4-e4b
+  provider: local
+  runtime: LM Studio (localhost:1234)
+  sleep_between_rates_s: 10
+  notes: 4B dense model from Google. No thinking mode. Fast inference.
+
+per_request_params:
+  temperature: 0.2
+  seed: 2026
+
+trace: true
+
+protocols: [http]
+
+failure_rates: [0.0, 0.01, 0.02, 0.03, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30]
+experiments_per_rate: 200  # progressive: N=50 -> 100 -> 200 (post-bugfix 2026-04-30)
+
+seed: 2026
+simulate_delays: false
+
+# Auto-generated tags for paper roster (2026-05-02)
+tags:
+  family: gemma4
+  architecture: matformer
+  total_params: 7.5B
+  active_params: ~4B
+  reasoning: false
+  provider: google
+  region: usa
+  runtime: local
+roles:
+  - cross_model
+  - matformer_axis
+  - iso_4b_active

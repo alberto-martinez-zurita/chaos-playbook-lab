@@ -1,0 +1,64 @@
+# Gemma 4 26B (4B active) — local MoE cross-model anchor
+# The LLM tracks state (productId, orderId) autonomously across all turns.
+
+name: gemma4_26b
+description: >
+  Google Gemma 4 26B-A4B (MoE, 4B active) on LM Studio. HTTP protocol.
+  The LLM tracks state autonomously. With --trace-llm to capture full
+  request/response data per turn.
+created: 2026-04-13
+generation: cross_protocol_local_moe
+
+# ── Model ────────────────────────────────────────────────────────────────────
+model:
+  id: gemma-4-26b-a4b-it
+  tag: gemma426ba4b
+  provider: local
+  base_url: http://localhost:1234/v1
+  runtime: LM Studio (local)
+  quantization: Q4_K_M
+  sleep_between_rates_s: 60
+  size_gb: 17.99
+  notes: >
+    MoE architecture (4B active / 26B total). Loaded in LM Studio with
+    full GPU offload.
+
+lmstudio_load_settings:
+  gpu_offload: max
+  context_length: 8192
+  flash_attention: true
+
+# ── Per-request parameters ───────────────────────────────────────────────────
+per_request_params:
+  temperature: 0.2
+  seed: 2026
+
+trace: true                     # Full per-turn JSONL traces
+
+# ── Protocols ────────────────────────────────────────────────────────────────
+protocols: [http, mcp, a2a]
+
+# ── Rate plan ────────────────────────────────────────────────────────────────
+# Resume support via per-rate CSVs.
+failure_rates: [0.0, 0.01, 0.02, 0.03, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30]
+experiments_per_rate: 200  # progressive: N=50 -> 100 -> 200 (post-bugfix 2026-04-30); reached 200 on 2026-05-10
+
+# ── Expected analysis ────────────────────────────────────────────────────────
+# 1. SR per rate, per agent
+# 2. Per-step breakdown: does the model get productId right? orderId?
+
+# Auto-generated tags for paper roster (2026-05-02)
+tags:
+  family: gemma4
+  architecture: moe
+  total_params: 26B
+  active_params: 4B
+  reasoning: false
+  provider: google
+  region: usa
+  runtime: local
+roles:
+  - cross_model
+  - cross_protocol
+  - moe_axis
+  - iso_4b_active

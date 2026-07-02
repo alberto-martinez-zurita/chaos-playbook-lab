@@ -1,0 +1,36 @@
+{
+  "0.3": {
+    "failure_rate": 0.3,
+    "n_experiments": 600,
+    "mcp-glm45-nothink-nopb": {
+      "n_runs": 600,
+      "success_rate": {
+        "mean": 0.5666666666666667,
+        "std": 0.02023
+      },
+      "duration_s": {
+        "mean": 11.904660297632212,
+        "std": 6.862033
+      },
+      "inconsistencies": {
+        "mean": 0.20333333333333325,
+        "std": 0.402478
+      }
+    },
+    "mcp-glm45-nothink-pb": {
+      "n_runs": 600,
+      "success_rate": {
+        "mean": 0.9916666666666667,
+        "std": 0.003711
+      },
+      "duration_s": {
+        "mean": 15.416715660095207,
+        "std": 8.657906
+      },
+      "inconsistencies": {
+        "mean": 0.008333333333333331,
+        "std": 0.090906
+      }
+    }
+  }
+}

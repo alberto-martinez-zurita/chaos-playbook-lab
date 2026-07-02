@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chaos Playbook Engine - Dashboard</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        /* CSS Clean - Dobles llaves para evitar conflictos con Python .format() */
+        :root {{ --primary: #4ECDC4; --secondary: #FF6B6B; --dark: #2d3748; --light: #f7fafc; --bg-gray: #f0f2f5; }}
+
+        body {{ font-family: 'Segoe UI', system-ui, sans-serif; background: var(--bg-gray); padding: 40px; color: var(--dark); line-height: 1.5; }}
+
+        .container {{ max-width: 1400px; margin: 0 auto; background: white; border-radius: 16px; box-shadow: 0 20px 40px rgba(0,0,0,0.08); overflow: hidden; }}
+
+        .header {{ background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%); color: white; padding: 40px; text-align: center; border-bottom: 4px solid var(--primary); }}
+        .header h1 {{ margin: 0; font-size: 2.5rem; letter-spacing: -1px; }}
+        .header p {{ opacity: 0.8; font-weight: 300; margin-top: 10px; font-size: 1.1rem; }}
+
+        .content {{ padding: 40px; background-color:#3f4f75 }}
+        .section {{ margin-bottom: 60px; }}
+        h2 {{ display: flex; align-items: center; gap: 10px; border-bottom: 2px solid #edf2f7; padding-bottom: 15px; margin-bottom: 30px; color: #FFFFFF; font-size: 1.5rem; }}
+
+        /* KPI Cards */
+        .summary-cards {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 40px; }}
+        .summary-card {{ background: #fff; padding: 25px; border-radius: 12px; border: 1px solid #edf2f7; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.02); transition: transform 0.2s; }}
+        .summary-card:hover {{ transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,0,0,0.05); border-color: var(--primary); }}
+        .summary-card-label {{ font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; color: #718096; font-weight: 600; margin-bottom: 10px; }}
+        .summary-card-value {{ font-size: 2rem; font-weight: 800; color: #1a202c; }}
+
+        /* Charts Grid */
+        .charts-grid {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(600px, 1fr)); gap: 30px; margin-bottom: 40px; }}
+        .chart-container {{ background: #fff; border: 1px solid #edf2f7; border-radius: 12px; padding: 20px; height: 350px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); }}
+
+        /* Tables Layout */
+        .summary-tables {{ display: grid; grid-template-columns: repeat(auto-fit, minmax(600px, 1fr)); gap: 30px; align-items: start; }}
+
+        /* Tables Style - Compact */
+        .table-container {{ background: #fff; border-radius: 12px; border: 1px solid #edf2f7; padding: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.02); overflow-x: auto; }}
+        h3 {{ margin: 0 0 20px 0; color: #4a5568; font-size: 1rem; font-weight: 700; }}
+
+        table {{ width: 100%; border-collapse: collapse; font-size: 0.85rem; }}
+        th {{ background: #cee2ef; color: #4a5568; padding: 12px 6px; text-align: center; font-weight: 700; border-bottom: 2px solid #edf2f7; white-space: nowrap; }}
+        th:first-child {{ text-align: left; background: #cee2ef; }}
+        td {{ padding: 10px 6px; border-bottom: 1px solid #edf2f7; color: #4a5568; text-align: center; white-space: nowrap; }}
+        td:first-child {{ text-align: left; font-weight: 600; color: #2d3748; }}
+        tr:last-child td {{ border-bottom: none; }}
+        tr:hover td {{ background-color: #f8fafc; }}
+
+        /* Detailed Grid */
+        .detailed-grid {{ grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); }}
+        .detailed-card {{ border-top: 4px solid var(--primary); }}
+        .card-header {{ display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }}
+        .badge {{ background: #edf2f7; padding: 4px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 600; color: #718096; }}
+
+        .footer {{ text-align: center; padding: 40px; background: linear-gradient(135deg, #1a202c 0%, #2d3748 100%); color: white; font-size: 0.9em; border-top: 1px solid #edf2f7 }}
+
+        /* Utils */
+        .positive {{ color: #38a169; font-weight: 700; }}
+        .negative {{ color: #e53e3e; font-weight: 700; }}
+        .neutral {{ color: #a0aec0; }}
+        .improvement_class.positive {{ color: #38a169; }}
+        .improvement_class.negative {{ color: #e53e3e; }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔬 Chaos Playbook Engine</h1>
+            <p>Run: {run_name} | Generated: {generated_time}</p>
+        </div>
+
+        <div class="content">
+            <div class="section">
+                <h2>📊 Executive Summary</h2>
+                <div class="summary-cards">
+                    <div class="summary-card">
+                        <div class="summary-card-label">Max Effectiveness Gain</div>
+                        <div class="summary-card-value {improvement_class}">{improvement:+.0f}%</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-card-label">Avg Latency (Baseline)</div>
+                        <div class="summary-card-value">{avg_duration_baseline:.2f}s</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-card-label">Avg Latency (Playbook)</div>
+                        <div class="summary-card-value">{avg_duration_playbook:.2f}s</div>
+                    </div>
+                    <div class="summary-card">
+                        <div class="summary-card-label">Avg Consistency</div>
+                        <div class="summary-card-value">{avg_consistency_playbook:.0f}%</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>📈 Graphical Data</h2>
+                <div class="charts-grid">
+                    <div class="chart-container"><div id="effectiveness-chart" style="height:100%"></div></div>
+                    <div class="chart-container"><div id="latency-chart" style="height:100%"></div></div>
+                    <div class="chart-container"><div id="consistency-chart" style="height:100%"></div></div>
+                    <div class="chart-container"><div id="combined-chart" style="height:100%"></div></div>
+                </div>
+            </div>
+
+            <div class="section">
+                <h2>📋 Summary Data</h2>
+                <div id="summary-tables-container"></div>
+            </div>
+
+            <div class="section">
+                <h2>🔍 Detailed Data</h2>
+                <div id="detailed-tables-container"></div>
+            </div>
+        </div>
+        <div class="footer">Chaos Playbook Engine v5.0 - Validation Report</div>
+    </div>
+
+    <script>
+        // --- Raw metrics data injected by Python ---
+        var metricsData = {metrics_json};
+        var failureRates = {failure_rates_label_json};
+
+        // --- Table Rendering ---
+        function cssClass(val, threshold) {{
+            if (Math.abs(val) < threshold) return 'neutral';
+            return val > 0 ? 'positive' : 'negative';
+        }}
+
+        function renderSummaryTables(metrics) {{
+            var rates = Object.keys(metrics).sort(function(a,b) {{ return parseFloat(a) - parseFloat(b); }});
+
+            function makeHeader() {{
+                var h = '<tr><th>Agent</th>';
+                rates.forEach(function(r) {{ h += '<th>' + (parseFloat(r)*100).toFixed(0) + '%</th>'; }});
+                return h + '</tr>';
+            }}
+
+            // Table 1: Success Rate
+            var t1 = '<div class="table-container"><h3>Success Rate</h3><table>' + makeHeader();
+            [['baseline','Baseline'],['playbook','Playbook']].forEach(function(pair) {{
+                t1 += '<tr><td><strong>' + pair[1] + '</strong></td>';
+                rates.forEach(function(r) {{
+                    var val = metrics[r][pair[0]].success_rate.mean * 100;
+                    t1 += '<td>' + val.toFixed(0) + '%</td>';
+                }});
+                t1 += '</tr>';
+            }});
+            t1 += '<tr><td><strong>Delta</strong></td>';
+            rates.forEach(function(r) {{
+                var d = (metrics[r].playbook.success_rate.mean - metrics[r].baseline.success_rate.mean) * 100;
+                t1 += '<td class="' + cssClass(d, 0.05) + '">' + (d > 0 ? '+' : '') + d.toFixed(0) + '%</td>';
+            }});
+            t1 += '</tr></table></div>';
+
+            // Table 2: Latency
+            var t2 = '<div class="table-container"><h3>Latency Overhead</h3><table>' + makeHeader();
+            [['baseline','Baseline'],['playbook','Playbook']].forEach(function(pair) {{
+                t2 += '<tr><td><strong>' + pair[1] + '</strong></td>';
+                rates.forEach(function(r) {{
+                    var val = metrics[r][pair[0]].duration_s.mean;
+                    t2 += '<td>' + val.toFixed(2) + 's</td>';
+                }});
+                t2 += '</tr>';
+            }});
+            t2 += '<tr><td><strong>Overhead</strong></td>';
+            rates.forEach(function(r) {{
+                var b = metrics[r].baseline.duration_s.mean;
+                var p = metrics[r].playbook.duration_s.mean;
+                var ov = b > 0 ? ((p/b)-1)*100 : 0;
+                t2 += '<td class="' + (ov > 10 ? 'negative' : 'neutral') + '">+' + ov.toFixed(0) + '%</td>';
+            }});
+            t2 += '</tr></table></div>';
+
+            // Table 3: Consistency
+            var t3 = '<div class="table-container"><h3>Consistency Rate</h3><table>' + makeHeader();
+            [['baseline','Baseline'],['playbook','Playbook']].forEach(function(pair) {{
+                t3 += '<tr><td><strong>' + pair[1] + '</strong></td>';
+                rates.forEach(function(r) {{
+                    var inc = (metrics[r][pair[0]].inconsistencies || {{}}).mean || 0;
+                    t3 += '<td>' + ((1-inc)*100).toFixed(0) + '%</td>';
+                }});
+                t3 += '</tr>';
+            }});
+            t3 += '<tr><td><strong>Delta</strong></td>';
+            rates.forEach(function(r) {{
+                var bInc = (metrics[r].baseline.inconsistencies || {{}}).mean || 0;
+                var pInc = (metrics[r].playbook.inconsistencies || {{}}).mean || 0;
+                var delta = ((1-pInc) - (1-bInc)) * 100;
+                t3 += '<td class="' + cssClass(delta, 0.05) + '">' + (delta > 0 ? '+' : '') + delta.toFixed(0) + '%</td>';
+            }});
+            t3 += '</tr></table></div>';
+
+            document.getElementById('summary-tables-container').innerHTML =
+                '<div class="summary-tables">' + t1 + t2 + t3 + '</div>';
+        }}
+
+        function renderDetailedTables(metrics) {{
+            var rates = Object.keys(metrics).sort(function(a,b) {{ return parseFloat(a) - parseFloat(b); }});
+            var html = '<div class="summary-tables detailed-grid">';
+
+            rates.forEach(function(rateStr) {{
+                var d = metrics[rateStr];
+                var rate = d.failure_rate;
+                var nExp = d.n_experiments;
+                var base = d.baseline;
+                var play = d.playbook;
+
+                var bSucc = base.success_rate.mean * 100;
+                var pSucc = play.success_rate.mean * 100;
+                var succDelta = pSucc - bSucc;
+
+                var bDur = base.duration_s.mean;
+                var pDur = play.duration_s.mean;
+                var latOver = bDur > 0 ? ((pDur/bDur)-1)*100 : 0;
+
+                var bCons = (1 - ((base.inconsistencies || {{}}).mean || 0)) * 100;
+                var pCons = (1 - ((play.inconsistencies || {{}}).mean || 0)) * 100;
+                var consDelta = pCons - bCons;
+
+                var sCss = succDelta > 0 ? 'positive' : (succDelta < 0 ? 'negative' : 'neutral');
+                var lCss = latOver > 0 ? 'negative' : 'positive';
+                var cCss = consDelta > 0 ? 'positive' : 'neutral';
+
+                html += '<div class="table-container detailed-card">' +
+                    '<div class="card-header"><h3>Chaos Level: ' + (rate*100).toFixed(0) + '%</h3>' +
+                    '<span class="badge">' + nExp + ' runs</span></div>' +
+                    '<table>' +
+                    '<tr><th>Metric</th><th>Base</th><th>Playbook</th><th>Delta</th></tr>' +
+                    '<tr><td>Success</td><td>' + bSucc.toFixed(0) + '%</td><td>' + pSucc.toFixed(0) + '%</td>' +
+                    '<td class="' + sCss + '">' + (succDelta > 0 ? '+' : '') + succDelta.toFixed(0) + '%</td></tr>' +
+                    '<tr><td>Latency</td><td>' + bDur.toFixed(2) + 's</td><td>' + pDur.toFixed(2) + 's</td>' +
+                    '<td class="' + lCss + '">+' + latOver.toFixed(0) + '%</td></tr>' +
+                    '<tr><td>Consistency</td><td>' + bCons.toFixed(0) + '%</td><td>' + pCons.toFixed(0) + '%</td>' +
+                    '<td class="' + cCss + '">' + (consDelta > 0 ? '+' : '') + consDelta.toFixed(0) + '%</td></tr>' +
+                    '</table></div>';
+            }});
+
+            html += '</div>';
+            document.getElementById('detailed-tables-container').innerHTML = html;
+        }}
+
+        // Render tables from data
+        renderSummaryTables(metricsData);
+        renderDetailedTables(metricsData);
+
+        // --- Charts (Plotly) ---
+        var layoutBase = {{
+            font: {{family: 'Segoe UI, sans-serif'}},
+            plot_bgcolor: '#fff',
+            paper_bgcolor: '#fff',
+            margin: {{t: 60, r: 20, l: 60, b: 40}},
+            legend: {{orientation: 'h', x: 0.5, xanchor: 'center', y: 1.1, yanchor: 'top'}},
+            xaxis: {{
+                showline: true, linewidth: 2, linecolor: '#E2E8F0',
+                mirror: true, tickfont: {{size: 10}}
+            }},
+            yaxis: {{ showgrid: true, gridcolor: '#F7FAFC' }}
+        }};
+
+        var layoutSuccess = JSON.parse(JSON.stringify(layoutBase));
+        layoutSuccess.title = 'Success Rate';
+        layoutSuccess.barmode = 'group';
+
+        Plotly.newPlot('effectiveness-chart', [
+            {{ x: failureRates, y: {baseline_success_json}, name: 'Baseline', type: 'bar', marker: {{color: '#FF6B6B'}} }},
+            {{ x: failureRates, y: {playbook_success_json}, name: 'Playbook', type: 'bar', marker: {{color: '#4ECDC4'}} }}
+        ], layoutSuccess, {{responsive: true}});
+
+        var layoutLatency = JSON.parse(JSON.stringify(layoutBase));
+        layoutLatency.title = 'Latency Overhead';
+
+        Plotly.newPlot('latency-chart', [
+            {{ x: {failure_rates_json}, y: {latency_overhead_json}, name: 'Overhead %', mode: 'lines+markers', line: {{color: '#FF6B6B'}} }}
+        ], layoutLatency, {{responsive: true}});
+
+        var layoutConsistency = JSON.parse(JSON.stringify(layoutBase));
+        layoutConsistency.title = 'Data Consistency';
+        layoutConsistency.yaxis.range = [0, 105];
+
+        Plotly.newPlot('consistency-chart', [
+            {{ x: {failure_rates_json}, y: {baseline_consistency_json}, name: 'Baseline', mode: 'lines+markers', line: {{color: '#FF6B6B'}} }},
+            {{ x: {failure_rates_json}, y: {playbook_consistency_json}, name: 'Playbook', mode: 'lines+markers', line: {{color: '#4ECDC4'}} }}
+        ], layoutConsistency, {{responsive: true}});
+
+        var benefitTrace = {{
+            x: {failure_rates_json}, y: {effectiveness_improvement_json}, name: 'Benefit (Success Gain)',
+            type: 'scatter', mode: 'lines', fill: 'tozeroy', line: {{color: '#4ECDC4'}}
+        }};
+        var costTrace = {{
+            x: {failure_rates_json}, y: {latency_overhead_json}, name: 'Cost (Latency)',
+            yaxis: 'y2', type: 'scatter', mode: 'lines+markers', line: {{color: '#FF6B6B', dash: 'dot'}}
+        }};
+
+        var layoutCombined = JSON.parse(JSON.stringify(layoutBase));
+        layoutCombined.title = 'ROI Analysis';
+        layoutCombined.yaxis = {{title: 'Gain (pp)', titlefont: {{color: '#4ECDC4'}}, tickfont: {{color: '#4ECDC4'}}, showline: true, linewidth: 2, linecolor: '#E2E8F0'}};
+        layoutCombined.yaxis2 = {{title: 'Latency (%)', titlefont: {{color: '#FF6B6B'}}, tickfont: {{color: '#FF6B6B'}}, overlaying: 'y', side: 'right', showgrid: false}};
+
+        Plotly.newPlot('combined-chart', [benefitTrace, costTrace], layoutCombined, {{responsive: true}});
+    </script>
+</body>
+</html>

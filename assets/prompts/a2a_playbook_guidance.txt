@@ -1,0 +1,9 @@
+
+
+Recovery playbook — when a task delegation fails, apply these strategies:
+  - timeout → retry with linear backoff (max 3 retries, 2s delay)
+  - task_rejected → retry with exponential backoff (max 3, 1s base)
+  - partial_failure → retry with linear backoff (max 3, 2s delay)
+All errors are transient — always retry before giving up.
+Always retry the exact same task delegation that failed.
+Only abort after exhausting all retries for a given step.

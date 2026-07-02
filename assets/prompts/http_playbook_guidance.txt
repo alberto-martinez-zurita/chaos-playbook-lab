@@ -1,0 +1,9 @@
+
+
+Recovery playbook — when a step fails, apply these strategies:
+  - HTTP 408, 504 → retry with linear backoff (max 3 retries, 2s delay)
+  - HTTP 429 → wait 5s then retry (max 3 retries)
+  - HTTP 500, 502, 503 → retry with exponential backoff (max 3, 1s base)
+All errors are transient — always retry before giving up.
+Always retry the exact same endpoint that failed.
+Only abort after exhausting all retries for a given step.

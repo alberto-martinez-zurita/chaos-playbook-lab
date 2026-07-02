@@ -1,0 +1,59 @@
+{
+  "_metadata": {
+    "description": "Conservative Playbook - Minimal retries, fast failure. Optimizes for latency over recovery."
+  },
+  "find_product": {
+    "400": { "strategy": "fail_fast", "config": {} },
+    "401": { "strategy": "fail_fast", "config": {} },
+    "403": { "strategy": "fail_fast", "config": {} },
+    "404": { "strategy": "fail_fast", "config": {} },
+    "408": { "strategy": "retry_linear_backoff", "config": { "delay": 0.5, "max_retries": 1 } },
+    "429": { "strategy": "wait_and_retry", "config": { "wait_seconds": 2, "max_retries": 1 } },
+    "500": { "strategy": "retry_linear_backoff", "config": { "delay": 0.5, "max_retries": 1 } },
+    "502": { "strategy": "fail_fast", "config": {} },
+    "503": { "strategy": "retry_linear_backoff", "config": { "delay": 1.0, "max_retries": 2 } },
+    "504": { "strategy": "fail_fast", "config": {} }
+  },
+  "check_inventory": {
+    "400": { "strategy": "fail_fast", "config": {} },
+    "401": { "strategy": "fail_fast", "config": {} },
+    "403": { "strategy": "fail_fast", "config": {} },
+    "408": { "strategy": "retry_linear_backoff", "config": { "delay": 0.5, "max_retries": 1 } },
+    "429": { "strategy": "wait_and_retry", "config": { "wait_seconds": 2, "max_retries": 1 } },
+    "500": { "strategy": "retry_linear_backoff", "config": { "delay": 0.5, "max_retries": 1 } },
+    "502": { "strategy": "fail_fast", "config": {} },
+    "503": { "strategy": "retry_linear_backoff", "config": { "delay": 0.5, "max_retries": 1 } },
+    "504": { "strategy": "fail_fast", "config": {} }
+  },
+  "place_order": {
+    "400": { "strategy": "fail_fast", "config": {} },
+    "401": { "strategy": "fail_fast", "config": {} },
+    "403": { "strategy": "fail_fast", "config": {} },
+    "404": { "strategy": "fail_fast", "config": {} },
+    "422": { "strategy": "fail_fast", "config": {} },
+    "408": { "strategy": "fail_fast", "config": {} },
+    "429": { "strategy": "wait_and_retry", "config": { "wait_seconds": 2, "max_retries": 1 } },
+    "500": { "strategy": "fail_fast", "config": {} },
+    "502": { "strategy": "fail_fast", "config": {} },
+    "503": { "strategy": "retry_linear_backoff", "config": { "delay": 1.0, "max_retries": 1 } },
+    "504": { "strategy": "fail_fast", "config": {} }
+  },
+  "confirm_order": {
+    "400": { "strategy": "fail_fast", "config": {} },
+    "401": { "strategy": "fail_fast", "config": {} },
+    "403": { "strategy": "fail_fast", "config": {} },
+    "404": { "strategy": "retry_linear_backoff", "config": { "delay": 1.0, "max_retries": 1 } },
+    "405": { "strategy": "fail_fast", "config": {} },
+    "408": { "strategy": "retry_linear_backoff", "config": { "delay": 0.5, "max_retries": 1 } },
+    "429": { "strategy": "wait_and_retry", "config": { "wait_seconds": 2, "max_retries": 1 } },
+    "500": { "strategy": "retry_linear_backoff", "config": { "delay": 0.5, "max_retries": 1 } },
+    "502": { "strategy": "fail_fast", "config": {} },
+    "503": { "strategy": "retry_linear_backoff", "config": { "delay": 0.5, "max_retries": 2 } },
+    "504": { "strategy": "fail_fast", "config": {} }
+  },
+  "default": {
+    "strategy": "fail_fast",
+    "reasoning": "Unknown error. Fail immediately to minimize latency.",
+    "config": {}
+  }
+}

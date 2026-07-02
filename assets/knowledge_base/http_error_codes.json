@@ -1,0 +1,8 @@
+{
+  "408": "Request Timeout - The server timed out waiting for the request.",
+  "429": "Too Many Requests - The user has sent too many requests in a given amount of time.",
+  "500": "Internal Server Error - A generic error message, given when an unexpected condition was encountered.",
+  "502": "Bad Gateway - The server received an invalid response from the upstream.",
+  "503": "Service Unavailable - The server cannot handle the request.",
+  "504": "Gateway Timeout - The server did not receive a timely response."
+}

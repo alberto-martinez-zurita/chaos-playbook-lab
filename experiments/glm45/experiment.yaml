@@ -1,0 +1,71 @@
+# GLM 4.5 — cross-protocol cloud baseline
+# Canonical cross-protocol dataset: HTTP rerun post-bugfix here, MCP/A2A
+# reused from the original cross-protocol run (those protocols never had
+# the agent-loop bug, no rerun needed).
+# The LLM tracks state (productId, orderId) autonomously across all turns.
+
+name: glm45
+description: >
+  GLM 4.5 (Zhipu AI) cross-protocol baseline. Cloud model via z.ai API.
+  Both think and nothink modes, same rates, same seed across protocols.
+  Full per-turn JSONL traces (--trace-llm).
+created: 2026-04-13
+generation: cross_protocol_baseline
+
+# ── Model ────────────────────────────────────────────────────────────────────
+model:
+  id: glm-4.5
+  tag: glm45
+  provider: zhipuai
+  base_url: https://api.z.ai/api/coding/paas/v4
+  runtime: cloud (z.ai API)
+  has_thinking: true
+  sleep_between_rates_s: 5
+  notes: >
+    Commercial cloud — no control over quantization/GPU.
+
+# ── Per-request parameters ───────────────────────────────────────────────────
+per_request_params:
+  temperature: 0.2
+  seed: 2026
+  thinking: [true, false]       # Both reasoning modes
+
+trace: true                     # Full per-turn JSONL traces
+
+# ── Protocols ────────────────────────────────────────────────────────────────
+# HTTP run here; MCP/A2A reused from the original cross-protocol run.
+protocols: [http]
+
+# ── Rate plan ────────────────────────────────────────────────────────────────
+failure_rates: [0.0, 0.01, 0.02, 0.03, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30]
+experiments_per_rate: 600  # progressive: 50 -> 100 -> 200 -> 500 -> 600 (top-up 2026-05-14)
+
+# ── Totals ───────────────────────────────────────────────────────────────────
+# 3 protocols × 2 thinking modes × 2 agents (pb/nopb) × 10 rates × 600/rate = 72,000
+total_experiments: 72000
+
+# ── Infrastructure ───────────────────────────────────────────────────────────
+seed: 2026
+simulate_delays: false
+
+# ── Expected analysis ────────────────────────────────────────────────────────
+# 1. Cross-protocol dataset: HTTP (rerun) + MCP/A2A (preserved)
+# 2. think vs nothink contrast on the same backbone
+# 3. Per-step trace analysis: state tracking (productId, orderId) accuracy
+
+# Auto-generated tags for paper roster (2026-05-02)
+tags:
+  family: glm4
+  architecture: moe
+  total_params: 355B
+  active_params: 32B
+  reasoning: optional
+  provider: zhipu
+  region: china
+  runtime: cloud
+roles:
+  - cross_model
+  - cross_protocol
+  - think_vs_nothink
+  - moe_axis
+  - cloud_baseline

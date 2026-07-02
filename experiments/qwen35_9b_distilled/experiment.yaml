@@ -1,0 +1,54 @@
+# Qwen 3.5 9B distilled with DeepSeek V4 Flash
+# Pilot N=5: first probe of "does distillation transfer chaos robustness?"
+# Direct A/B vs qwen35_9b vanilla (which scored pb 100% across all rates at N=200).
+# If pilot is clean (no max_turns clustering, follows JSON contract),
+# scale to N=200 for paper inclusion or Paper 5 dataset.
+#
+# IMPORTANT: this is a community distillation (Pixelber/Flipradio on HF). The
+# training trace from DeepSeek V4 Flash → Qwen 9B base. Disclosure note for
+# any paper inclusion: model lineage + the DeepSeek-V4-Flash provenance.
+
+name: qwen35_9b_distilled
+description: >
+  Qwen 3.5 9B base distilled with DeepSeek V4 Flash reasoning traces
+  (Pixelber/Flipradio, HF). Pilot N=5 to establish A/B contrast vs the
+  existing vanilla Qwen 3.5 9B run.
+created: 2026-04-29
+generation: distillation_pilot
+
+model:
+  id: flipradio_qwen_3.5_9b_deepseek_v4_flash_distillation
+  tag: qwen35-9b-distilled
+  provider: local
+  runtime: LM Studio (localhost:1234)
+  sleep_between_rates_s: 5
+  notes: Qwen 3.5 9B base + DeepSeek V4 Flash reasoning distillation. Community model (Pixelber/Flipradio HF). Pilot first.
+
+per_request_params:
+  temperature: 0.2
+  seed: 2026
+
+trace: true
+
+protocols: [http]
+
+failure_rates: [0.0, 0.01, 0.02, 0.03, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30]
+experiments_per_rate: 200  # progressive: N=50 -> 100 -> 200 (post-bugfix 2026-04-30)
+
+seed: 2026
+simulate_delays: false
+
+# Auto-generated tags for paper roster (2026-05-02)
+tags:
+  family: qwen3.5
+  architecture: dense
+  total_params: 9B
+  active_params: 9B
+  reasoning: inherited
+  provider: flipradio_community
+  region: community
+  runtime: local
+  teacher: deepseek_v4_flash
+roles:
+  - cross_model
+  - distillation_pair

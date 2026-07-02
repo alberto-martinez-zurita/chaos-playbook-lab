@@ -1,0 +1,7 @@
+# production settings template
+# environment: prod
+# agent:
+#   model: vertexai/gemini-2.5-flash
+# session_service:
+#   type: PostgreSQLSessionService
+#   db_url: postgresql://user:password@host/db

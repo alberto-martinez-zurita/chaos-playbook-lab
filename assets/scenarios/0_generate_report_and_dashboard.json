@@ -1,0 +1,24 @@
+{
+  "title": "⚔️ Agent A/B Comparison: Strong vs Weak Playbook",
+  "steps": [
+    {
+      "name": "2. Generating Visualizations",
+      "script": "cli/generate_parametric_plots.py",
+      "args": ["--latest"]
+    },
+    {
+      "name": "3. Compiling Markdown Report",
+      "script": "cli/generate_parametric_report.py",
+      "args": ["--latest"]
+    },
+    {
+      "name": "4. Building Interactive Dashboard",
+      "script": "cli/generate_report.py",
+      "args": ["--latest"]
+    }
+  ],
+  "auto_open": [
+    "report.md",
+    "dashboard.html"
+  ]
+}

@@ -1,0 +1,9 @@
+
+
+Recovery playbook — when a tool call fails, apply these strategies:
+  - timeout → retry same tool call with linear backoff (max 3 retries, 2s delay)
+  - rate_limited → wait 5s then retry (max 3 retries)
+  - internal_error → retry with exponential backoff (max 3, 1s base)
+All errors are transient — always retry before giving up.
+Always retry the exact same tool call that failed.
+Only abort after exhausting all retries for a given step.

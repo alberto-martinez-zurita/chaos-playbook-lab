@@ -1,0 +1,36 @@
+{
+  "0.3": {
+    "failure_rate": 0.3,
+    "n_experiments": 200,
+    "http-nemotron-nano-4b-think-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.34,
+        "std": 0.033496
+      },
+      "duration_s": {
+        "mean": 9.516794886589052,
+        "std": 5.849058
+      },
+      "inconsistencies": {
+        "mean": 0.2850000000000001,
+        "std": 0.451414
+      }
+    },
+    "http-nemotron-nano-4b-think-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.865,
+        "std": 0.024164
+      },
+      "duration_s": {
+        "mean": 17.69093302845956,
+        "std": 9.905581
+      },
+      "inconsistencies": {
+        "mean": 0.11500000000000006,
+        "std": 0.319022
+      }
+    }
+  }
+}

@@ -1,0 +1,50 @@
+# Qwen 3.5 0.8B — local LM Studio, post-bugfix smoke test
+# This was previously discarded in _backup_2026-04-26/G8_qwen35_08b as
+# "below capability floor" pre-bugfix. Worth retest with bug fix in place.
+# If still below floor → confirms it's capacity, not bug.
+
+name: qwen35_0_8b
+description: >
+  Qwen 3.5 0.8B Dense (Alibaba) on LM Studio. HTTP.
+  Smoke N=5 only — likely below capability floor. Retest after bugfix
+  to determine if previous discard was bug-induced or real.
+created: 2026-05-02
+generation: post-bugfix
+
+model:
+  id: qwen3.5-0.8b
+  tag: qwen35-0_8b
+  provider: local
+  runtime: LM Studio (localhost:1234)
+  sleep_between_rates_s: 5
+  notes: 0.8B dense from Alibaba. Pre-bugfix data in _backup_2026-04-26/G8_qwen35_08b/.
+
+per_request_params:
+  temperature: 0.2
+  seed: 2026
+
+trace: true
+
+protocols: [http]
+
+failure_rates: [0.0, 0.01, 0.02, 0.03, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30]
+experiments_per_rate: 200  # smoke only — likely below floor
+
+seed: 2026
+simulate_delays: false
+
+tags:
+  family: qwen3.5
+  architecture: dense
+  total_params: 0.8B
+  active_params: 0.8B
+  reasoning: false
+  provider: alibaba
+  region: china
+  runtime: local
+  status: probably_below_floor
+roles:
+  - cross_model
+  - dense_axis
+  - hump_shape_left_anchor
+  - capacity_floor_test

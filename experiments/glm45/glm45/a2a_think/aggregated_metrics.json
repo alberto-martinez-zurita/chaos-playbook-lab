@@ -1,0 +1,36 @@
+{
+  "0.3": {
+    "failure_rate": 0.3,
+    "n_experiments": 600,
+    "a2a-glm45-think-nopb": {
+      "n_runs": 600,
+      "success_rate": {
+        "mean": 0.515,
+        "std": 0.020403
+      },
+      "duration_s": {
+        "mean": 36.60617321530975,
+        "std": 44.144173
+      },
+      "inconsistencies": {
+        "mean": 0.15166666666666662,
+        "std": 0.358697
+      }
+    },
+    "a2a-glm45-think-pb": {
+      "n_runs": 600,
+      "success_rate": {
+        "mean": 0.995,
+        "std": 0.00288
+      },
+      "duration_s": {
+        "mean": 58.30745060483609,
+        "std": 64.34885
+      },
+      "inconsistencies": {
+        "mean": 0.005,
+        "std": 0.070534
+      }
+    }
+  }
+}

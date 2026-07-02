@@ -1,0 +1,34 @@
+{
+  "title": "🎥 Chaos Agent - Video Demo Protocol",
+  "steps": [
+    {
+      "name": "1. Running Chaos Experiments (Fast Mode)",
+      "script": "cli/run_simulation.py",
+      "args": [
+        "--failure-rates", "0.0", "0.01", "0.03", "0.05", "0.10", "0.15", "0.20",
+        "--experiments-per-rate", "1000",
+        "--seed", "42",
+        "--verbose"
+      ]
+    },
+    {
+      "name": "2. Generating Visualizations",
+      "script": "cli/generate_parametric_plots.py",
+      "args": ["--latest"]
+    },
+    {
+      "name": "3. Compiling Markdown Report",
+      "script": "cli/generate_parametric_report.py",
+      "args": ["--latest"]
+    },
+    {
+      "name": "4. Building Interactive Dashboard",
+      "script": "cli/generate_report.py",
+      "args": ["--latest"]
+    }
+  ],
+  "auto_open": [
+    "report.md",
+    "dashboard.html"
+  ]
+}
