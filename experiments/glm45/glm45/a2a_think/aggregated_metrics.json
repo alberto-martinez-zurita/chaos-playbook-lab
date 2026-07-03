@@ -1,4 +1,310 @@
 {
+  "0.0": {
+    "failure_rate": 0.0,
+    "n_experiments": 600,
+    "a2a-glm45-think-nopb": {
+      "n_runs": 600,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 31.483422130346298,
+        "std": 7.402884
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    },
+    "a2a-glm45-think-pb": {
+      "n_runs": 600,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 34.5350280324618,
+        "std": 22.331883
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.01": {
+    "failure_rate": 0.01,
+    "n_experiments": 600,
+    "a2a-glm45-think-nopb": {
+      "n_runs": 600,
+      "success_rate": {
+        "mean": 0.9716666666666667,
+        "std": 0.006774
+      },
+      "duration_s": {
+        "mean": 33.1117295829455,
+        "std": 11.008962
+      },
+      "inconsistencies": {
+        "mean": 0.01,
+        "std": 0.099499
+      }
+    },
+    "a2a-glm45-think-pb": {
+      "n_runs": 600,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 32.722696778774264,
+        "std": 11.28328
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.02": {
+    "failure_rate": 0.02,
+    "n_experiments": 600,
+    "a2a-glm45-think-nopb": {
+      "n_runs": 600,
+      "success_rate": {
+        "mean": 0.9733333333333334,
+        "std": 0.006577
+      },
+      "duration_s": {
+        "mean": 33.822783781290056,
+        "std": 11.058214
+      },
+      "inconsistencies": {
+        "mean": 0.01,
+        "std": 0.099499
+      }
+    },
+    "a2a-glm45-think-pb": {
+      "n_runs": 600,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 33.63522673010826,
+        "std": 13.6982
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.03": {
+    "failure_rate": 0.03,
+    "n_experiments": 600,
+    "a2a-glm45-think-nopb": {
+      "n_runs": 600,
+      "success_rate": {
+        "mean": 0.9583333333333334,
+        "std": 0.008158
+      },
+      "duration_s": {
+        "mean": 32.34559006849925,
+        "std": 21.017803
+      },
+      "inconsistencies": {
+        "mean": 0.016666666666666666,
+        "std": 0.128019
+      }
+    },
+    "a2a-glm45-think-pb": {
+      "n_runs": 600,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 37.78207016468048,
+        "std": 40.478202
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.05": {
+    "failure_rate": 0.05,
+    "n_experiments": 600,
+    "a2a-glm45-think-nopb": {
+      "n_runs": 600,
+      "success_rate": {
+        "mean": 0.9066666666666666,
+        "std": 0.011876
+      },
+      "duration_s": {
+        "mean": 31.57206250190735,
+        "std": 13.388914
+      },
+      "inconsistencies": {
+        "mean": 0.028333333333333332,
+        "std": 0.165923
+      }
+    },
+    "a2a-glm45-think-pb": {
+      "n_runs": 600,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 35.98512987176577,
+        "std": 21.231309
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.1": {
+    "failure_rate": 0.1,
+    "n_experiments": 600,
+    "a2a-glm45-think-nopb": {
+      "n_runs": 600,
+      "success_rate": {
+        "mean": 0.825,
+        "std": 0.015512
+      },
+      "duration_s": {
+        "mean": 38.21161710460981,
+        "std": 47.233279
+      },
+      "inconsistencies": {
+        "mean": 0.06833333333333333,
+        "std": 0.252317
+      }
+    },
+    "a2a-glm45-think-pb": {
+      "n_runs": 600,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 40.688021434942875,
+        "std": 29.3808
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.15": {
+    "failure_rate": 0.15,
+    "n_experiments": 600,
+    "a2a-glm45-think-nopb": {
+      "n_runs": 600,
+      "success_rate": {
+        "mean": 0.7016666666666667,
+        "std": 0.018678
+      },
+      "duration_s": {
+        "mean": 36.820447166363394,
+        "std": 30.654006
+      },
+      "inconsistencies": {
+        "mean": 0.11166666666666666,
+        "std": 0.314956
+      }
+    },
+    "a2a-glm45-think-pb": {
+      "n_runs": 600,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 39.351030888160075,
+        "std": 22.894692
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.2": {
+    "failure_rate": 0.2,
+    "n_experiments": 600,
+    "a2a-glm45-think-nopb": {
+      "n_runs": 600,
+      "success_rate": {
+        "mean": 0.645,
+        "std": 0.019535
+      },
+      "duration_s": {
+        "mean": 41.885296320915224,
+        "std": 51.595621
+      },
+      "inconsistencies": {
+        "mean": 0.13166666666666665,
+        "std": 0.338128
+      }
+    },
+    "a2a-glm45-think-pb": {
+      "n_runs": 600,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 46.233590864340464,
+        "std": 50.488129
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.25": {
+    "failure_rate": 0.25,
+    "n_experiments": 600,
+    "a2a-glm45-think-nopb": {
+      "n_runs": 600,
+      "success_rate": {
+        "mean": 0.5666666666666667,
+        "std": 0.02023
+      },
+      "duration_s": {
+        "mean": 33.79915100137392,
+        "std": 41.123573
+      },
+      "inconsistencies": {
+        "mean": 0.155,
+        "std": 0.361905
+      }
+    },
+    "a2a-glm45-think-pb": {
+      "n_runs": 600,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 46.121495533784234,
+        "std": 35.679063
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
   "0.3": {
     "failure_rate": 0.3,
     "n_experiments": 600,
@@ -9,11 +315,11 @@
         "std": 0.020403
       },
       "duration_s": {
-        "mean": 36.60617321530975,
+        "mean": 36.606173215309774,
         "std": 44.144173
       },
       "inconsistencies": {
-        "mean": 0.15166666666666662,
+        "mean": 0.15166666666666667,
         "std": 0.358697
       }
     },
@@ -24,7 +330,7 @@
         "std": 0.00288
       },
       "duration_s": {
-        "mean": 58.30745060483609,
+        "mean": 58.30745060483614,
         "std": 64.34885
       },
       "inconsistencies": {

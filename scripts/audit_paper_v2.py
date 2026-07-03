@@ -1,4 +1,7 @@
 """Academic audit v2 — statistical rigor + figure-text-data alignment."""
+import sys
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 import json
 from pathlib import Path
 from statistics import mean, median

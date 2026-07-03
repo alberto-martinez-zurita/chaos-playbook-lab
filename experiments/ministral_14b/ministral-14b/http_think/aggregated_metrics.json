@@ -1,4 +1,310 @@
 {
+  "0.0": {
+    "failure_rate": 0.0,
+    "n_experiments": 200,
+    "http-ministral-14b-think-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 16.043803111314773,
+        "std": 2.287268
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    },
+    "http-ministral-14b-think-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 15.552515000104904,
+        "std": 1.675273
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.01": {
+    "failure_rate": 0.01,
+    "n_experiments": 200,
+    "http-ministral-14b-think-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.97,
+        "std": 0.012062
+      },
+      "duration_s": {
+        "mean": 15.663146679401398,
+        "std": 2.156771
+      },
+      "inconsistencies": {
+        "mean": 0.01,
+        "std": 0.099499
+      }
+    },
+    "http-ministral-14b-think-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 15.82607987165451,
+        "std": 1.740745
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.02": {
+    "failure_rate": 0.02,
+    "n_experiments": 200,
+    "http-ministral-14b-think-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.91,
+        "std": 0.020236
+      },
+      "duration_s": {
+        "mean": 15.833766260147094,
+        "std": 2.820272
+      },
+      "inconsistencies": {
+        "mean": 0.045,
+        "std": 0.207304
+      }
+    },
+    "http-ministral-14b-think-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 17.51249602675438,
+        "std": 2.430031
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.03": {
+    "failure_rate": 0.03,
+    "n_experiments": 200,
+    "http-ministral-14b-think-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.885,
+        "std": 0.022558
+      },
+      "duration_s": {
+        "mean": 17.854505573511123,
+        "std": 3.182378
+      },
+      "inconsistencies": {
+        "mean": 0.06,
+        "std": 0.237487
+      }
+    },
+    "http-ministral-14b-think-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 18.484395061731338,
+        "std": 1.573851
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.05": {
+    "failure_rate": 0.05,
+    "n_experiments": 200,
+    "http-ministral-14b-think-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.815,
+        "std": 0.027457
+      },
+      "duration_s": {
+        "mean": 17.025905071496965,
+        "std": 3.530064
+      },
+      "inconsistencies": {
+        "mean": 0.09,
+        "std": 0.286182
+      }
+    },
+    "http-ministral-14b-think-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 19.04369665980339,
+        "std": 2.271383
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.1": {
+    "failure_rate": 0.1,
+    "n_experiments": 200,
+    "http-ministral-14b-think-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.66,
+        "std": 0.033496
+      },
+      "duration_s": {
+        "mean": 15.446982889175414,
+        "std": 4.369651
+      },
+      "inconsistencies": {
+        "mean": 0.165,
+        "std": 0.371181
+      }
+    },
+    "http-ministral-14b-think-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 19.59959820508957,
+        "std": 3.227145
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.15": {
+    "failure_rate": 0.15,
+    "n_experiments": 200,
+    "http-ministral-14b-think-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.51,
+        "std": 0.035348
+      },
+      "duration_s": {
+        "mean": 14.203666752576828,
+        "std": 5.158176
+      },
+      "inconsistencies": {
+        "mean": 0.21,
+        "std": 0.407308
+      }
+    },
+    "http-ministral-14b-think-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.995,
+        "std": 0.004987
+      },
+      "duration_s": {
+        "mean": 21.35736752152443,
+        "std": 5.263195
+      },
+      "inconsistencies": {
+        "mean": 0.005,
+        "std": 0.070534
+      }
+    }
+  },
+  "0.2": {
+    "failure_rate": 0.2,
+    "n_experiments": 200,
+    "http-ministral-14b-think-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.41,
+        "std": 0.034778
+      },
+      "duration_s": {
+        "mean": 13.2839946269989,
+        "std": 5.596053
+      },
+      "inconsistencies": {
+        "mean": 0.235,
+        "std": 0.423999
+      }
+    },
+    "http-ministral-14b-think-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.98,
+        "std": 0.009899
+      },
+      "duration_s": {
+        "mean": 23.203717811107637,
+        "std": 9.067484
+      },
+      "inconsistencies": {
+        "mean": 0.015,
+        "std": 0.121552
+      }
+    }
+  },
+  "0.25": {
+    "failure_rate": 0.25,
+    "n_experiments": 200,
+    "http-ministral-14b-think-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.34,
+        "std": 0.033496
+      },
+      "duration_s": {
+        "mean": 12.681307228803634,
+        "std": 5.61893
+      },
+      "inconsistencies": {
+        "mean": 0.245,
+        "std": 0.430087
+      }
+    },
+    "http-ministral-14b-think-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.96,
+        "std": 0.013856
+      },
+      "duration_s": {
+        "mean": 24.831367497444152,
+        "std": 11.052899
+      },
+      "inconsistencies": {
+        "mean": 0.04,
+        "std": 0.195959
+      }
+    }
+  },
   "0.3": {
     "failure_rate": 0.3,
     "n_experiments": 200,
@@ -9,11 +315,11 @@
         "std": 0.031573
       },
       "duration_s": {
-        "mean": 11.502741525173192,
+        "mean": 11.502741525173187,
         "std": 5.429328
       },
       "inconsistencies": {
-        "mean": 0.24999999999999986,
+        "mean": 0.25,
         "std": 0.433013
       }
     },
@@ -24,11 +330,11 @@
         "std": 0.016121
       },
       "duration_s": {
-        "mean": 26.426131926774982,
+        "mean": 26.42613192677498,
         "std": 12.128483
       },
       "inconsistencies": {
-        "mean": 0.04499999999999999,
+        "mean": 0.045,
         "std": 0.207304
       }
     }

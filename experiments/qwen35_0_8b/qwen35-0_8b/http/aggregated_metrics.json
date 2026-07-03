@@ -1,4 +1,310 @@
 {
+  "0.0": {
+    "failure_rate": 0.0,
+    "n_experiments": 200,
+    "http-qwen35-0_8b-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 0.3583822524547577,
+        "std": 0.97544
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    },
+    "http-qwen35-0_8b-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 0.1449457311630249,
+        "std": 0.114707
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.01": {
+    "failure_rate": 0.01,
+    "n_experiments": 200,
+    "http-qwen35-0_8b-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 0.27082127809524537,
+        "std": 0.684489
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    },
+    "http-qwen35-0_8b-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 0.1433204221725464,
+        "std": 0.112813
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.02": {
+    "failure_rate": 0.02,
+    "n_experiments": 200,
+    "http-qwen35-0_8b-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 0.21849496364593507,
+        "std": 0.516477
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    },
+    "http-qwen35-0_8b-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 0.14272798776626586,
+        "std": 0.11197
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.03": {
+    "failure_rate": 0.03,
+    "n_experiments": 200,
+    "http-qwen35-0_8b-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 0.23875463843345643,
+        "std": 0.562512
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    },
+    "http-qwen35-0_8b-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 0.1491130554676056,
+        "std": 0.117351
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.05": {
+    "failure_rate": 0.05,
+    "n_experiments": 200,
+    "http-qwen35-0_8b-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 0.25981159090995787,
+        "std": 0.599164
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    },
+    "http-qwen35-0_8b-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 0.14641988635063172,
+        "std": 0.112366
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.1": {
+    "failure_rate": 0.1,
+    "n_experiments": 200,
+    "http-qwen35-0_8b-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 0.2064612352848053,
+        "std": 0.473145
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    },
+    "http-qwen35-0_8b-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 0.14159004211425782,
+        "std": 0.101771
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.15": {
+    "failure_rate": 0.15,
+    "n_experiments": 200,
+    "http-qwen35-0_8b-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 0.203465713262558,
+        "std": 0.432131
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    },
+    "http-qwen35-0_8b-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 0.13919468760490417,
+        "std": 0.098955
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.2": {
+    "failure_rate": 0.2,
+    "n_experiments": 200,
+    "http-qwen35-0_8b-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 0.1964213728904724,
+        "std": 0.419128
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    },
+    "http-qwen35-0_8b-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 0.13941662907600402,
+        "std": 0.101064
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.25": {
+    "failure_rate": 0.25,
+    "n_experiments": 200,
+    "http-qwen35-0_8b-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 0.1886746859550476,
+        "std": 0.38945
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    },
+    "http-qwen35-0_8b-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 0.14559129476547242,
+        "std": 0.113613
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
   "0.3": {
     "failure_rate": 0.3,
     "n_experiments": 200,
@@ -9,7 +315,7 @@
         "std": 0.0
       },
       "duration_s": {
-        "mean": 0.1961794674396514,
+        "mean": 0.19617946743965148,
         "std": 0.401928
       },
       "inconsistencies": {
@@ -24,7 +330,7 @@
         "std": 0.0
       },
       "duration_s": {
-        "mean": 0.14149362444877603,
+        "mean": 0.14149362444877625,
         "std": 0.102403
       },
       "inconsistencies": {

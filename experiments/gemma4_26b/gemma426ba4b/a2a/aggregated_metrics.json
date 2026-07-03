@@ -1,4 +1,310 @@
 {
+  "0.0": {
+    "failure_rate": 0.0,
+    "n_experiments": 200,
+    "a2a-gemma426ba4b-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 16.393206589221954,
+        "std": 2.938942
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    },
+    "a2a-gemma426ba4b-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 16.686309779882432,
+        "std": 3.124168
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.01": {
+    "failure_rate": 0.01,
+    "n_experiments": 200,
+    "a2a-gemma426ba4b-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.995,
+        "std": 0.004987
+      },
+      "duration_s": {
+        "mean": 17.323184076547623,
+        "std": 5.933546
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    },
+    "a2a-gemma426ba4b-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 17.12426887154579,
+        "std": 3.997624
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.02": {
+    "failure_rate": 0.02,
+    "n_experiments": 200,
+    "a2a-gemma426ba4b-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.99,
+        "std": 0.007036
+      },
+      "duration_s": {
+        "mean": 17.94587629914284,
+        "std": 10.041979
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    },
+    "a2a-gemma426ba4b-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 17.407273906469346,
+        "std": 6.350326
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.03": {
+    "failure_rate": 0.03,
+    "n_experiments": 200,
+    "a2a-gemma426ba4b-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.98,
+        "std": 0.009899
+      },
+      "duration_s": {
+        "mean": 18.466232224702836,
+        "std": 12.358983
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    },
+    "a2a-gemma426ba4b-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 18.060897986888886,
+        "std": 5.1789
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.05": {
+    "failure_rate": 0.05,
+    "n_experiments": 200,
+    "a2a-gemma426ba4b-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.97,
+        "std": 0.012062
+      },
+      "duration_s": {
+        "mean": 18.588818838596342,
+        "std": 13.45961
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    },
+    "a2a-gemma426ba4b-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 17.493833689689637,
+        "std": 5.685783
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.1": {
+    "failure_rate": 0.1,
+    "n_experiments": 200,
+    "a2a-gemma426ba4b-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.935,
+        "std": 0.017432
+      },
+      "duration_s": {
+        "mean": 18.604205499887467,
+        "std": 13.768934
+      },
+      "inconsistencies": {
+        "mean": 0.005,
+        "std": 0.070534
+      }
+    },
+    "a2a-gemma426ba4b-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 19.287455645799636,
+        "std": 7.731221
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.15": {
+    "failure_rate": 0.15,
+    "n_experiments": 200,
+    "a2a-gemma426ba4b-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.935,
+        "std": 0.017432
+      },
+      "duration_s": {
+        "mean": 21.827112090587615,
+        "std": 19.888743
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    },
+    "a2a-gemma426ba4b-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 20.861638083457947,
+        "std": 9.732551
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.2": {
+    "failure_rate": 0.2,
+    "n_experiments": 200,
+    "a2a-gemma426ba4b-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.92,
+        "std": 0.019183
+      },
+      "duration_s": {
+        "mean": 24.065941030979157,
+        "std": 22.700424
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    },
+    "a2a-gemma426ba4b-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 22.173582565784454,
+        "std": 9.962089
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.25": {
+    "failure_rate": 0.25,
+    "n_experiments": 200,
+    "a2a-gemma426ba4b-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.885,
+        "std": 0.022558
+      },
+      "duration_s": {
+        "mean": 24.00845692038536,
+        "std": 22.871256
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    },
+    "a2a-gemma426ba4b-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 23.469066865444184,
+        "std": 10.628834
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
   "0.3": {
     "failure_rate": 0.3,
     "n_experiments": 200,
@@ -9,7 +315,7 @@
         "std": 0.024164
       },
       "duration_s": {
-        "mean": 26.637165393829342,
+        "mean": 26.637165393829346,
         "std": 26.024108
       },
       "inconsistencies": {
@@ -24,7 +330,7 @@
         "std": 0.0
       },
       "duration_s": {
-        "mean": 24.653720227479912,
+        "mean": 24.653720227479933,
         "std": 11.300052
       },
       "inconsistencies": {

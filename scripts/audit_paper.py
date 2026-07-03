@@ -1,4 +1,7 @@
 """Comprehensive audit: verify every specific numeric claim in the paper."""
+import sys
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
 import json, csv
 from pathlib import Path
 from statistics import mean, median

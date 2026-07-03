@@ -1,4 +1,310 @@
 {
+  "0.0": {
+    "failure_rate": 0.0,
+    "n_experiments": 200,
+    "http-gemma4-e2b-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.46,
+        "std": 0.035242
+      },
+      "duration_s": {
+        "mean": 44.458631623983386,
+        "std": 21.172246
+      },
+      "inconsistencies": {
+        "mean": 0.54,
+        "std": 0.498397
+      }
+    },
+    "http-gemma4-e2b-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.865,
+        "std": 0.024164
+      },
+      "duration_s": {
+        "mean": 24.45147325158119,
+        "std": 15.032679
+      },
+      "inconsistencies": {
+        "mean": 0.135,
+        "std": 0.341724
+      }
+    }
+  },
+  "0.01": {
+    "failure_rate": 0.01,
+    "n_experiments": 200,
+    "http-gemma4-e2b-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.48,
+        "std": 0.035327
+      },
+      "duration_s": {
+        "mean": 42.270043498277666,
+        "std": 21.015252
+      },
+      "inconsistencies": {
+        "mean": 0.505,
+        "std": 0.499975
+      }
+    },
+    "http-gemma4-e2b-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.86,
+        "std": 0.024536
+      },
+      "duration_s": {
+        "mean": 24.579667962789536,
+        "std": 15.167585
+      },
+      "inconsistencies": {
+        "mean": 0.14,
+        "std": 0.346987
+      }
+    }
+  },
+  "0.02": {
+    "failure_rate": 0.02,
+    "n_experiments": 200,
+    "http-gemma4-e2b-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.425,
+        "std": 0.034955
+      },
+      "duration_s": {
+        "mean": 41.03469531416893,
+        "std": 21.738278
+      },
+      "inconsistencies": {
+        "mean": 0.545,
+        "std": 0.497971
+      }
+    },
+    "http-gemma4-e2b-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.865,
+        "std": 0.024164
+      },
+      "duration_s": {
+        "mean": 25.515088341236115,
+        "std": 15.408805
+      },
+      "inconsistencies": {
+        "mean": 0.135,
+        "std": 0.341724
+      }
+    }
+  },
+  "0.03": {
+    "failure_rate": 0.03,
+    "n_experiments": 200,
+    "http-gemma4-e2b-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.42,
+        "std": 0.0349
+      },
+      "duration_s": {
+        "mean": 40.597773613929746,
+        "std": 21.665226
+      },
+      "inconsistencies": {
+        "mean": 0.54,
+        "std": 0.498397
+      }
+    },
+    "http-gemma4-e2b-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.86,
+        "std": 0.024536
+      },
+      "duration_s": {
+        "mean": 26.14283480644226,
+        "std": 16.090622
+      },
+      "inconsistencies": {
+        "mean": 0.14,
+        "std": 0.346987
+      }
+    }
+  },
+  "0.05": {
+    "failure_rate": 0.05,
+    "n_experiments": 200,
+    "http-gemma4-e2b-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.4,
+        "std": 0.034641
+      },
+      "duration_s": {
+        "mean": 38.12782510042191,
+        "std": 21.049327
+      },
+      "inconsistencies": {
+        "mean": 0.53,
+        "std": 0.499099
+      }
+    },
+    "http-gemma4-e2b-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.84,
+        "std": 0.025923
+      },
+      "duration_s": {
+        "mean": 26.192259505987167,
+        "std": 15.667031
+      },
+      "inconsistencies": {
+        "mean": 0.155,
+        "std": 0.361905
+      }
+    }
+  },
+  "0.1": {
+    "failure_rate": 0.1,
+    "n_experiments": 200,
+    "http-gemma4-e2b-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.315,
+        "std": 0.032846
+      },
+      "duration_s": {
+        "mean": 31.639791632890702,
+        "std": 19.29508
+      },
+      "inconsistencies": {
+        "mean": 0.545,
+        "std": 0.497971
+      }
+    },
+    "http-gemma4-e2b-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.82,
+        "std": 0.027166
+      },
+      "duration_s": {
+        "mean": 28.018093190193177,
+        "std": 16.481834
+      },
+      "inconsistencies": {
+        "mean": 0.17,
+        "std": 0.375633
+      }
+    }
+  },
+  "0.15": {
+    "failure_rate": 0.15,
+    "n_experiments": 200,
+    "http-gemma4-e2b-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.245,
+        "std": 0.030412
+      },
+      "duration_s": {
+        "mean": 27.62758411645889,
+        "std": 18.209572
+      },
+      "inconsistencies": {
+        "mean": 0.525,
+        "std": 0.499375
+      }
+    },
+    "http-gemma4-e2b-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.81,
+        "std": 0.02774
+      },
+      "duration_s": {
+        "mean": 30.087420378923415,
+        "std": 17.099922
+      },
+      "inconsistencies": {
+        "mean": 0.18,
+        "std": 0.384187
+      }
+    }
+  },
+  "0.2": {
+    "failure_rate": 0.2,
+    "n_experiments": 200,
+    "http-gemma4-e2b-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.19,
+        "std": 0.02774
+      },
+      "duration_s": {
+        "mean": 25.39255550980568,
+        "std": 17.94374
+      },
+      "inconsistencies": {
+        "mean": 0.51,
+        "std": 0.4999
+      }
+    },
+    "http-gemma4-e2b-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.715,
+        "std": 0.03192
+      },
+      "duration_s": {
+        "mean": 35.21784331798553,
+        "std": 19.889369
+      },
+      "inconsistencies": {
+        "mean": 0.26,
+        "std": 0.438634
+      }
+    }
+  },
+  "0.25": {
+    "failure_rate": 0.25,
+    "n_experiments": 200,
+    "http-gemma4-e2b-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.185,
+        "std": 0.027457
+      },
+      "duration_s": {
+        "mean": 21.68801197528839,
+        "std": 14.502497
+      },
+      "inconsistencies": {
+        "mean": 0.44,
+        "std": 0.496387
+      }
+    },
+    "http-gemma4-e2b-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.62,
+        "std": 0.034322
+      },
+      "duration_s": {
+        "mean": 40.63101588129997,
+        "std": 21.740714
+      },
+      "inconsistencies": {
+        "mean": 0.355,
+        "std": 0.478513
+      }
+    }
+  },
   "0.3": {
     "failure_rate": 0.3,
     "n_experiments": 200,
@@ -9,11 +315,11 @@
         "std": 0.024897
       },
       "duration_s": {
-        "mean": 19.999833985567104,
+        "mean": 19.999833985567093,
         "std": 13.842161
       },
       "inconsistencies": {
-        "mean": 0.4200000000000001,
+        "mean": 0.42,
         "std": 0.493559
       }
     },
@@ -24,11 +330,11 @@
         "std": 0.0351
       },
       "duration_s": {
-        "mean": 40.43748027682305,
+        "mean": 40.437480276823045,
         "std": 20.458447
       },
       "inconsistencies": {
-        "mean": 0.4049999999999998,
+        "mean": 0.405,
         "std": 0.490892
       }
     }

@@ -1,4 +1,310 @@
 {
+  "0.0": {
+    "failure_rate": 0.0,
+    "n_experiments": 200,
+    "http-nemotron-nano-4b-think-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.85,
+        "std": 0.025249
+      },
+      "duration_s": {
+        "mean": 14.724615598917007,
+        "std": 10.26005
+      },
+      "inconsistencies": {
+        "mean": 0.15,
+        "std": 0.357071
+      }
+    },
+    "http-nemotron-nano-4b-think-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.93,
+        "std": 0.018042
+      },
+      "duration_s": {
+        "mean": 11.588402872085572,
+        "std": 6.482703
+      },
+      "inconsistencies": {
+        "mean": 0.07,
+        "std": 0.255147
+      }
+    }
+  },
+  "0.01": {
+    "failure_rate": 0.01,
+    "n_experiments": 200,
+    "http-nemotron-nano-4b-think-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.84,
+        "std": 0.025923
+      },
+      "duration_s": {
+        "mean": 13.960177283287049,
+        "std": 9.576244
+      },
+      "inconsistencies": {
+        "mean": 0.145,
+        "std": 0.352101
+      }
+    },
+    "http-nemotron-nano-4b-think-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.93,
+        "std": 0.018042
+      },
+      "duration_s": {
+        "mean": 11.642418612241745,
+        "std": 6.576683
+      },
+      "inconsistencies": {
+        "mean": 0.07,
+        "std": 0.255147
+      }
+    }
+  },
+  "0.02": {
+    "failure_rate": 0.02,
+    "n_experiments": 200,
+    "http-nemotron-nano-4b-think-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.8,
+        "std": 0.028284
+      },
+      "duration_s": {
+        "mean": 13.82891522884369,
+        "std": 9.806249
+      },
+      "inconsistencies": {
+        "mean": 0.165,
+        "std": 0.371181
+      }
+    },
+    "http-nemotron-nano-4b-think-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.93,
+        "std": 0.018042
+      },
+      "duration_s": {
+        "mean": 11.99556138753891,
+        "std": 6.68357
+      },
+      "inconsistencies": {
+        "mean": 0.07,
+        "std": 0.255147
+      }
+    }
+  },
+  "0.03": {
+    "failure_rate": 0.03,
+    "n_experiments": 200,
+    "http-nemotron-nano-4b-think-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.775,
+        "std": 0.029528
+      },
+      "duration_s": {
+        "mean": 13.72283193230629,
+        "std": 9.616506
+      },
+      "inconsistencies": {
+        "mean": 0.18,
+        "std": 0.384187
+      }
+    },
+    "http-nemotron-nano-4b-think-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.93,
+        "std": 0.018042
+      },
+      "duration_s": {
+        "mean": 12.046361626386643,
+        "std": 6.715124
+      },
+      "inconsistencies": {
+        "mean": 0.07,
+        "std": 0.255147
+      }
+    }
+  },
+  "0.05": {
+    "failure_rate": 0.05,
+    "n_experiments": 200,
+    "http-nemotron-nano-4b-think-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.735,
+        "std": 0.031207
+      },
+      "duration_s": {
+        "mean": 13.283781646490096,
+        "std": 9.170675
+      },
+      "inconsistencies": {
+        "mean": 0.195,
+        "std": 0.396201
+      }
+    },
+    "http-nemotron-nano-4b-think-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.93,
+        "std": 0.018042
+      },
+      "duration_s": {
+        "mean": 12.153148436546326,
+        "std": 6.716786
+      },
+      "inconsistencies": {
+        "mean": 0.07,
+        "std": 0.255147
+      }
+    }
+  },
+  "0.1": {
+    "failure_rate": 0.1,
+    "n_experiments": 200,
+    "http-nemotron-nano-4b-think-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.63,
+        "std": 0.034139
+      },
+      "duration_s": {
+        "mean": 12.381809986829758,
+        "std": 8.707132
+      },
+      "inconsistencies": {
+        "mean": 0.225,
+        "std": 0.417582
+      }
+    },
+    "http-nemotron-nano-4b-think-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.94,
+        "std": 0.016793
+      },
+      "duration_s": {
+        "mean": 12.614282015562058,
+        "std": 6.361199
+      },
+      "inconsistencies": {
+        "mean": 0.06,
+        "std": 0.237487
+      }
+    }
+  },
+  "0.15": {
+    "failure_rate": 0.15,
+    "n_experiments": 200,
+    "http-nemotron-nano-4b-think-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.53,
+        "std": 0.035292
+      },
+      "duration_s": {
+        "mean": 11.593276805877686,
+        "std": 7.716215
+      },
+      "inconsistencies": {
+        "mean": 0.255,
+        "std": 0.435861
+      }
+    },
+    "http-nemotron-nano-4b-think-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.935,
+        "std": 0.017432
+      },
+      "duration_s": {
+        "mean": 13.737234785556794,
+        "std": 6.866476
+      },
+      "inconsistencies": {
+        "mean": 0.065,
+        "std": 0.246526
+      }
+    }
+  },
+  "0.2": {
+    "failure_rate": 0.2,
+    "n_experiments": 200,
+    "http-nemotron-nano-4b-think-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.435,
+        "std": 0.035055
+      },
+      "duration_s": {
+        "mean": 10.316565719842911,
+        "std": 6.626147
+      },
+      "inconsistencies": {
+        "mean": 0.285,
+        "std": 0.451414
+      }
+    },
+    "http-nemotron-nano-4b-think-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.905,
+        "std": 0.020733
+      },
+      "duration_s": {
+        "mean": 15.246631746292115,
+        "std": 8.434032
+      },
+      "inconsistencies": {
+        "mean": 0.085,
+        "std": 0.278882
+      }
+    }
+  },
+  "0.25": {
+    "failure_rate": 0.25,
+    "n_experiments": 200,
+    "http-nemotron-nano-4b-think-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.385,
+        "std": 0.034407
+      },
+      "duration_s": {
+        "mean": 10.274319432973861,
+        "std": 7.705056
+      },
+      "inconsistencies": {
+        "mean": 0.295,
+        "std": 0.456043
+      }
+    },
+    "http-nemotron-nano-4b-think-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.885,
+        "std": 0.022558
+      },
+      "duration_s": {
+        "mean": 16.325129848718642,
+        "std": 9.179131
+      },
+      "inconsistencies": {
+        "mean": 0.105,
+        "std": 0.306553
+      }
+    }
+  },
   "0.3": {
     "failure_rate": 0.3,
     "n_experiments": 200,
@@ -9,11 +315,11 @@
         "std": 0.033496
       },
       "duration_s": {
-        "mean": 9.516794886589052,
+        "mean": 9.51679488658905,
         "std": 5.849058
       },
       "inconsistencies": {
-        "mean": 0.2850000000000001,
+        "mean": 0.285,
         "std": 0.451414
       }
     },
@@ -24,11 +330,11 @@
         "std": 0.024164
       },
       "duration_s": {
-        "mean": 17.69093302845956,
+        "mean": 17.69093302845955,
         "std": 9.905581
       },
       "inconsistencies": {
-        "mean": 0.11500000000000006,
+        "mean": 0.115,
         "std": 0.319022
       }
     }

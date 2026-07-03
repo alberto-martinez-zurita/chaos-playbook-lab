@@ -1,4 +1,242 @@
 {
+  "0.0": {
+    "failure_rate": 0.0,
+    "n_experiments": 50,
+    "http-gpt-oss-20b-think-nopb": {
+      "n_runs": 50,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 13.453177437782287,
+        "std": 2.852357
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    },
+    "http-gpt-oss-20b-think-pb": {
+      "n_runs": 50,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 14.04086579322815,
+        "std": 0.937426
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.01": {
+    "failure_rate": 0.01,
+    "n_experiments": 50,
+    "http-gpt-oss-20b-think-nopb": {
+      "n_runs": 50,
+      "success_rate": {
+        "mean": 0.98,
+        "std": 0.019799
+      },
+      "duration_s": {
+        "mean": 13.199495286941529,
+        "std": 1.713936
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    },
+    "http-gpt-oss-20b-think-pb": {
+      "n_runs": 50,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 14.091169176101685,
+        "std": 0.992002
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.02": {
+    "failure_rate": 0.02,
+    "n_experiments": 50,
+    "http-gpt-oss-20b-think-nopb": {
+      "n_runs": 50,
+      "success_rate": {
+        "mean": 0.96,
+        "std": 0.027713
+      },
+      "duration_s": {
+        "mean": 13.106820311546326,
+        "std": 1.68388
+      },
+      "inconsistencies": {
+        "mean": 0.02,
+        "std": 0.14
+      }
+    },
+    "http-gpt-oss-20b-think-pb": {
+      "n_runs": 50,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 14.13485059261322,
+        "std": 1.036249
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.03": {
+    "failure_rate": 0.03,
+    "n_experiments": 50,
+    "http-gpt-oss-20b-think-nopb": {
+      "n_runs": 50,
+      "success_rate": {
+        "mean": 0.94,
+        "std": 0.033586
+      },
+      "duration_s": {
+        "mean": 13.057271513938904,
+        "std": 1.872701
+      },
+      "inconsistencies": {
+        "mean": 0.04,
+        "std": 0.195959
+      }
+    },
+    "http-gpt-oss-20b-think-pb": {
+      "n_runs": 50,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 14.139457726478577,
+        "std": 1.010578
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.05": {
+    "failure_rate": 0.05,
+    "n_experiments": 50,
+    "http-gpt-oss-20b-think-nopb": {
+      "n_runs": 50,
+      "success_rate": {
+        "mean": 0.92,
+        "std": 0.038367
+      },
+      "duration_s": {
+        "mean": 13.010990562438964,
+        "std": 2.262905
+      },
+      "inconsistencies": {
+        "mean": 0.04,
+        "std": 0.195959
+      }
+    },
+    "http-gpt-oss-20b-think-pb": {
+      "n_runs": 50,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 14.312631440162658,
+        "std": 1.237842
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.1": {
+    "failure_rate": 0.1,
+    "n_experiments": 50,
+    "http-gpt-oss-20b-think-nopb": {
+      "n_runs": 50,
+      "success_rate": {
+        "mean": 0.78,
+        "std": 0.058583
+      },
+      "duration_s": {
+        "mean": 12.22879141330719,
+        "std": 3.27044
+      },
+      "inconsistencies": {
+        "mean": 0.1,
+        "std": 0.3
+      }
+    },
+    "http-gpt-oss-20b-think-pb": {
+      "n_runs": 50,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 15.507873759269714,
+        "std": 3.243135
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.15": {
+    "failure_rate": 0.15,
+    "n_experiments": 50,
+    "http-gpt-oss-20b-think-nopb": {
+      "n_runs": 50,
+      "success_rate": {
+        "mean": 0.7,
+        "std": 0.064807
+      },
+      "duration_s": {
+        "mean": 11.784582180976868,
+        "std": 3.751181
+      },
+      "inconsistencies": {
+        "mean": 0.1,
+        "std": 0.3
+      }
+    },
+    "http-gpt-oss-20b-think-pb": {
+      "n_runs": 50,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 16.251472601890566,
+        "std": 3.574028
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
   "0.2": {
     "failure_rate": 0.2,
     "n_experiments": 50,
@@ -9,27 +247,27 @@
         "std": 0.067882
       },
       "duration_s": {
-        "mean": 11.59131868362427,
+        "mean": 11.591318683624268,
         "std": 4.457696
       },
       "inconsistencies": {
-        "mean": 0.10000000000000003,
+        "mean": 0.1,
         "std": 0.3
       }
     },
     "http-gpt-oss-20b-think-pb": {
       "n_runs": 50,
       "success_rate": {
-        "mean": 0.96,
-        "std": 0.027713
+        "mean": 0.78,
+        "std": 0.058583
       },
       "duration_s": {
-        "mean": 64.06897788524628,
-        "std": 278.508652
+        "mean": 10.948394751548767,
+        "std": 7.39069
       },
       "inconsistencies": {
-        "mean": 0.02,
-        "std": 0.14
+        "mean": 0.0,
+        "std": 0.0
       }
     }
   }

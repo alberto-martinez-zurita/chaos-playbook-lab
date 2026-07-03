@@ -1,79 +1,91 @@
-# Chaos Playbook Lab — Paper draft
+# The paper
 
-Working draft of the paper *"Chaos Playbook Lab — probing LLM-agent reliability across architectures with a structured recovery playbook"* by Alberto Martínez Zurita & Alessandro Russo (target: ISSRE / ICST 2027).
+*"Mapping LLM-agent reliability under chaos: a cross-architecture study of structured recovery playbooks"*
+Alberto Martínez Zurita · Alessandro Russo — Chaos Playbook Lab, Working Paper 1.
 
-## Status (2026-05-10)
+**Status: campaign closed, v1.0 released (2 July 2026).** First version 19 May 2026. Target venue: ISSRE 2027.
 
-The *N* = 200 top-up sweep is complete across the local roster. All eleven active models are at their final *N*:
+## Read it
 
-| Model | Status |
+| Artifact | File |
 |---|---|
-| qwen3.5 0.8 B | ✓ *N* = 200 (HTTP) |
-| qwen3.5 2 B   | ✓ *N* = 200 (HTTP) |
-| qwen3.5 4 B   | ✓ *N* = 200 (HTTP) |
-| Gemma 4 E2B   | ✓ *N* = 200 (HTTP) |
-| Gemma 4 E4B   | ✓ *N* = 200 (HTTP) |
-| Nemotron Nano 4 B | ✓ *N* = 200 (HTTP think) |
-| qwen3.5 9 B   | ✓ *N* = 200 (HTTP) |
-| qwen3.5 9 B distilled | ✓ *N* = 200 (HTTP) |
-| Ministral 14 B | ✓ *N* = 200 (HTTP/MCP/A2A think) |
-| Gemma 4 26 B  | ✓ *N* = 100 (HTTP/MCP/A2A) |
-| GLM 4.5       | ✓ *N* = 500 (HTTP/MCP/A2A think+nothink, cloud) |
+| PDF (33 pp.) | [`mapping-llm-agent-reliability-under-chaos.pdf`](mapping-llm-agent-reliability-under-chaos.pdf) |
+| Self-contained HTML | [`mapping-llm-agent-reliability-under-chaos.html`](mapping-llm-agent-reliability-under-chaos.html) |
+| Combined Markdown (build intermediate) | [`paper.combined.md`](paper.combined.md) |
 
-Grand total: **110,800 active runs** across 416 non-empty cells.
+## Sections (Markdown sources)
 
-The paper is split into one Markdown file per section so we can iterate independently. Build the camera-ready PDF later (LaTeX or pandoc) once the prose is stable.
+| # | File |
+|---|---|
+| 0 | [00-abstract.md](00-abstract.md) |
+| 1 | [01-introduction.md](01-introduction.md) |
+| 2 | [02-related-work.md](02-related-work.md) |
+| 3 | [03-methodology.md](03-methodology.md) |
+| 4 | [04-results.md](04-results.md) |
+| 5 | [05-discussion.md](05-discussion.md) |
+| 6 | [06-conclusions.md](06-conclusions.md) (incl. Acknowledgements) |
+| 7 | [07-references.md](07-references.md) (44 entries) |
 
-## Sections
+## Final sample sizes
 
-| # | File | Status |
-|---|---|---|
-| 0 | [00-abstract.md](00-abstract.md) | draft |
-| 1 | [01-introduction.md](01-introduction.md) | draft |
-| 2 | [02-related-work.md](02-related-work.md) | draft |
-| 3 | [03-methodology.md](03-methodology.md) | draft |
-| 4 | [04-results.md](04-results.md) | draft |
-| 5 | [05-discussion.md](05-discussion.md) | draft |
-| 6 | [06-conclusions.md](06-conclusions.md) | draft |
+All eleven active models at their final *N* per arm and rate:
+
+| Model | Coverage |
+|---|---|
+| qwen3.5 0.8 B / 2 B / 4 B / 9 B / 9 B-distilled | *N* = 200 (HTTP) |
+| Gemma 4 E2B / E4B | *N* = 200 (HTTP) |
+| Nemotron 3 Nano 4 B | *N* = 200 (HTTP, think) |
+| Ministral 14 B | *N* = 200 (HTTP / MCP / A2A, think) |
+| Gemma 4 26 B (MoE) | *N* = 200 (HTTP / MCP / A2A) |
+| GLM 4.5 (cloud) | *N* = 600 (HTTP / MCP / A2A × think / nothink) |
+| gpt-oss-20b (excluded, §3.6) | *N* = 50 (HTTP, rates 0.00–0.20 only) |
+
+Grand total: **128,800 runs across 416 non-empty cells** — 128,000 active + 800 appendix runs from the excluded model.
 
 ## Figures
 
-All figures live in [`figures/`](figures/) as paired SVG + PNG. They are regenerated from raw CSVs in `experiments/` by [`scripts/generate_paper_figures.py`](../scripts/generate_paper_figures.py).
+All figures live in [`figures/`](figures/) as paired SVG + PNG, regenerated from the raw CSVs in `experiments/` by `scripts/generate_paper_figures.py`.
 
 | ID | File | What it shows |
 |---|---|---|
-| 2 | `figures/fig2_hare_tortoise.svg` | Per-model success rate (pb vs nopb) at chaos = 20 %. Shows the playbook closes the failure gap regardless of size. |
-| 3 | `figures/fig3_hump.svg` | Δ (pb − nopb) at chaos = 10 % vs active parameters. Surfaces a hump: 4 B–14 B benefits most, 0.8 B is a capacity floor, frontier saturates. |
-| 4 | `figures/fig4_cross_model.svg` | 2×2 grid by capability bucket (Sub-2B / 4B / 9–26B / Frontier). Each panel: SR vs chaos rate, pb vs nopb. |
-| 5 | `figures/fig5_thinking.svg` | GLM 4.5 think vs nothink across HTTP / MCP / A2A. Probes whether explicit reasoning helps under chaos. |
-| 6 | `figures/fig6_cross_protocol.svg` | Models with full coverage (Ministral, Gemma4-26B, GLM 4.5) across the three protocols. Tests playbook generalisation. |
-| 7 | `figures/fig7_cost_of_playbook.svg` | Operational cost: tokens, wall time and LLM calls per run, nopb vs pb at chaos = 10 %. |
+| 2 | `fig2_hare_tortoise` | Per-model SR (pb vs nopb) vs mean run duration at chaos = 20 %; arrows are the playbook lift. |
+| 3 | `fig3_hump` | Δ(pb − nopb) vs active parameters at chaos = 10 % **and** 30 % (two panels). The hump: 4 B–14 B benefits most, 0.8 B is a capacity floor, the frontier saturates. |
+| 4 | `fig4_cross_model` | 2×2 grid by capability bucket (Sub-2B / 4B / 9–26B / Frontier). Each panel: SR vs chaos rate, both arms. |
+| 5 | `fig5_thinking` | GLM 4.5 think vs nothink across HTTP / MCP / A2A. |
+| 6 | `fig6_cross_protocol` | The three multi-protocol models (Ministral 14 B, Gemma 4 26 B, GLM 4.5) across HTTP / MCP / A2A. |
+| 7 | `fig7_cost_of_playbook` | Operational cost at chaos = 10 %: tokens, wall time and LLM calls per run, nopb vs pb. |
+| 8 | `fig8_distillation` | qwen3.5 9 B vanilla vs community-distilled under identical HTTP sweeps. |
+| 9 | `fig9_heatmap` | Δ(pb − nopb) heatmap across (model × chaos rate), full HTTP sweep. |
 
 ## Tables
 
-Tables live in [`tables/`](tables/) as Markdown. Same regeneration pipeline.
+Tables live in [`tables/`](tables/) as Markdown. Note the paper-number ↔ filename mapping:
 
-| ID | File | What it lists |
+| Paper table | File | Generated by |
 |---|---|---|
-| 1 | `tables/table1_roster.md` | Active model roster — 11 models in the comparative figures. |
-| 2 | `tables/table2_excluded.md` | Excluded / partial models — appendix evidence (currently `gpt_oss_20b`). |
-| — | `tables/table_runs_summary.md` | Per-model row counts in the released CSVs. |
+| Table 1 — active roster | `tables/table1_roster.md` | `generate_paper_figures.py` |
+| Table 2 — runtime details | `tables/table_runtime.md` | hand-curated from `experiments/*/experiment.yaml` |
+| Table 3 — excluded models | `tables/table2_excluded.md` | `generate_paper_figures.py` |
+| Runs summary (§3.4) | `tables/table_runs_summary.md` | `generate_paper_figures.py` |
 
 ## Data layout
 
 The paper draws from `experiments/<model>/<model_alias>/<protocol>[_<thinking>]/rate_<R>.csv` where:
-- `<model>` ∈ Table 1 / Table 2.
+- `<model>` ∈ Table 1 / Table 3.
 - `<protocol>` ∈ {`http`, `mcp`, `a2a`}.
 - `<thinking>` ∈ {`think`, `nothink`} when the model exposes that toggle.
 - `rate_<R>.csv` covers chaos rates `0.00, 0.01, 0.02, 0.03, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30`.
 
-Each row is one run with: `experiment_id`, `agent_type`, `outcome` ∈ {success, failure}, `duration_ms`, `steps_completed`, `failed_at`, `inconsistencies_count`, `retries`, `seed`, `failure_rate`, `llm_calls`, `input_chars`, `output_chars`, `prompt_tokens`, `completion_tokens`, `reasoning_tokens`, `steps_completed_list`.
+Each row is one run with: `experiment_id`, `agent_type`, `outcome`, `duration_ms`, `steps_completed`, `failed_at`, `inconsistencies_count`, `retries`, `seed`, `failure_rate`, `llm_calls`, `input_chars`, `output_chars`, `prompt_tokens`, `completion_tokens`, `reasoning_tokens`, `steps_completed_list`.
 
-`agent_type` encodes `<protocol>-<model>-[<thinking>-]<pb|nopb>` so the same CSV holds both arms of the A/B test.
+`agent_type` encodes `<protocol>-<model>-[<thinking>-]<pb|nopb>`, so the same CSV holds both arms of the A/B test. Per-cell `aggregated_metrics.json` files are derived artifacts, rebuildable with `scripts/reaggregate_metrics.py`.
 
 ## Regeneration
 
-```
-python scripts/generate_paper_figures.py                  # all figures + tables
+```bash
+python scripts/generate_paper_figures.py                  # all figures + generated tables
 python scripts/generate_paper_figures.py --figure 6,7     # subset
+python scripts/audit_paper.py                             # verify headline stats vs prose
+python scripts/audit_paper_v2.py
+python scripts/build_paper_pdf.py                         # combined.md -> HTML -> PDF (needs pandoc + Chrome)
 ```

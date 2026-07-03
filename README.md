@@ -1,8 +1,10 @@
 # Chaos Playbook Lab
 
 > **Reproducibility package** for the paper *"Mapping LLM-agent reliability under chaos: a cross-architecture study of structured recovery playbooks"* (Working Paper 1, 2026). Paper, dataset, chaos rig and every script needed to regenerate every figure and table — in one repository.
+>
+> An earlier prototype of this rig — the [Chaos Playbook Engine](https://github.com/alberto-martinez-zurita/chaos-playbook-engine) — won **1st place, Enterprise Agents track**, at the Google × Kaggle *AI Agents Intensive* capstone (December 2025).
 
-We treat **chaos engineering as a scientific instrument**: a deterministic, seed-controlled proxy injects transient faults at the agent ↔ tool boundary while an LLM agent executes a four-step business workflow. For each of **11 models** (0.8 B → 355 B parameters), **3 transport protocols** (HTTP, MCP, A2A) and **10 failure rates** (0 % → 30 %), we run a paired A/B comparison between an unguided agent (`nopb`) and the same agent given a ~69-word structured **recovery playbook** (`pb`) — **128,000 active runs** (plus 800 appendix runs from an excluded model).
+We treat **chaos engineering as a scientific instrument**: a deterministic, seed-controlled proxy injects transient faults at the agent ↔ tool boundary while an LLM agent executes a four-step business workflow. We sweep **11 models** (0.8 B → 355 B parameters) over **ten failure rates** (0 % → 30 %) on HTTP, extend the three multi-protocol models (Ministral 14 B, Gemma 4 26 B, GLM 4.5) to **MCP and A2A**, and toggle **think/nothink** on GLM 4.5 — in every cell, a paired A/B comparison between an unguided agent (`nopb`) and the same agent given a ~69-word structured **recovery playbook** (`pb`): **128,000 active runs** (plus 800 appendix runs from an excluded model).
 
 ## Headline findings
 
@@ -34,6 +36,9 @@ python scripts/generate_paper_figures.py
 python scripts/audit_paper.py
 python scripts/audit_paper_v2.py
 
+#    (optional) rebuild each cell's aggregated_metrics.json from the raw CSVs:
+python scripts/reaggregate_metrics.py
+
 # 3. Rebuild the paper itself (combined Markdown → HTML → PDF).
 #    Needs pandoc and Chrome/Edge on PATH:
 python scripts/build_paper_pdf.py
@@ -53,7 +58,7 @@ experiments/<model>/<model-tag>/<protocol>[_think|_nothink]/rate_<R>.csv
 - Per-turn JSONL traces (`trace.jsonl`) accompany the cells that were run with tracing enabled.
 - `experiments/<model>/experiment.yaml` records the model identifier, runtime, protocols, rates and sample sizes for each cell.
 - `lmstudio-logs-zips/` contains the zipped LM Studio server logs for the local-runtime campaign days.
-- The whole dataset is ~30 MB of plain CSV.
+- The CSVs themselves total ~30 MB; per-turn traces and the zipped runtime logs bring the full repository to ~780 MB.
 
 ## The chaos rig
 
@@ -77,6 +82,8 @@ scripts/          # figure/table generation, stats audit, paper build, experimen
 assets/           # prompts (system + playbooks), fault catalog, model registry, OpenAPI spec
 config/           # engine settings presets
 tests/            # unit + integration tests (pytest)
+lmstudio-logs-zips/  # zipped LM Studio server logs (local-runtime evidence)
+data/             # auxiliary data (playbook training seed)
 ```
 
 ## Run new experiments (optional)
@@ -93,7 +100,7 @@ Local models are served via LM Studio (`localhost:1234`); the cloud cell used th
 ## Tests
 
 ```bash
-pytest tests/
+pytest tests/        # 230 tests
 ```
 
 ## License

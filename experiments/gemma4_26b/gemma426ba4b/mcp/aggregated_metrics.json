@@ -1,4 +1,310 @@
 {
+  "0.0": {
+    "failure_rate": 0.0,
+    "n_experiments": 200,
+    "mcp-gemma426ba4b-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 14.157274374961853,
+        "std": 3.028563
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    },
+    "mcp-gemma426ba4b-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 14.271314243078232,
+        "std": 2.837756
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.01": {
+    "failure_rate": 0.01,
+    "n_experiments": 200,
+    "mcp-gemma426ba4b-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.98,
+        "std": 0.009899
+      },
+      "duration_s": {
+        "mean": 14.09135167479515,
+        "std": 4.328095
+      },
+      "inconsistencies": {
+        "mean": 0.005,
+        "std": 0.070534
+      }
+    },
+    "mcp-gemma426ba4b-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 15.142172904014588,
+        "std": 7.241322
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.02": {
+    "failure_rate": 0.02,
+    "n_experiments": 200,
+    "mcp-gemma426ba4b-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.955,
+        "std": 0.014659
+      },
+      "duration_s": {
+        "mean": 14.551762620210647,
+        "std": 5.569051
+      },
+      "inconsistencies": {
+        "mean": 0.01,
+        "std": 0.099499
+      }
+    },
+    "mcp-gemma426ba4b-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 16.5801910340786,
+        "std": 9.655605
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.03": {
+    "failure_rate": 0.03,
+    "n_experiments": 200,
+    "mcp-gemma426ba4b-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.95,
+        "std": 0.015411
+      },
+      "duration_s": {
+        "mean": 14.889937794208526,
+        "std": 8.096326
+      },
+      "inconsistencies": {
+        "mean": 0.01,
+        "std": 0.099499
+      }
+    },
+    "mcp-gemma426ba4b-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 16.836456724405288,
+        "std": 10.517481
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.05": {
+    "failure_rate": 0.05,
+    "n_experiments": 200,
+    "mcp-gemma426ba4b-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.92,
+        "std": 0.019183
+      },
+      "duration_s": {
+        "mean": 16.6708067047596,
+        "std": 19.144508
+      },
+      "inconsistencies": {
+        "mean": 0.01,
+        "std": 0.099499
+      }
+    },
+    "mcp-gemma426ba4b-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 18.479850944280624,
+        "std": 13.482486
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.1": {
+    "failure_rate": 0.1,
+    "n_experiments": 200,
+    "mcp-gemma426ba4b-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.8,
+        "std": 0.028284
+      },
+      "duration_s": {
+        "mean": 20.02606655716896,
+        "std": 34.288816
+      },
+      "inconsistencies": {
+        "mean": 0.075,
+        "std": 0.263391
+      }
+    },
+    "mcp-gemma426ba4b-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 26.22736194252968,
+        "std": 25.96306
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.15": {
+    "failure_rate": 0.15,
+    "n_experiments": 200,
+    "mcp-gemma426ba4b-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.68,
+        "std": 0.032985
+      },
+      "duration_s": {
+        "mean": 38.84788105726242,
+        "std": 295.29163
+      },
+      "inconsistencies": {
+        "mean": 0.12,
+        "std": 0.324962
+      }
+    },
+    "mcp-gemma426ba4b-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 33.666202075481415,
+        "std": 36.013371
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.2": {
+    "failure_rate": 0.2,
+    "n_experiments": 200,
+    "mcp-gemma426ba4b-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.62,
+        "std": 0.034322
+      },
+      "duration_s": {
+        "mean": 43.01541952252388,
+        "std": 297.526055
+      },
+      "inconsistencies": {
+        "mean": 0.11,
+        "std": 0.31289
+      }
+    },
+    "mcp-gemma426ba4b-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 44.74184682607651,
+        "std": 50.421676
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.25": {
+    "failure_rate": 0.25,
+    "n_experiments": 200,
+    "mcp-gemma426ba4b-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.52,
+        "std": 0.035327
+      },
+      "duration_s": {
+        "mean": 40.5808384668827,
+        "std": 296.18853
+      },
+      "inconsistencies": {
+        "mean": 0.145,
+        "std": 0.352101
+      }
+    },
+    "mcp-gemma426ba4b-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 53.16004042744637,
+        "std": 55.480925
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
   "0.3": {
     "failure_rate": 0.3,
     "n_experiments": 200,
@@ -13,7 +319,7 @@
         "std": 297.903034
       },
       "inconsistencies": {
-        "mean": 0.1649999999999999,
+        "mean": 0.165,
         "std": 0.371181
       }
     },
@@ -24,11 +330,11 @@
         "std": 0.004987
       },
       "duration_s": {
-        "mean": 60.848987616300576,
+        "mean": 60.84898761630058,
         "std": 68.262023
       },
       "inconsistencies": {
-        "mean": 0.004999999999999999,
+        "mean": 0.005,
         "std": 0.070534
       }
     }

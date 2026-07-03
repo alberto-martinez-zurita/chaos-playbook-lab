@@ -1,4 +1,310 @@
 {
+  "0.0": {
+    "failure_rate": 0.0,
+    "n_experiments": 200,
+    "http-qwen35-9b-distilled-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 21.95661934018135,
+        "std": 2.06568
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    },
+    "http-qwen35-9b-distilled-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 21.999202674627305,
+        "std": 1.233716
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.01": {
+    "failure_rate": 0.01,
+    "n_experiments": 200,
+    "http-qwen35-9b-distilled-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.99,
+        "std": 0.007036
+      },
+      "duration_s": {
+        "mean": 21.376657819747926,
+        "std": 1.703407
+      },
+      "inconsistencies": {
+        "mean": 0.005,
+        "std": 0.070534
+      }
+    },
+    "http-qwen35-9b-distilled-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 21.95489744901657,
+        "std": 1.333761
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.02": {
+    "failure_rate": 0.02,
+    "n_experiments": 200,
+    "http-qwen35-9b-distilled-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.97,
+        "std": 0.012062
+      },
+      "duration_s": {
+        "mean": 21.43093732357025,
+        "std": 2.484604
+      },
+      "inconsistencies": {
+        "mean": 0.02,
+        "std": 0.14
+      }
+    },
+    "http-qwen35-9b-distilled-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 22.23939595580101,
+        "std": 2.017806
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.03": {
+    "failure_rate": 0.03,
+    "n_experiments": 200,
+    "http-qwen35-9b-distilled-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.95,
+        "std": 0.015411
+      },
+      "duration_s": {
+        "mean": 21.55979288458824,
+        "std": 2.586076
+      },
+      "inconsistencies": {
+        "mean": 0.035,
+        "std": 0.18378
+      }
+    },
+    "http-qwen35-9b-distilled-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 22.669953138828276,
+        "std": 2.000879
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.05": {
+    "failure_rate": 0.05,
+    "n_experiments": 200,
+    "http-qwen35-9b-distilled-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.9,
+        "std": 0.021213
+      },
+      "duration_s": {
+        "mean": 21.681455632448195,
+        "std": 4.430423
+      },
+      "inconsistencies": {
+        "mean": 0.065,
+        "std": 0.246526
+      }
+    },
+    "http-qwen35-9b-distilled-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 23.253033052682877,
+        "std": 2.663549
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.1": {
+    "failure_rate": 0.1,
+    "n_experiments": 200,
+    "http-qwen35-9b-distilled-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.82,
+        "std": 0.027166
+      },
+      "duration_s": {
+        "mean": 21.9745683324337,
+        "std": 4.734203
+      },
+      "inconsistencies": {
+        "mean": 0.105,
+        "std": 0.306553
+      }
+    },
+    "http-qwen35-9b-distilled-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 1.0,
+        "std": 0.0
+      },
+      "duration_s": {
+        "mean": 24.66593255639076,
+        "std": 3.538192
+      },
+      "inconsistencies": {
+        "mean": 0.0,
+        "std": 0.0
+      }
+    }
+  },
+  "0.15": {
+    "failure_rate": 0.15,
+    "n_experiments": 200,
+    "http-qwen35-9b-distilled-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.7,
+        "std": 0.032404
+      },
+      "duration_s": {
+        "mean": 23.02086807370186,
+        "std": 16.278136
+      },
+      "inconsistencies": {
+        "mean": 0.175,
+        "std": 0.379967
+      }
+    },
+    "http-qwen35-9b-distilled-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.995,
+        "std": 0.004987
+      },
+      "duration_s": {
+        "mean": 26.231445511579512,
+        "std": 4.69729
+      },
+      "inconsistencies": {
+        "mean": 0.005,
+        "std": 0.070534
+      }
+    }
+  },
+  "0.2": {
+    "failure_rate": 0.2,
+    "n_experiments": 200,
+    "http-qwen35-9b-distilled-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.595,
+        "std": 0.034711
+      },
+      "duration_s": {
+        "mean": 22.32259214043617,
+        "std": 6.481194
+      },
+      "inconsistencies": {
+        "mean": 0.255,
+        "std": 0.435861
+      }
+    },
+    "http-qwen35-9b-distilled-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.98,
+        "std": 0.009899
+      },
+      "duration_s": {
+        "mean": 28.28322909116745,
+        "std": 9.20755
+      },
+      "inconsistencies": {
+        "mean": 0.015,
+        "std": 0.121552
+      }
+    }
+  },
+  "0.25": {
+    "failure_rate": 0.25,
+    "n_experiments": 200,
+    "http-qwen35-9b-distilled-nopb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.545,
+        "std": 0.035212
+      },
+      "duration_s": {
+        "mean": 23.239364215135573,
+        "std": 7.840259
+      },
+      "inconsistencies": {
+        "mean": 0.28,
+        "std": 0.448999
+      }
+    },
+    "http-qwen35-9b-distilled-pb": {
+      "n_runs": 200,
+      "success_rate": {
+        "mean": 0.945,
+        "std": 0.016121
+      },
+      "duration_s": {
+        "mean": 30.227298107147217,
+        "std": 11.414339
+      },
+      "inconsistencies": {
+        "mean": 0.055,
+        "std": 0.22798
+      }
+    }
+  },
   "0.3": {
     "failure_rate": 0.3,
     "n_experiments": 200,
@@ -9,11 +315,11 @@
         "std": 0.035354
       },
       "duration_s": {
-        "mean": 22.689043569564806,
+        "mean": 22.68904356956482,
         "std": 8.319473
       },
       "inconsistencies": {
-        "mean": 0.28999999999999987,
+        "mean": 0.29,
         "std": 0.453762
       }
     },
@@ -24,11 +330,11 @@
         "std": 0.018042
       },
       "duration_s": {
-        "mean": 33.878171234130846,
+        "mean": 33.87817123413086,
         "std": 13.571665
       },
       "inconsistencies": {
-        "mean": 0.060000000000000005,
+        "mean": 0.06,
         "std": 0.237487
       }
     }
