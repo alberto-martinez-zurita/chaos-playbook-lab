@@ -47,8 +47,20 @@ ARCH_COLORS = {
     "dense": "#22c55e",
     "moe": "#a78bfa",
     "matformer": "#fbbf24",
+    "ple": "#fbbf24",  # Per-Layer Embeddings (Gemma 4 E2B/E4B), see METADATA_CORRECTIONS
     "hybrid_mamba2_transformer": "#ef4444",  # red — Nemotron family
     "default": "#94a3b8",
+}
+
+# Descriptive-metadata corrections applied at figure-generation time (paper v1.1, Oct 2026).
+# The experiment.yaml files are kept exactly as used during the campaign; their `tags` block is
+# not read by the experiment runner (src/chaos_engine/experiments/config.py) and only feeds the
+# figures and tables. The official Gemma 4 Technical Report (arXiv:2607.02770) describes E2B/E4B
+# as Per-Layer-Embedding models with 2.3B / 4.5B effective parameters of 5B / 8B total, not as
+# MatFormer models. No run, CSV or metric is affected.
+METADATA_CORRECTIONS = {
+    "gemma4_e2b": {"architecture": "ple", "total_params": "5B", "active_params": "~2.3B"},
+    "gemma4_e4b": {"architecture": "ple", "total_params": "8B", "active_params": "~4.5B"},
 }
 
 MODEL_PRETTY_ORDER = [
@@ -226,6 +238,7 @@ def load_models(root: Path) -> dict[str, ModelData]:
         with open(yaml_path, "r", encoding="utf-8") as f:
             cfg = yaml.safe_load(f) or {}
         tags = cfg.get("tags", {}) if isinstance(cfg.get("tags"), dict) else {}
+        tags = {**tags, **METADATA_CORRECTIONS.get(model_dir.name, {})}
         roles = cfg.get("roles", []) if isinstance(cfg.get("roles"), list) else []
 
         # Find the data subdir (== model.tag)
@@ -335,7 +348,7 @@ def plot_fig4_cross_model(models: dict[str, ModelData], protocol: str = "http") 
          ["qwen35_0_8b", "qwen35_2b", "gemma4_e2b"]),
         ("4B class — iso-active architecture",
          ["qwen35_4b", "gemma4_e4b", "nemotron_nano_4b"]),
-        ("9–26B  — middle/upper of the hump",
+        ("9–26B  — middle and upper roster",
          ["qwen35_9b", "qwen35_9b_distilled", "ministral_14b", "gemma4_26b"]),
         ("Frontier (cloud)",
          ["glm45"]),
@@ -476,7 +489,7 @@ def plot_fig3_hump(models: dict[str, ModelData], protocol: str = "http",
         ax.set_title(f"chaos = {rate*100:.0f}%", fontsize=12, pad=8)
         ax.legend(loc="lower right", fontsize=9, frameon=False)
 
-    fig.suptitle("Hump-shape — playbook gain vs model capability (rate-dependent)",
+    fig.suptitle("Playbook gain vs model capability (depends on the chaos rate)",
                  fontsize=13, y=1.02)
     fig.tight_layout()
     save_fig(fig, "fig3_hump")
