@@ -76,14 +76,17 @@ median Δ at 30 % chaos is <strong>+43.5 percentage points</strong>
 (bootstrap 95 % CI over models [40.0, 55.0]); in paired exact McNemar
 tests with Holm correction the effect is significant in every
 functioning-roster HTTP cell at failure rates of 5 % and above, and no
-model is harmed at any rate. <strong>(ii)</strong> The benefit depends
-on capability and on the chaos rate: at 30 % chaos the mid-range models
-gain the most (+36.5 to +67 pp, largest at 14 B) and the frontier model
-gains less (+40 pp), while at 10 % chaos the gain is not monotonic in
-model size. We report this as an observed pattern, not a formally tested
-non-monotonicity. <strong>(iii)</strong> The cost is modest: 13 %–69 %
-more tokens per run (mean ≈ 42 %) and +0.57 LLM calls on average; wall
-time is model-dependent (−20 % to +43 %).</p>
+model is harmed at any rate under the transient faults we inject. Much
+of the effect is explained by retry behaviour: without the playbook
+several models rarely retry a failed call, and the playbook induces them
+to do so. <strong>(ii)</strong> The benefit depends on capability and on
+the chaos rate: at 30 % chaos the mid-range models gain the most (+36.5
+to +67 pp, largest at 14 B) and the frontier model gains less (+40 pp),
+while at 10 % chaos the gain is not monotonic in model size. We report
+this as an observed pattern, not a formally tested non-monotonicity.
+<strong>(iii)</strong> The cost is modest: 13 %–69 % more tokens per run
+(mean ≈ 42 %) and +0.57 LLM calls on average; wall time is
+model-dependent (−20 % to +43 %).</p>
 <p>We also document a <em>capacity floor</em> (qwen3.5 0.8 B fails the
 task at 0 % chaos in both arms) and a <em>structural-rescue
 artefact</em> (qwen3.5 2 B succeeds at 0 % chaos only with the playbook,
@@ -188,7 +191,9 @@ pp</strong>; across the full active roster the range is +0 pp (qwen3.5
 0.8 B) to +67 pp (Ministral 14 B). In paired exact tests with
 multiple-comparison correction the effect is significant in every
 functioning-roster HTTP cell at failure rates of 5 % and above, and no
-model is harmed at any rate.</li>
+model is harmed at any rate under the transient faults we inject. A
+large part of the gain comes from inducing retries in models that
+otherwise rarely retry (§5.5 xi).</li>
 <li><strong>The benefit depends on capability and on the chaos
 rate.</strong> At 30 % chaos the mid-range models gain the most (largest
 at 14 B) and the 355 B frontier model gains less because its unguided
@@ -258,8 +263,13 @@ responses and schema drift at the tool boundary across two frontier APIs
 (Gemini 2.0 Flash, GPT-4o) over 1,280 episodes; Hell or High Water [38]
 benchmarks agent recovery when functions disappear or fail
 mid-trajectory; AgentNoiseBench [39] categorises noise into user-noise
-and tool-noise in an automated pipeline. Our contribution differs on
-four axes: (i) <strong>scale</strong> (128,000 runs vs 1,280 episodes in
+and tool-noise in an automated pipeline. More recent work extends this
+direction: ToolMaze [43] benchmarks replanning and anomaly recovery
+across workflow topologies and a taxonomy of explicit and implicit
+perturbations, and AgentCheck [44] turns an MCP server into a
+fault-injection surface to reproduce failures and test mitigations such
+as retries. Our contribution differs on four axes: (i)
+<strong>scale</strong> (128,000 runs vs 1,280 episodes in
 ReliabilityBench), (ii) <strong>roster breadth</strong> (eleven models
 spanning 0.8 B to 355 B vs two frontier APIs), (iii) <strong>an explicit
 A/B comparison with a structured recovery playbook</strong> (a
@@ -411,6 +421,23 @@ prompt and recorded in the released per-turn traces, but is not part of
 the success predicate; per-field state-tracking accuracy is flagged as
 trace-level follow-up (§5.5 ix). Both arms face the same oracle, so the
 A/B contrast is unaffected by this choice.</p>
+<p><strong>The agent loop.</strong> At each turn the model receives the
+system prompt (task description, available tools and, in the
+<code>pb</code> arm, the playbook) and a single harness-generated
+message summarising the previous step: the call made, its status (the
+tool result or the injected error) and the list of steps completed so
+far. The model does not see the earlier conversation; the workflow state
+is carried by this summary. The model answers with one action: a tool
+call, <code>complete</code> or <code>abort</code>. A retry is the model
+re-issuing the call that failed; it is counted in the
+<code>retries</code> column. The agent has no wait action, so the
+backoff delays mentioned in the playbook are not executed: retries are
+immediate. Each run has a turn budget of 15 turns (HTTP) or 12 turns
+(MCP and A2A); a run that exhausts it is a failure. The released
+repository also contains an LLM-free deterministic agent
+(<code>agents/deterministic.py</code>) that executes the workflow with a
+fixed retry strategy; it was not run as a baseline arm in this campaign
+(§5.5 xi).</p>
 <h2 id="32-the-chaos-rig">3.2 The chaos rig</h2>
 <p>A small chaos proxy sits between the agent and the tool endpoints.
 Each tool call is faulted with probability <em>p</em> (the configured
@@ -462,9 +489,11 @@ Second, a retry is a new tool call that consumes a new random draw, so
 once the two arms take different actions their fault sequences diverge
 (§3.8). In the GLM 4.5 and Gemma 4 26 B MCP/A2A cells, part of the runs
 were collected in later batches with other seed bases (3026 +
-<em>i</em>, 4026 + <em>i</em>, …); §5.5 (vii) uses these batches as a
-seed-robustness check. Three protocol-specific implementations of the
-rig exist:</p>
+<em>i</em>, 4026 + <em>i</em>, …), so in those cells the two arms are
+not paired run by run for every index; the paired tests of §3.7
+therefore use only the HTTP cells, which are fully paired, and §5.5
+(vii) uses the extra batches as a seed-robustness check. Three
+protocol-specific implementations of the rig exist:</p>
 <ul>
 <li><strong>HTTP</strong>: classic JSON-over-HTTP REST endpoints. The
 proxy wraps the test Petstore.</li>
@@ -1187,9 +1216,9 @@ analyse this model further:</p>
 <div class="table-excluded">
 <p><strong>Table 3 — Excluded / partial models.</strong></p>
 <p>These models appear in the dataset but are excluded from the main
-comparative figures (Fig 2/3/4) because their coverage or failure mode
-is qualitatively different from the active roster. Listed here as
-appendix evidence.</p>
+comparative figures (Figs 1–3) because their coverage or failure mode is
+qualitatively different from the active roster. Listed here as appendix
+evidence.</p>
 <table>
 <thead>
 <tr>
@@ -1204,10 +1233,10 @@ appendix evidence.</p>
 <td>gpt_oss_20b</td>
 <td>21B</td>
 <td>3.6B</td>
-<td>Mode collapse &#39;?????&#39; loop responses at rates ≥0.25; rates 0.00–0.20
-preserved as qualitative evidence of high-chaos breakdown but not
-comparable with the rest of the roster (different N + truncated
-rates).</td>
+<td>Reproducible degenerate decoding loop (&#39;?&#39; tokens) at rate 0.20
+(§3.6); rates 0.00–0.20 preserved as qualitative evidence of high-chaos
+breakdown but not comparable with the rest of the roster (different N +
+truncated rates).</td>
 </tr>
 </tbody>
 </table>
@@ -1371,7 +1400,8 @@ floor benefits from the playbook, and at 20 % chaos the <code>pb</code>
 arm lies between <strong>89 % and 99 %</strong> for the upper-roster
 models (qwen3.5 9 B and above): the playbook <em>flattens</em> the
 success-rate distribution at the top, regardless of where the model
-started. No model has a negative Δ at any rate.</p>
+started. No model has a negative Δ at any rate (under the transient
+faults we inject; see §5.5 xi).</p>
 <p>The design is paired—run <em>i</em> uses the same seed and task
 instance in both arms—so the effect can be tested on matched pairs.
 Table 4 counts, for each functioning-roster model, the runs that succeed
@@ -1690,9 +1720,9 @@ there. The arms are visibly closer than for any other model in the
 roster, which is the saturation signature: the unguided model is already
 close to the playbook ceiling.</li>
 </ul>
-<h2 id="44-thinking-helps-on-flat-toolsand-hurts-on-structured-error-protocols">4.4
-Thinking helps on flat tools—and hurts on structured-error
-protocols</h2>
+<h2 id="44-thinking-has-no-detectable-effect-on-flat-tools-and-hurts-on-structured-error-protocols">4.4
+Thinking has no detectable effect on flat tools and hurts on
+structured-error protocols</h2>
 <p><strong>Fig 4—Think vs nothink across protocols</strong>
 (<code>paper/figures/fig5_thinking.svg</code>). Three panels, one per
 protocol (HTTP, MCP, A2A). Each panel plots GLM 4.5 for both arms.
@@ -1879,7 +1909,7 @@ ablation—pair vanilla vs distilled with matched compute budgets and
 matched system-prompt shapes—would be needed to identify the mechanism.
 We flag this as item 4 in §6.3 (the targeted distillation ablation).</p>
 <p>Historical context: the closest prior art is from the
-image-classification adversarial literature, where Papernot et al. [43]
+image-classification adversarial literature, where Papernot et al. [45]
 showed that defensive distillation can transfer robustness to
 perturbations. Our finding extends the &quot;distillation can preserve /
 improve robustness&quot; axis from image-classification adversarial inputs to
@@ -2036,14 +2066,15 @@ bounded.</li>
 map</h2>
 <p>Combining the eight figures and the paired tests:</p>
 <ol type="1">
-<li><strong>Across all functioning models the playbook helps and never
-harms</strong>, with a median Δ of <strong>+24 pp</strong> at chaos = 10
-% (bootstrap 95 % CI over models: [14.0, 34.0]) and <strong>+43.5
-pp</strong> at chaos = 30 % (bootstrap 95 % CI: [40.0, 55.0]) over the
-functioning roster (n = 9; the qwen3.5 0.8 B floor and the qwen3.5 2 B
-structural-rescue case are excluded, §5.3). In paired exact tests with
-Holm correction the effect is significant in every functioning-roster
-HTTP cell at failure rates of 5 % and above (Table 4).</li>
+<li><strong>Across all functioning models the playbook helps and, under
+the transient faults we inject, never harms</strong>, with a median Δ of
+<strong>+24 pp</strong> at chaos = 10 % (bootstrap 95 % CI over models:
+[14.0, 34.0]) and <strong>+43.5 pp</strong> at chaos = 30 % (bootstrap
+95 % CI: [40.0, 55.0]) over the functioning roster (n = 9; the qwen3.5
+0.8 B floor and the qwen3.5 2 B structural-rescue case are excluded,
+§5.3). In paired exact tests with Holm correction the effect is
+significant in every functioning-roster HTTP cell at failure rates of 5
+% and above (Table 4).</li>
 <li><strong>The marginal value of the playbook depends on capability and
 on the chaos rate.</strong> At 30 % chaos it is largest in the mid-range
 (maximum at 14 B) and smaller for the frontier model, whose unguided
@@ -2257,15 +2288,45 @@ than transcribed into this paper. Headline SR differences are large
 relative to plausible runtime-driven variance, but wall-time numbers in
 §4.7 should be read as ordinal comparisons within this study, not as
 absolute deployment estimates.</p>
+<p><strong>(xi) A retry-propensity reading, and missing
+baselines.</strong> Because every injected fault is transient and the
+playbook tells the model to retry, much of the measured effect can be
+read as the playbook <em>inducing retries</em>. A simple model makes
+this concrete: if each of the four steps fails independently with
+probability <em>p</em> and is never retried, the expected success rate
+is (1 − <em>p</em>)⁴; with up to three retries per step it is (1 −
+<em>p</em>⁴)⁴. Ministral 14 B without the playbook makes no retries at
+all and its success rate matches the first expression (66.0 % vs 65.6 %
+at <em>p</em> = 0.10; 41.0 % vs 41.0 % at 0.20; 27.5 % vs 24.0 % at
+0.30); with the playbook it retries 1.3 times per run at <em>p</em> =
+0.20 and reaches 98.0 %, close to the second expression (99.4 %). Across
+the functioning roster at <em>p</em> = 0.30, mean retries per run rise
+from 0.0–0.8 without the playbook to 1.7–2.4 with it. This reading does
+not diminish the practical result—several current models do not retry
+transient failures on their own, and a 69-word instruction changes
+that—but it bounds its interpretation. Three baselines that would
+sharpen it were not run in this campaign: (a) an LLM-free deterministic
+retry policy (the released <code>agents/deterministic.py</code>), which
+sets the reliability ceiling a conventional client achieves without any
+model; (b) a minimal one-line instruction (&quot;retry a failed call&quot;) and a
+length-matched neutral text, to separate the content of the playbook
+from the presence of extra instructions; and (c) a mix of transient and
+permanent faults, under which an &quot;always retry&quot; playbook could waste the
+turn budget—so the absence of harm reported here holds for transient
+faults only. Concurrent work reports the same lever: in AgentCheck [44],
+retries raised one agent&#39;s success under timeouts from 30 % to 100
+%.</p>
 <h2 id="56-what-does-this-mean-for-an-sre">5.6 What does this mean for
 an SRE?</h2>
 <p>Three concrete recommendations for someone deploying an LLM agent
 today:</p>
 <ol type="1">
-<li><strong>Add a recovery playbook.</strong> The cost is bounded (about
-+42 % tokens and +0.6 LLM calls per run) and the benefit is large
-(median +24 pp at chaos = 10 %, +43.5 pp at chaos = 30 %), and there is
-no model in our roster where the playbook hurts.</li>
+<li><strong>Add a recovery playbook, and check that it matches your
+failure modes.</strong> The cost is bounded (about +42 % tokens and +0.6
+LLM calls per run) and the benefit is large (median +24 pp at chaos = 10
+%, +43.5 pp at chaos = 30 %) for transient faults; a playbook that says
+&quot;always retry&quot; is only safe when faults are in fact transient (§5.5
+xi).</li>
 <li><strong>Choose the model and the playbook together.</strong> In our
 roster, mid-range models with a playbook reach 86 %–96 % success at 30 %
 chaos, close to the frontier model with a playbook (97 %) at a fraction
@@ -2308,10 +2369,11 @@ unguided agent and the same agent under a small structured
 <strong>recovery playbook</strong>.</p>
 <p>Three findings stand:</p>
 <ol type="1">
-<li><strong>The playbook helps and never harms.</strong> Median Δ(pb −
-nopb) over the <strong>functioning roster</strong> (n = 9, excluding the
-capacity-floor and structural-rescue cases) is +24 pp at chaos = 10 %
-and +43.5 pp at chaos = 30 %, significant in paired exact tests in every
+<li><strong>The playbook helps and, under the transient faults we
+inject, never harms.</strong> Median Δ(pb − nopb) over the
+<strong>functioning roster</strong> (n = 9, excluding the capacity-floor
+and structural-rescue cases) is +24 pp at chaos = 10 % and +43.5 pp at
+chaos = 30 %, significant in paired exact tests in every
 functioning-roster HTTP cell at failure rates of 5 % and above; the
 <code>pb</code> arm of the models from qwen3.5 4 B upwards stays between
 86 % and 100 % at every chaos rate we tested.</li>
@@ -2324,7 +2386,8 @@ tested.</li>
 <li><strong>The cost is bounded and predictable</strong>: about +42 %
 tokens on average and less than one extra LLM call per run (≈ +0.57),
 with model-dependent wall time (−20 % to +43 %). There is no model in
-the roster where the playbook lowers the success rate.</li>
+the roster where the playbook lowers the success rate under the
+transient faults we inject.</li>
 </ol>
 <p>We also documented two qwen caveats (a capacity floor at qwen3.5 0.8
 B and a structural-rescue artefact at qwen3.5 2 B) and showed that the
@@ -2342,6 +2405,10 @@ recovery rules vs the act of providing any recovery scaffolding.</li>
 <li>We did not test <strong>bursty</strong> or
 <strong>correlated</strong> chaos. The rig is uniform-random per
 call.</li>
+<li>We did not compare the playbook with an <strong>LLM-free
+deterministic retry policy</strong> or with a <strong>minimal retry
+instruction</strong>, and we did not mix <strong>permanent</strong>
+faults with transient ones (§5.5 xi).</li>
 <li>We did not inject <strong>silently corrupted payloads</strong>
 (dropped fields, swapped types, truncated JSON). Every fault in this
 campaign was explicitly signalled to the agent; robustness to quiet
@@ -2572,9 +2639,18 @@ Adversarial Robustness of LLMs</strong>. arXiv:2410.05306.</p>
 <strong>Robustness and Cybersecurity in the EU Artificial Intelligence
 Act</strong>. <em>FAccT 2025 — ACM Conference on Fairness,
 Accountability, and Transparency</em>. arXiv:2502.16184.</p>
+<h2 id="recent-work-on-tool-failure-recovery">Recent work on
+tool-failure recovery</h2>
+<p>[43] Zhu, D., Ma, X., Shen, Y., Li, X., Zhao, Y., Wang, S., Yan, L.,
+&amp; Yin, D. (2026). <strong>When Tools Fail: Benchmarking Dynamic
+Replanning and Anomaly Recovery in LLM Agents</strong> (ToolMaze).
+arXiv:2606.05806.</p>
+<p>[44] Mazumder, A., &amp; Lia, N. J. (2026). <strong>AgentCheck: A
+Reproduce-Intervene-Mitigate Workbench for LLM Agents over MCP</strong>.
+arXiv:2607.11098.</p>
 <h2 id="distillation-and-robustness-historical-anchor">Distillation and
 robustness (historical anchor)</h2>
-<p>[43] Papernot, N., McDaniel, P., Wu, X., Jha, S., &amp; Swami, A.
+<p>[45] Papernot, N., McDaniel, P., Wu, X., Jha, S., &amp; Swami, A.
 (2016). <strong>Distillation as a Defense to Adversarial Perturbations
 against Deep Neural Networks</strong>. <em>IEEE Symposium on Security
 and Privacy 2016</em>, 582–597. arXiv:1511.04508.</p>

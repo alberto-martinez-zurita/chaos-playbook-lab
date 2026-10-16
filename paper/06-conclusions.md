@@ -6,9 +6,9 @@ We treated chaos engineering as a scientific instrument and used it to map the r
 
 Three findings stand:
 
-1. **The playbook helps and never harms.** Median Δ(pb − nopb) over the **functioning roster** (n = 9, excluding the capacity-floor and structural-rescue cases) is +24 pp at chaos = 10 % and +43.5 pp at chaos = 30 %, significant in paired exact tests in every functioning-roster HTTP cell at failure rates of 5 % and above; the `pb` arm of the models from qwen3.5 4 B upwards stays between 86 % and 100 % at every chaos rate we tested.
+1. **The playbook helps and, under the transient faults we inject, never harms.** Median Δ(pb − nopb) over the **functioning roster** (n = 9, excluding the capacity-floor and structural-rescue cases) is +24 pp at chaos = 10 % and +43.5 pp at chaos = 30 %, significant in paired exact tests in every functioning-roster HTTP cell at failure rates of 5 % and above; the `pb` arm of the models from qwen3.5 4 B upwards stays between 86 % and 100 % at every chaos rate we tested.
 2. **The benefit depends on capability and on the chaos rate.** A 0.8 B model is at the capacity floor; at 30 % chaos the mid-range models gain the most and the frontier model gains less, as its unguided baseline approaches the playbook's ceiling; at 10 % chaos the gain is not monotonic in size. This pattern is observed, not formally tested.
-3. **The cost is bounded and predictable**: about +42 % tokens on average and less than one extra LLM call per run (≈ +0.57), with model-dependent wall time (−20 % to +43 %). There is no model in the roster where the playbook lowers the success rate.
+3. **The cost is bounded and predictable**: about +42 % tokens on average and less than one extra LLM call per run (≈ +0.57), with model-dependent wall time (−20 % to +43 %). There is no model in the roster where the playbook lowers the success rate under the transient faults we inject.
 
 We also documented two qwen caveats (a capacity floor at qwen3.5 0.8 B and a structural-rescue artefact at qwen3.5 2 B) and showed that the playbook generalises across HTTP / MCP / A2A.
 
@@ -19,6 +19,7 @@ To set expectations:
 - We did not measure *task generalisation* beyond the four-step structured-tool-use workflow. Other task families (long-horizon planning, retrieval-heavy QA, tool composition under ambiguity) may exhibit different shapes.
 - We did not vary the **content** of the playbook. We do not yet know how much of the gap is attributable to the specific recovery rules vs the act of providing any recovery scaffolding.
 - We did not test **bursty** or **correlated** chaos. The rig is uniform-random per call.
+- We did not compare the playbook with an **LLM-free deterministic retry policy** or with a **minimal retry instruction**, and we did not mix **permanent** faults with transient ones (§5.5 xi).
 - We did not inject **silently corrupted payloads** (dropped fields, swapped types, truncated JSON). Every fault in this campaign was explicitly signalled to the agent; robustness to quiet corruption—an axis the engine's payload-corruption library supports—is left unexercised here.
 - We did not run **multi-agent collusion** or **adversarial-environment** scenarios, which sit on a separate axis from the operational chaos studied here.
 

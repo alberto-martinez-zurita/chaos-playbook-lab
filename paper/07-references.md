@@ -106,6 +106,12 @@
 
 [42] Nolte, H., Rateike, M., & Finck, M. (2025). **Robustness and Cybersecurity in the EU Artificial Intelligence Act**. *FAccT 2025 — ACM Conference on Fairness, Accountability, and Transparency*. arXiv:2502.16184.
 
+## Recent work on tool-failure recovery
+
+[43] Zhu, D., Ma, X., Shen, Y., Li, X., Zhao, Y., Wang, S., Yan, L., & Yin, D. (2026). **When Tools Fail: Benchmarking Dynamic Replanning and Anomaly Recovery in LLM Agents** (ToolMaze). arXiv:2606.05806.
+
+[44] Mazumder, A., & Lia, N. J. (2026). **AgentCheck: A Reproduce-Intervene-Mitigate Workbench for LLM Agents over MCP**. arXiv:2607.11098.
+
 ## Distillation and robustness (historical anchor)
 
-[43] Papernot, N., McDaniel, P., Wu, X., Jha, S., & Swami, A. (2016). **Distillation as a Defense to Adversarial Perturbations against Deep Neural Networks**. *IEEE Symposium on Security and Privacy 2016*, 582–597. arXiv:1511.04508.
+[45] Papernot, N., McDaniel, P., Wu, X., Jha, S., & Swami, A. (2016). **Distillation as a Defense to Adversarial Perturbations against Deep Neural Networks**. *IEEE Symposium on Security and Privacy 2016*, 582–597. arXiv:1511.04508.

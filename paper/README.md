@@ -9,7 +9,7 @@ Alberto Martínez Zurita · Alessandro Russo — Chaos Playbook Lab, Working Pap
 
 | Artifact | File |
 |---|---|
-| PDF (33 pp.) | [`mapping-llm-agent-reliability-under-chaos.pdf`](mapping-llm-agent-reliability-under-chaos.pdf) |
+| PDF (36 pp.) | [`mapping-llm-agent-reliability-under-chaos.pdf`](mapping-llm-agent-reliability-under-chaos.pdf) |
 | Self-contained HTML | [`mapping-llm-agent-reliability-under-chaos.html`](mapping-llm-agent-reliability-under-chaos.html) |
 | Combined Markdown (build intermediate) | [`paper.combined.md`](paper.combined.md) |
 
@@ -24,7 +24,7 @@ Alberto Martínez Zurita · Alessandro Russo — Chaos Playbook Lab, Working Pap
 | 4 | [04-results.md](04-results.md) |
 | 5 | [05-discussion.md](05-discussion.md) |
 | 6 | [06-conclusions.md](06-conclusions.md) (incl. Acknowledgements) |
-| 7 | [07-references.md](07-references.md) (43 entries) |
+| 7 | [07-references.md](07-references.md) (45 entries) |
 
 ## Final sample sizes
 

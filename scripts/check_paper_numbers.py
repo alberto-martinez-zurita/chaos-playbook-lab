@@ -26,11 +26,12 @@ for f in sorted(glob.glob(os.path.join(args.root, '*', '*', '*', 'rate_*.csv')))
         for r in csv.DictReader(fh):
             runs += 1; excluded_runs += model == 'gpt_oss_20b'
             arm = 'nopb' if '-nopb' in r['agent_type'] else 'pb'
-            c = cells.setdefault((model, variant, rate, arm), {'n': 0, 's': 0, 'dur': 0.0, 'tok': 0, 'calls': 0})
+            c = cells.setdefault((model, variant, rate, arm), {'n': 0, 's': 0, 'dur': 0.0, 'tok': 0, 'calls': 0, 'ret': 0})
             c['n'] += 1; c['s'] += r['outcome'] == 'success'
             c['dur'] += float(r['duration_ms'] or 0)
             c['tok'] += int(r['prompt_tokens'] or 0) + int(r['completion_tokens'] or 0)
             c['calls'] += int(r['llm_calls'] or 0)
+            c['ret'] += int(r['retries'] or 0)
 
 def C(m, v, r, a): return cells[(m, v, f'{r:.2f}', a)]
 def sr(m, v, r, a): c = C(m, v, r, a); return round(100 * c['s'] / c['n'], 2)
@@ -170,6 +171,18 @@ chk('§6.4', 'functioning pb@30 range 56–97 %', '56-97', f'{round(p30[0])}-{ro
 chk('§6.4', 'functioning pb@30 without the smallest model 86–97 %', '86-97', f'{math.floor(p30[1])}-{round(p30[-1])}')
 mid = [sr(*HTTP[k], .3, 'pb') for k in ['qwen3.5 4 B', 'Gemma 4 E4B', 'Nemotron Nano 4 B', 'Gemma 4 26 B (MoE)', 'qwen3.5 9 B', 'qwen3.5 9 B (distilled)', 'Ministral 14 B']]
 chk('§5.6', 'mid-range pb@30 between 86 and 96 %', True, 86 <= min(mid) and max(mid) <= 96)
+
+
+# ---------- §5.5 (xi): retry-propensity reading ----------
+for r, meas, theo in [(.1, 66.0, 65.6), (.2, 41.0, 41.0), (.3, 27.5, 24.0)]:
+    chk('§5.5 xi', f'Ministral nopb@{r} vs (1-p)^4', (meas, theo), (sr('ministral_14b', 'http_think', r, 'nopb'), round(100 * (1 - r) ** 4, 1)))
+mret = lambda m, v, r, a: C(m, v, r, a)['ret'] / C(m, v, r, a)['n']
+chk('§5.5 xi', 'Ministral nopb retries = 0 at 10/20/30 %', True, all(mret('ministral_14b', 'http_think', r, 'nopb') == 0 for r in (.1, .2, .3)))
+chk('§5.5 xi', 'Ministral pb retries per run @20 ≈ 1.3', 1.3, round(mret('ministral_14b', 'http_think', .2, 'pb'), 1), 0.05)
+chk('§5.5 xi', 'Ministral pb@20 and (1-p^4)^4', (98.0, 99.4), (sr('ministral_14b', 'http_think', .2, 'pb'), round(100 * (1 - .2 ** 4) ** 4, 1)))
+rn = [mret(*HTTP[k], .3, 'nopb') for k in FUNC]; rp = [mret(*HTTP[k], .3, 'pb') for k in FUNC]
+chk('§5.5 xi', 'mean retries @30 nopb range 0.0–0.8', True, 0 <= min(rn) and max(rn) < 0.85)
+chk('§5.5 xi', 'mean retries @30 pb range 1.7–2.4', True, 1.65 <= min(rp) and max(rp) < 2.45)
 
 with open(args.csv, 'w', newline='', encoding='utf-8') as fh:
     w = csv.writer(fh, delimiter=';'); w.writerow(['section', 'claim', 'paper', 'recomputed', 'status']); w.writerows(rows)
