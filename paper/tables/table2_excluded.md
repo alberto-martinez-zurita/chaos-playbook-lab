@@ -1,6 +1,6 @@
 **Table 3 — Excluded / partial models.**
 
-These models appear in the dataset but are excluded from the main comparative figures (Figs 1–3) because their coverage or failure mode is qualitatively different from the active roster. Listed here as appendix evidence.
+These models appear in the dataset but are excluded from the main comparative figures (all comparative figures) because their coverage or failure mode is qualitatively different from the active roster. Listed here as appendix evidence.
 
 | Model | Total params | Active | Reason for exclusion |
 |---|---|---|---|

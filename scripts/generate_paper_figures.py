@@ -69,7 +69,7 @@ MODEL_PRETTY_ORDER = [
     "gpt_oss_20b", "gemma4_26b", "glm45",
 ]
 
-# Models excluded from main comparative figures (Figs 1–3). They still appear
+# Models excluded from main comparative figures (all comparative figures). They still appear
 # in Table 2 (excluded / partial) with their failure-mode annotation.
 EXCLUDED_FROM_MAIN = {
     "gpt_oss_20b": (
@@ -904,7 +904,7 @@ def table_excluded(models: dict[str, ModelData]) -> str:
                     f"| {reason} |")
     return ("**Table 3 — Excluded / partial models.**\n\n"
             "These models appear in the dataset but are excluded from the main "
-            "comparative figures (Figs 1–3) because their coverage or failure "
+            "comparative figures (all comparative figures) because their coverage or failure "
             "mode is qualitatively different from the active roster. Listed "
             "here as appendix evidence.\n\n" + "\n".join(rows) + "\n")
 

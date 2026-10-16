@@ -79,6 +79,7 @@ At chaos = 30 % the gap profile is:
 
 | Model | Δ at 30 % chaos |
 |---|---:|
+| Gemma 4 E2B | +41.5 |
 | qwen3.5 4 B | +36.5 |
 | Gemma 4 E4B | +41.0 |
 | Nemotron Nano 4 B | +52.5 |
@@ -109,12 +110,12 @@ Each panel plots success rate vs failure rate for both arms, with Wilson 95 % ba
 
 - **Panel A** (Sub-2B): qwen3.5 0.8 B is flat at zero in both arms (capacity floor). qwen3.5 2 B's `nopb` arm is at the floor at every rate (0 % to ~4 %); the `pb` arm starts at 100 % at chaos = 0 % and degrades to 17 % at chaos = 30 %. Gemma 4 E2B is the most informative member of this bucket—both arms function and the playbook gap widens with chaos, mirroring the larger models.
 - **Panel B** (~4 B class): the two non-reasoning models (qwen3.5 4 B dense, Gemma 4 E4B PLE) stay within 3 pp of each other on the `nopb` arm at every rate; the reasoning hybrid Mamba2–Transformer model (Nemotron 3 Nano 4 B) sits 12–26 pp below them. The `pb` arm is essentially saturated for qwen3.5 4 B and Gemma 4 E4B (≥ 94 % at chaos = 30 %) and slightly behind for Nemotron Nano 4 B (86.5 % at 30 %). Nemotron has the *lowest* `nopb` of the three at chaos = 0 % (85 %) and the *largest* `pb − nopb` gap at chaos = 30 % (+52.5 pp). We cannot disentangle two confounded effects in this panel: reasoning-by-default introducing self-induced drift (consistent with the §4.4 think/nothink evidence on GLM 4.5 under MCP/A2A) versus the hybrid Mamba2–Transformer architecture itself. Running Nemotron with its reasoning toggle off would separate them; we did not vary it in this campaign.
-- **Panel C** (9 B–26 B): all four models reach `pb` ≥ 86 % at chaos = 30 %. The MoE model (Gemma 4 26 B, ~4 B active) behaves like the dense 9 B–14 B models on both arms. The community-distilled qwen3.5 9 B scores above the original on `nopb` at every chaos rate (gap +1 pp at chaos = 0 % widening to +13 pp at chaos = 30 %, individually significant only at the highest rates; §4.6), and on `pb` it saturates at 100 % up to chaos = 10 % and stays 6–8.5 pp above the original at every higher rate.
+- **Panel C** (9 B–26 B): all four models reach `pb` ≥ 86 % at chaos = 30 %. The MoE model (Gemma 4 26 B, ~4 B active) behaves like the dense 9 B–14 B models on both arms. The community-distilled qwen3.5 9 B scores above the original on `nopb` at every chaos rate (gap +1 pp at chaos = 0 % widening to +13 pp at chaos = 30 %, individually significant only at 10 % and 30 %; §4.6), and on `pb` it saturates at 100 % up to chaos = 10 % and stays 6–8.5 pp above the original at every higher rate.
 - **Panel D** (Frontier): GLM 4.5 (think mode, 32 B active of 355 B) maintains a `nopb` floor of 57.0 % at chaos = 30 %—among the highest in the HTTP roster, statistically indistinguishable from qwen3.5 4 B (57.5 %) within Wilson 95 % CIs (GLM at *N* = 600 has Wilson half-width ≈ 4.0 pp vs qwen3.5 4 B at *N* = 200 with ≈ 6.8 pp)—and reaches `pb` = 97.0 % there. The arms are visibly closer than for any other model in the roster, which is the saturation signature: the unguided model is already close to the playbook ceiling.
 
 ## 4.4 Thinking has no detectable effect on flat tools and hurts on structured-error protocols
 
-**Fig 4—Think vs nothink across protocols** (`paper/figures/fig5_thinking.svg`). Three panels, one per protocol (HTTP, MCP, A2A). Each panel plots GLM 4.5 for both arms. Encoding follows Fig 5 (pastel green = `pb`, pastel red = `nopb`; solid = `pb`, dashed = `nopb`), with marker shape distinguishing think (○) from nothink (△).
+**Fig 4—Think vs nothink across protocols** (`paper/figures/fig5_thinking.svg`). Three panels, one per protocol (HTTP, MCP, A2A). Each panel plots GLM 4.5 for both arms. Colour and line style encode the arm (pastel green and solid = `pb`; pastel red and dashed = `nopb`), with marker shape distinguishing think (○) from nothink (△).
 
 ![Fig 4—GLM 4.5 think vs nothink across HTTP/MCP/A2A](figures/fig5_thinking.png)
 
@@ -133,13 +134,13 @@ Two observations:
 - The `pb` arm **mostly generalises across protocols**: at chaos = 30 % it lies between 88 % and 100 % for the three models, except Ministral 14 B on MCP (79.5 %). The same recovery instructions, adapted to each protocol's error vocabulary, produce comparable success on HTTP, MCP and A2A. The one consistent dip is MCP under think mode (Ministral 14 B: MCP `pb` 79.5 % vs HTTP 94.5 % / A2A 93.5 %; GLM 4.5 think: MCP `pb` 88.3 % vs HTTP 97.0 % / A2A 99.5 %), the same pattern surfaced in §4.4: explicit reasoning interferes with structured-error recovery even when the playbook is active.
 - The `nopb` curve has more cross-protocol spread, and **the direction of the spread is model-dependent**. For **Ministral 14 B** and **Gemma 4 26 B**, A2A is the *most forgiving* environment (chaos = 30 % `nopb`: Ministral A2A 87.5 % vs HTTP 27.5 %, a +60 pp gap; Gemma 26 B A2A 86.5 % vs HTTP 38.5 %, +48 pp). For **GLM 4.5 in think mode** the pattern flips—HTTP is best (57.0 %), MCP worst (39.2 %), A2A in the middle (51.5 %). In **GLM 4.5 nothink** mode, A2A is best again (65.2 %), echoing the mid-roster pattern.
 
-The constructive interpretation has two parts. First, **the playbook brings most protocol/model combinations up to a similar ceiling** (90–100 % at chaos = 30 %), with **MCP under reasoning the documented exception**—both Ministral 14 B (MCP `pb` = 79.5 %) and GLM 4.5 think (MCP `pb` = 88.3 %) sit visibly below their HTTP/A2A `pb`. We do *not* claim the playbook fully equalises across protocols; on this single recovered case the protocol-specific structural disadvantage of MCP under reasoning leaks through. Second, the protocol-specific *floor*—i.e. what the unguided model achieves—is shaped by how much **structural scaffolding** the protocol gives the model for free. A2A delegates each step to a sub-agent with a focused scope and wraps chaos in typed error semantics (`task_rejected`, `timeout`) that are easier to recover from than a bare HTTP 503; this is consistent with the structural help that mid-sized models (Ministral, Gemma 26 B) appear to absorb. The frontier model (GLM 4.5 think) does not benefit from this envelope—its own reasoning chain already maintains state—and on MCP/A2A the extra structure even costs `nopb` performance (§4.4). The playbook is the partial equaliser: it removes most of the protocol-specific structural advantage on the `pb` arm, while leaving the MCP-under-reasoning floor as a stubborn residual. We mark this as a hypothesis pending trace-level evidence (§5.5).
+The constructive interpretation has two parts. First, **the playbook brings most protocol/model combinations up to a similar ceiling** (90–100 % at chaos = 30 %), with **MCP under reasoning the documented exception**—both Ministral 14 B (MCP `pb` = 79.5 %) and GLM 4.5 think (MCP `pb` = 88.3 %) sit visibly below their HTTP/A2A `pb`. We do *not* claim the playbook fully equalises across protocols; on this single recovered case the protocol-specific structural disadvantage of MCP under reasoning leaks through. Second, the protocol-specific *floor*—i.e. what the unguided model achieves—is shaped by how much **structural scaffolding** the protocol gives the model for free. In our A2A rig each step is phrased as a delegated task and chaos arrives as typed task errors (`task_rejected`, `timeout`), which may be easier to recover from than a bare HTTP status code; this is consistent with the structural help that mid-sized models (Ministral, Gemma 26 B) appear to absorb. The frontier model (GLM 4.5 think) does not benefit from this envelope—its own reasoning chain already maintains state—and on MCP/A2A the extra structure even costs `nopb` performance (§4.4). The playbook is the partial equaliser: it removes most of the protocol-specific structural advantage on the `pb` arm, while leaving the MCP-under-reasoning floor as a stubborn residual. We mark this as a hypothesis pending trace-level evidence (§5.5).
 
 ## 4.6 Does community distillation preserve chaos resilience?
 
-**Fig 7—Distillation pair** (`paper/figures/fig8_distillation.svg`). Two panels comparing qwen3.5 9 B (original) and a community-distilled 9 B variant (DeepSeek-V4-Flash teacher) under identical HTTP chaos sweeps, *N* = 200 per cell.
+**Fig 6—Distillation pair** (`paper/figures/fig8_distillation.svg`). Two panels comparing qwen3.5 9 B (original) and a community-distilled 9 B variant (DeepSeek-V4-Flash teacher) under identical HTTP chaos sweeps, *N* = 200 per cell.
 
-![Fig 7—qwen3.5 9 B vanilla vs community-distilled (HTTP, N = 200)](figures/fig8_distillation.png)
+![Fig 6—qwen3.5 9 B vanilla vs community-distilled (HTTP, N = 200)](figures/fig8_distillation.png)
 
 On the `nopb` arm the distilled variant scores above the original at all ten chaos rates, with the gap widening as chaos increases; individually, most of these differences are within sampling noise:
 
@@ -149,26 +150,26 @@ On the `nopb` arm the distilled variant scores above the original at all ten cha
 |---:|---:|---:|---:|---:|
 | 0 % | 99.0 | 100.0 | +1.0 | ± 1.4 (not individually sig.) |
 | 5 % | 86.5 | 90.0 | +3.5 | ± 6.3 (not individually sig.) |
-| 10 % | 73.0 | 82.0 | **+9.0** | ± 8.0 (marginally sig.) |
+| 10 % | 73.0 | 82.0 | **+9.0** | ± 8.0 (sig.) |
 | 20 % | 53.0 | 59.5 | +6.5 | ± 9.7 (not individually sig.) |
 | 30 % | 36.5 | 49.5 | **+13.0** | ± 9.6 (sig.) |
 
-Only the difference at 30 % chaos is individually significant (10 % is marginal), so the evidence is the consistency of the direction across rates rather than any single difference. A sign test over the ten rates (10/10 in the same direction, two-sided *p* = 0.002) supports that consistency, under the assumption that the ten rates are independent comparisons; because both variants share the seed schedule, a paired analysis per rate would be the stricter test. We therefore read this as suggestive, not conclusive. On the `pb` arm the distilled variant sits 0–8.5 pp above the original at every rate; the playbook saturates both lines near 100 % up to chaos = 10 %.
+Only the differences at 10 % and 30 % chaos are individually significant, so the evidence is the consistency of the direction across rates rather than any single difference. A sign test over the ten rates (10/10 in the same direction, two-sided *p* = 0.002) supports that consistency, under the assumption that the ten rates are independent comparisons; because both variants share the seed schedule, a paired analysis per rate would be the stricter test. We therefore read this as suggestive, not conclusive. On the `pb` arm the distilled variant sits 0–8.5 pp above the original at every rate; the playbook saturates both lines near 100 % up to chaos = 10 %.
 
 This result inverts the direction of a preliminary internal observation made on an *N* = 5 distilled pilot (April 2026), which suggested the opposite—distilled appearing *more* fragile than vanilla. The pilot's apparent gap was within sampling noise; the *N* = 200 sweep settles it cleanly. Two empirical implications:
 
-1. **Community distillation did not reduce chaos resilience at the 9 B point in our roster, and may modestly improve it.** The unguided distilled model scores above the unguided original at every chaos rate we tested, significantly only at the highest rate. We do not interpret this as a general claim about distillation; it is one model pair, one task family. But it falsifies the conservative prior ("distillation can only lose") for this configuration.
+1. **Community distillation did not reduce chaos resilience at the 9 B point in our roster, and may modestly improve it.** The unguided distilled model scores above the unguided original at every chaos rate we tested, individually significant only at 10 % and 30 %. We do not interpret this as a general claim about distillation; it is one model pair, one task family. But it falsifies the conservative prior ("distillation can only lose") for this configuration.
 2. **The playbook benefit does not depend on the distillation step.** Both variants saturate near 100 % at low chaos and stay above 86 % at chaos = 30 %; the playbook gain travels with the underlying capability bracket (§4.2) rather than with the training recipe.
 
-Caveat: we deliberately do *not* claim a mechanism. The distilled variant emits zero `reasoning_tokens` per turn (the teacher's reasoning traces were not directly transferred), so we cannot attribute the gain to inherited deliberation pattern. A targeted ablation—pair vanilla vs distilled with matched compute budgets and matched system-prompt shapes—would be needed to identify the mechanism. We flag this as item 4 in §6.3 (the targeted distillation ablation).
+Caveat: we deliberately do *not* claim a mechanism. The distilled variant emits zero `reasoning_tokens` per turn (the teacher's reasoning traces were not directly transferred), so we cannot attribute the gain to inherited deliberation pattern. A targeted ablation—pair vanilla vs distilled with matched compute budgets and matched system-prompt shapes—would be needed to identify the mechanism. We flag this as item 5 in §6.3 (the targeted distillation ablation).
 
 Historical context: the closest prior art comes from image classification, where Papernot et al. [45] proposed defensive distillation against adversarial perturbations, a defence later shown to be ineffective by Carlini and Wagner [46]. Our observation concerns a different axis (benign, explicitly signalled tool failures in LLM agents) and does not rely on that line of work.
 
 ## 4.7 Cost is bounded and predictable
 
-**Fig 6—Cost of the playbook** (`paper/figures/fig7_cost_of_playbook.svg`). Three panels at chaos = 10 % HTTP: tokens per run (prompt + completion, mean), wall time per run (s, mean), LLM calls per run (mean). For each panel, two bars per model—`nopb` (pastel red) and `pb` (pastel green).
+**Fig 7—Cost of the playbook** (`paper/figures/fig7_cost_of_playbook.svg`). Three panels at chaos = 10 % HTTP: tokens per run (prompt + completion, mean), wall time per run (s, mean), LLM calls per run (mean). For each panel, two bars per model—`nopb` (pastel red) and `pb` (pastel green).
 
-![Fig 6—Cost of the playbook (tokens, wall time, LLM calls per run)](figures/fig7_cost_of_playbook.png)
+![Fig 7—Cost of the playbook (tokens, wall time, LLM calls per run)](figures/fig7_cost_of_playbook.png)
 
 Numbers (per run, mean, at chaos = 10 % HTTP):
 

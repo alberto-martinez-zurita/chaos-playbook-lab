@@ -24,7 +24,7 @@ Both arms run on the *same model*, the *same prompt skeleton* and the *same seed
 
 ## 1.3 What this paper claims
 
-We apply this instrument to **eleven LLMs** spanning nearly three orders of magnitude (0.8 B to 355 B total parameters), four architecture types (dense, Per-Layer-Embedding, hybrid Mamba2–Transformer and Mixture-of-Experts), one think/nothink toggle (GLM 4.5) plus two models that reason by default, and three transport protocols (HTTP, MCP, A2A). The full dataset is **128,000 active agent runs** (plus 800 appendix runs from an excluded model, §3.6), all released as raw CSVs alongside this paper.
+We apply this instrument to **eleven LLMs** spanning nearly three orders of magnitude (0.8 B to 355 B total parameters), four architecture types (dense, Per-Layer-Embedding, hybrid Mamba2–Transformer and Mixture-of-Experts), one think/nothink toggle (GLM 4.5) plus two models that reason by default, and three agent–tool interface styles (HTTP, MCP and A2A, emulated in-process). The full dataset is **128,000 active agent runs** (plus 800 appendix runs from an excluded model, §3.6), all released as raw CSVs alongside this paper.
 
 Four contributions:
 

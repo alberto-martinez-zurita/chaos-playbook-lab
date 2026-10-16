@@ -3,7 +3,7 @@
 *"Mapping LLM-agent reliability under chaos: a cross-architecture study of structured recovery playbooks"*
 Alberto Martínez Zurita · Alessandro Russo — Chaos Playbook Lab, Working Paper 1.
 
-**Status: campaign closed. v1.1 (October 2026): text revision after internal review—claims re-checked against the CSVs (`scripts/check_paper_numbers.py`), paired McNemar/Holm analysis added (`scripts/paired_analysis.py`, Table 4), architecture labels of Gemma 4 E2B/E4B and Qwen3.5 corrected, references re-verified. No run or data changed.** v1.0: 2 July 2026; first version 19 May 2026. Target venue: ISSRE 2027.
+**Status: campaign closed. v1.1 (October 2026): text revision after internal review—claims re-checked against the CSVs (`scripts/check_paper_numbers.py`), paired McNemar/Holm analysis added (`scripts/paired_analysis.py`, Table 5), architecture labels of Gemma 4 E2B/E4B and Qwen3.5 corrected, references re-verified. No run or data changed.** v1.0: 2 July 2026; first version 19 May 2026. Target venue: ISSRE 2027.
 
 ## Read it
 
@@ -86,7 +86,7 @@ Each row is one run with: `experiment_id`, `agent_type`, `outcome`, `duration_ms
 python scripts/generate_paper_figures.py                  # all figures + generated tables
 python scripts/generate_paper_figures.py --figure 6,7     # subset
 python scripts/check_paper_numbers.py                     # check every number quoted in the text (v1.1)
-python scripts/paired_analysis.py                         # paired McNemar + Holm (Table 4)
+python scripts/paired_analysis.py                         # paired McNemar + Holm (Table 5)
 python scripts/audit_paper.py                             # historical (v1.0) spot-checks
 python scripts/audit_paper_v2.py
 python scripts/build_paper_pdf.py                         # combined.md -> HTML -> PDF (needs pandoc + Chrome)
