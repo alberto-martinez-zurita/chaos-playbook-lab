@@ -2355,8 +2355,8 @@ react to each interface&#39;s error semantics, not to the behaviour of real
 protocol stacks. In addition, the HTTP rig wraps the proxy in a circuit
 breaker (§3.2) that blocks calls for 30 s after three consecutive
 failures; the MCP and A2A rigs have none. From the traces, among the
-functioning-roster HTTP cells and GLM 4.5 nothink, a run sees at least
-one blocked call in 0.0 % (<code>nopb</code>) and 0.1 %
+functioning-roster HTTP cells and GLM 4.5 (think and nothink), a run
+sees at least one blocked call in 0.0 % (<code>nopb</code>) and 0.1 %
 (<code>pb</code>) of runs at 10 % chaos, 0.5 % and 3.5 % at 20 %, and
 1.4 % and 8.9 % at 30 %; such runs succeed about 34 %–40 % of the time
 with the playbook. Because the breaker mostly penalises the arm that
