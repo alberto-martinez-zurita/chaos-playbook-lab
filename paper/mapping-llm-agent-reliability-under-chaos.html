@@ -1920,13 +1920,12 @@ attribute the gain to inherited deliberation pattern. A targeted
 ablation—pair vanilla vs distilled with matched compute budgets and
 matched system-prompt shapes—would be needed to identify the mechanism.
 We flag this as item 4 in §6.3 (the targeted distillation ablation).</p>
-<p>Historical context: the closest prior art is from the
-image-classification adversarial literature, where Papernot et al. [45]
-showed that defensive distillation can transfer robustness to
-perturbations. Our finding extends the &quot;distillation can preserve /
-improve robustness&quot; axis from image-classification adversarial inputs to
-LLM-agent chaos at the tool boundary—a different axis entirely, but
-consistent with the conservative prior.</p>
+<p>Historical context: the closest prior art comes from image
+classification, where Papernot et al. [45] proposed defensive
+distillation against adversarial perturbations, a defence later shown to
+be ineffective by Carlini and Wagner [46]. Our observation concerns a
+different axis (benign, explicitly signalled tool failures in LLM
+agents) and does not rely on that line of work.</p>
 <h2 id="47-cost-is-bounded-and-predictable">4.7 Cost is bounded and
 predictable</h2>
 <p><strong>Fig 6—Cost of the playbook</strong>
@@ -2652,8 +2651,9 @@ Balta, D. (2024). <strong>Towards Assuring EU AI Act Compliance and
 Adversarial Robustness of LLMs</strong>. arXiv:2410.05306.</p>
 <p>[42] Nolte, H., Rateike, M., &amp; Finck, M. (2025).
 <strong>Robustness and Cybersecurity in the EU Artificial Intelligence
-Act</strong>. <em>FAccT 2025 — ACM Conference on Fairness,
-Accountability, and Transparency</em>. arXiv:2502.16184.</p>
+Act</strong>. <em>Proceedings of the 2025 ACM Conference on Fairness,
+Accountability, and Transparency (FAccT &#39;25)</em>, 283–295.
+doi:10.1145/3715275.3732020. arXiv:2502.16184.</p>
 <h2 id="recent-work-on-tool-failure-recovery">Recent work on
 tool-failure recovery</h2>
 <p>[43] Zhu, D., Ma, X., Shen, Y., Li, X., Zhao, Y., Wang, S., Yan, L.,
@@ -2669,5 +2669,8 @@ robustness (historical anchor)</h2>
 (2016). <strong>Distillation as a Defense to Adversarial Perturbations
 against Deep Neural Networks</strong>. <em>IEEE Symposium on Security
 and Privacy 2016</em>, 582–597. arXiv:1511.04508.</p>
+<p>[46] Carlini, N., &amp; Wagner, D. (2017). <strong>Towards evaluating
+the robustness of neural networks</strong>. <em>IEEE Symposium on
+Security and Privacy 2017</em>, 39–57. arXiv:1608.04644.</p>
 </body>
 </html>

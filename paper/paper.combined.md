@@ -551,7 +551,7 @@ This result inverts the direction of a preliminary internal observation made on 
 
 Caveat: we deliberately do *not* claim a mechanism. The distilled variant emits zero `reasoning_tokens` per turn (the teacher's reasoning traces were not directly transferred), so we cannot attribute the gain to inherited deliberation pattern. A targeted ablation—pair vanilla vs distilled with matched compute budgets and matched system-prompt shapes—would be needed to identify the mechanism. We flag this as item 4 in §6.3 (the targeted distillation ablation).
 
-Historical context: the closest prior art is from the image-classification adversarial literature, where Papernot et al. [45] showed that defensive distillation can transfer robustness to perturbations. Our finding extends the "distillation can preserve / improve robustness" axis from image-classification adversarial inputs to LLM-agent chaos at the tool boundary—a different axis entirely, but consistent with the conservative prior.
+Historical context: the closest prior art comes from image classification, where Papernot et al. [45] proposed defensive distillation against adversarial perturbations, a defence later shown to be ineffective by Carlini and Wagner [46]. Our observation concerns a different axis (benign, explicitly signalled tool failures in LLM agents) and does not rely on that line of work.
 
 ## 4.7 Cost is bounded and predictable
 
@@ -827,7 +827,7 @@ An earlier prototype of this instrument—the *Chaos Playbook Engine*—won **fi
 
 [41] Bueno Momcilovic, T., Buesser, B., Zizzo, G., Purcell, M., & Balta, D. (2024). **Towards Assuring EU AI Act Compliance and Adversarial Robustness of LLMs**. arXiv:2410.05306.
 
-[42] Nolte, H., Rateike, M., & Finck, M. (2025). **Robustness and Cybersecurity in the EU Artificial Intelligence Act**. *FAccT 2025 — ACM Conference on Fairness, Accountability, and Transparency*. arXiv:2502.16184.
+[42] Nolte, H., Rateike, M., & Finck, M. (2025). **Robustness and Cybersecurity in the EU Artificial Intelligence Act**. *Proceedings of the 2025 ACM Conference on Fairness, Accountability, and Transparency (FAccT '25)*, 283–295. doi:10.1145/3715275.3732020. arXiv:2502.16184.
 
 ## Recent work on tool-failure recovery
 
@@ -838,3 +838,5 @@ An earlier prototype of this instrument—the *Chaos Playbook Engine*—won **fi
 ## Distillation and robustness (historical anchor)
 
 [45] Papernot, N., McDaniel, P., Wu, X., Jha, S., & Swami, A. (2016). **Distillation as a Defense to Adversarial Perturbations against Deep Neural Networks**. *IEEE Symposium on Security and Privacy 2016*, 582–597. arXiv:1511.04508.
+
+[46] Carlini, N., & Wagner, D. (2017). **Towards evaluating the robustness of neural networks**. *IEEE Symposium on Security and Privacy 2017*, 39–57. arXiv:1608.04644.

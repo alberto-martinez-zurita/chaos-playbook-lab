@@ -162,7 +162,7 @@ This result inverts the direction of a preliminary internal observation made on 
 
 Caveat: we deliberately do *not* claim a mechanism. The distilled variant emits zero `reasoning_tokens` per turn (the teacher's reasoning traces were not directly transferred), so we cannot attribute the gain to inherited deliberation pattern. A targeted ablation—pair vanilla vs distilled with matched compute budgets and matched system-prompt shapes—would be needed to identify the mechanism. We flag this as item 4 in §6.3 (the targeted distillation ablation).
 
-Historical context: the closest prior art is from the image-classification adversarial literature, where Papernot et al. [45] showed that defensive distillation can transfer robustness to perturbations. Our finding extends the "distillation can preserve / improve robustness" axis from image-classification adversarial inputs to LLM-agent chaos at the tool boundary—a different axis entirely, but consistent with the conservative prior.
+Historical context: the closest prior art comes from image classification, where Papernot et al. [45] proposed defensive distillation against adversarial perturbations, a defence later shown to be ineffective by Carlini and Wagner [46]. Our observation concerns a different axis (benign, explicitly signalled tool failures in LLM agents) and does not rely on that line of work.
 
 ## 4.7 Cost is bounded and predictable
 

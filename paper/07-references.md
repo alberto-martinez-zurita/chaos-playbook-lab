@@ -104,7 +104,7 @@
 
 [41] Bueno Momcilovic, T., Buesser, B., Zizzo, G., Purcell, M., & Balta, D. (2024). **Towards Assuring EU AI Act Compliance and Adversarial Robustness of LLMs**. arXiv:2410.05306.
 
-[42] Nolte, H., Rateike, M., & Finck, M. (2025). **Robustness and Cybersecurity in the EU Artificial Intelligence Act**. *FAccT 2025 — ACM Conference on Fairness, Accountability, and Transparency*. arXiv:2502.16184.
+[42] Nolte, H., Rateike, M., & Finck, M. (2025). **Robustness and Cybersecurity in the EU Artificial Intelligence Act**. *Proceedings of the 2025 ACM Conference on Fairness, Accountability, and Transparency (FAccT '25)*, 283–295. doi:10.1145/3715275.3732020. arXiv:2502.16184.
 
 ## Recent work on tool-failure recovery
 
@@ -115,3 +115,5 @@
 ## Distillation and robustness (historical anchor)
 
 [45] Papernot, N., McDaniel, P., Wu, X., Jha, S., & Swami, A. (2016). **Distillation as a Defense to Adversarial Perturbations against Deep Neural Networks**. *IEEE Symposium on Security and Privacy 2016*, 582–597. arXiv:1511.04508.
+
+[46] Carlini, N., & Wagner, D. (2017). **Towards evaluating the robustness of neural networks**. *IEEE Symposium on Security and Privacy 2017*, 39–57. arXiv:1608.04644.
