@@ -8,8 +8,8 @@ We treat **chaos engineering as a scientific instrument**: a deterministic, seed
 
 ## Headline findings
 
-1. **The playbook helps and never harms.** Median Δ(pb − nopb) over the functioning roster (n = 9) is **+24 pp** at 10 % chaos and **+43.5 pp** at 30 % chaos; no model is harmed at any rate tested.
-2. **The benefit is non-monotonic in capability — the hump.** 4 B–14 B-active models gain the most; a 0.8 B model sits below the capacity floor; the 355 B frontier model saturates early because its unguided arm already approaches the playbook ceiling.
+1. **The playbook helps and never harms.** Median Δ(pb − nopb) over the functioning roster (n = 9) is **+24 pp** at 10 % chaos and **+43.5 pp** at 30 % chaos; in paired exact McNemar tests with Holm correction the effect is significant in every functioning-roster HTTP cell at failure rates of 5 % and above; no model is harmed at any rate tested.
+2. **The benefit depends on capability and on the chaos rate.** At 30 % chaos the mid-range models gain the most (largest at 14 B) and the 355 B frontier model gains less because its unguided arm already approaches the playbook ceiling; at 10 % chaos the gain is not monotonic in size; a 0.8 B model sits below the capacity floor. This is an observed pattern, not a formally tested law.
 3. **The cost is bounded and predictable.** ≈ +42 % tokens per run on average, ≈ +0.57 extra LLM calls, model-dependent wall time.
 
 ## The paper
@@ -29,10 +29,13 @@ Requires Python 3.11+.
 ```bash
 pip install -r requirements.txt          # or: poetry install
 
-# 1. Regenerate ALL paper figures (Figs 2–9) and tables from the raw CSVs — one command:
+# 1. Regenerate all paper figures (Figs 1–8; files fig2_* … fig9_*) and generated tables from the raw CSVs:
 python scripts/generate_paper_figures.py
 
-# 2. Verify the headline statistics quoted in the prose (medians, Δ CIs, sign test):
+# 2. Check every number quoted in the paper against the CSVs, and run the paired tests (Table 4):
+python scripts/check_paper_numbers.py
+python scripts/paired_analysis.py
+#    (historical) spot-checks written for paper v1.0; some quoted phrases no longer match v1.1:
 python scripts/audit_paper.py
 python scripts/audit_paper_v2.py
 
@@ -44,7 +47,7 @@ python scripts/reaggregate_metrics.py
 python scripts/build_paper_pdf.py
 ```
 
-Every number quoted in the paper is regeneratable from the released CSVs. Figures and top-level tables are produced by `generate_paper_figures.py`; the statistical spot-checks live in the two `audit_paper*.py` scripts.
+Every number quoted in the paper can be recomputed from the released CSVs. Figures and generated tables are produced by `generate_paper_figures.py`; `check_paper_numbers.py` checks the numbers quoted in the text (v1.1) and `paired_analysis.py` reproduces the paired McNemar/Holm analysis. Descriptive metadata corrections (Gemma 4 E2B/E4B architecture and parameter counts, per the Gemma 4 Technical Report) are applied in `generate_paper_figures.py` (`METADATA_CORRECTIONS`); the `experiment.yaml` files are kept exactly as used in the campaign.
 
 ## The dataset
 
@@ -62,7 +65,7 @@ experiments/<model>/<model-tag>/<protocol>[_think|_nothink]/rate_<R>.csv
 
 ## The chaos rig
 
-`src/chaos_engine/` — the released rig (`chaos-engine`). A seed-controlled proxy draws a uniform random number per tool call and, at the configured rate, replaces the tool response with an **explicit, transient, typed fault**:
+`src/chaos_engine/` — the released rig (`chaos-engine`). A seeded proxy faults each tool call with probability *p* (run *i* uses seed 2026 + *i*, identical in both arms) and replaces the tool response with an **explicit, transient, typed fault** drawn uniformly from the rig's set:
 
 | Rig | Injected fault set |
 |---|---|
