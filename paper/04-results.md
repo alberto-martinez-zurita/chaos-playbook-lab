@@ -8,6 +8,8 @@ This section reports the empirical findings, illustrated by eight figures (Figs 
 
 ![Fig 1—Hare and tortoise (HTTP, chaos = 20 %)](figures/fig2_hare_tortoise.png)
 
+**Table 4—Success rates at 20 % chaos (HTTP).** SR in %, Δ in percentage points.
+
 | Model | `nopb` SR | `pb` SR | Δ (pp) |
 |---|---:|---:|---:|
 | qwen3.5 0.8 B | 0.0 | 0.0 | 0.0 |
@@ -24,9 +26,9 @@ This section reports the empirical findings, illustrated by eight figures (Figs 
 
 **Headline**: every active model above the capacity floor benefits from the playbook, and at 20 % chaos the `pb` arm lies between **89 % and 99 %** for the upper-roster models (qwen3.5 9 B and above): the playbook *flattens* the success-rate distribution at the top, regardless of where the model started. No model has a negative Δ at any rate (under the transient faults we inject; see §5.5 xi).
 
-The design is paired—run *i* uses the same seed and task instance in both arms—so the effect can be tested on matched pairs. Table 4 counts, for each functioning-roster model, the runs that succeed only with the playbook and only without it, and reports the exact McNemar test with Holm correction over the 81 functioning-roster HTTP cells with *p* > 0. The playbook effect is significant in 68 of the 81 cells; the 13 non-significant cells are all at failure rates of 1 %–3 %, where few calls fail and there is little to recover. At 10 % and 30 % chaos every model is significant (Holm-adjusted *p* < 10⁻⁴), and runs that succeed only *without* the playbook are rare (0–9 of 200; 0–1 of 600 for GLM 4.5).
+The design is paired—run *i* uses the same seed and task instance in both arms—so the effect can be tested on matched pairs. Table 5 counts, for each functioning-roster model, the runs that succeed only with the playbook and only without it, and reports the exact McNemar test with Holm correction over the 81 functioning-roster HTTP cells with *p* > 0. The playbook effect is significant in 68 of the 81 cells; the 13 non-significant cells are all at failure rates of 1 %–3 %, where few calls fail and there is little to recover. At 10 % and 30 % chaos every model is significant (Holm-adjusted *p* < 10⁻⁴), and runs that succeed only *without* the playbook are rare (0–9 of 200; 0–1 of 600 for GLM 4.5).
 
-**Table 4—Paired comparison (HTTP).** Runs that succeed only with the playbook / only without it, out of *N* = 200 pairs (GLM 4.5: 600).
+**Table 5—Paired comparison (HTTP).** Runs that succeed only with the playbook / only without it, out of *N* = 200 pairs (GLM 4.5: 600).
 
 | Model | 10 % chaos | 30 % chaos |
 |---|---:|---:|
@@ -41,7 +43,7 @@ The design is paired—run *i* uses the same seed and task instance in both arms
 | GLM 4.5 (think) | 87 / 1 | 240 / 0 |
 
 
-The qwen3.5 0.8 B row is the **capacity floor**: the model cannot complete the task even without chaos, and the playbook cannot rescue it. We discuss this in §5. The qwen3.5 2 B row is a **structural rescue** rather than a chaos rescue (its `nopb` baseline is 0 % at chaos = 0 %); it is shown here for completeness and revisited in §5.
+The qwen3.5 0.8 B row is the capacity floor and the qwen3.5 2 B row the structural-rescue case (§3.6, §5.3).
 
 ## 4.2 Where the playbook helps most
 
@@ -50,6 +52,8 @@ The qwen3.5 0.8 B row is the **capacity floor**: the model cannot complete the t
 ![Fig 2—Δ(pb − nopb) vs active parameters at chaos = 10 % and chaos = 30 %](figures/fig3_hump.png)
 
 The relation between Δ and model size **depends on the chaos rate**. At chaos = 30 % the largest gain is at 14 B (Ministral, +67 pp); the ~4 B–9 B models gain +36.5 to +55 pp, the ~2 B PLE model +41.5 pp and the frontier model +40 pp (32 B active). At chaos = 10 % there is no such pattern: the largest gain is the smallest functioning model (Gemma 4 E2B, ~2.3 B effective, +50.5 pp), whose `nopb` baseline is already weak, and the ~4 B models range from +13.5 to +31 pp. A quadratic fit of Δ on log(active parameters) over the functioning roster is concave at 30 % (peak near 10 B) and convex at 10 %, and neither curvature is statistically significant at n = 9 (§5.5 viii). Values at 10 % chaos (the qwen3.5 0.8 B floor and the qwen3.5 2 B structural-rescue case are omitted):
+
+**Table 6—Δ(pb − nopb) at 10 % chaos (HTTP), functioning roster.**
 
 | Active params (B) | Model | Δ at 10 % chaos |
 |---|---|---:|
@@ -71,6 +75,8 @@ Two observations.
 
 At chaos = 30 % the gap profile is:
 
+**Table 7—Δ(pb − nopb) at 30 % chaos (HTTP), functioning roster.**
+
 | Model | Δ at 30 % chaos |
 |---|---:|
 | qwen3.5 4 B | +36.5 |
@@ -90,6 +96,8 @@ The gap at chaos = 30 % is larger than at chaos = 10 % for every functioning mod
 
 ![Fig 3—Cross-model SR vs chaos rate, 4 capability brackets](figures/fig4_cross_model.png)
 
+**Table 8—Capability brackets of Fig 3.**
+
 | Panel | Bucket | Models |
 |---|---|---|
 | A | Sub-2B—capacity floor / structural rescue | qwen3.5 0.8 B, qwen3.5 2 B, Gemma 4 E2B |
@@ -101,7 +109,7 @@ Each panel plots success rate vs failure rate for both arms, with Wilson 95 % ba
 
 - **Panel A** (Sub-2B): qwen3.5 0.8 B is flat at zero in both arms (capacity floor). qwen3.5 2 B's `nopb` arm is at the floor at every rate (0 % to ~4 %); the `pb` arm starts at 100 % at chaos = 0 % and degrades to 17 % at chaos = 30 %. Gemma 4 E2B is the most informative member of this bucket—both arms function and the playbook gap widens with chaos, mirroring the larger models.
 - **Panel B** (~4 B class): the two non-reasoning models (qwen3.5 4 B dense, Gemma 4 E4B PLE) stay within 3 pp of each other on the `nopb` arm at every rate; the reasoning hybrid Mamba2–Transformer model (Nemotron 3 Nano 4 B) sits 12–26 pp below them. The `pb` arm is essentially saturated for qwen3.5 4 B and Gemma 4 E4B (≥ 94 % at chaos = 30 %) and slightly behind for Nemotron Nano 4 B (86.5 % at 30 %). Nemotron has the *lowest* `nopb` of the three at chaos = 0 % (85 %) and the *largest* `pb − nopb` gap at chaos = 30 % (+52.5 pp). We cannot disentangle two confounded effects in this panel: reasoning-by-default introducing self-induced drift (consistent with the §4.4 think/nothink evidence on GLM 4.5 under MCP/A2A) versus the hybrid Mamba2–Transformer architecture itself. Running Nemotron with its reasoning toggle off would separate them; we did not vary it in this campaign.
-- **Panel C** (9 B–26 B): all four models reach `pb` ≥ 86 % at chaos = 30 %. The MoE model (Gemma 4 26 B, ~4 B active) behaves like the dense 9 B–14 B models on both arms. The community-distilled qwen3.5 9 B is *uniformly above* the original on `nopb` across every chaos rate (gap +1 pp at chaos = 0 % widening to +13 pp at chaos = 30 %), and on `pb` it saturates at 100 % up to chaos = 10 % and stays 1–7 pp above the original at every higher rate. Distillation preserves—and at high chaos, modestly improves—chaos resilience at the 9 B point in our roster.
+- **Panel C** (9 B–26 B): all four models reach `pb` ≥ 86 % at chaos = 30 %. The MoE model (Gemma 4 26 B, ~4 B active) behaves like the dense 9 B–14 B models on both arms. The community-distilled qwen3.5 9 B scores above the original on `nopb` at every chaos rate (gap +1 pp at chaos = 0 % widening to +13 pp at chaos = 30 %, individually significant only at the highest rates; §4.6), and on `pb` it saturates at 100 % up to chaos = 10 % and stays 6–8.5 pp above the original at every higher rate.
 - **Panel D** (Frontier): GLM 4.5 (think mode, 32 B active of 355 B) maintains a `nopb` floor of 57.0 % at chaos = 30 %—among the highest in the HTTP roster, statistically indistinguishable from qwen3.5 4 B (57.5 %) within Wilson 95 % CIs (GLM at *N* = 600 has Wilson half-width ≈ 4.0 pp vs qwen3.5 4 B at *N* = 200 with ≈ 6.8 pp)—and reaches `pb` = 97.0 % there. The arms are visibly closer than for any other model in the roster, which is the saturation signature: the unguided model is already close to the playbook ceiling.
 
 ## 4.4 Thinking has no detectable effect on flat tools and hurts on structured-error protocols
@@ -133,7 +141,9 @@ The constructive interpretation has two parts. First, **the playbook brings most
 
 ![Fig 7—qwen3.5 9 B vanilla vs community-distilled (HTTP, N = 200)](figures/fig8_distillation.png)
 
-The distilled variant is **uniformly above the original on the `nopb` arm** across every chaos rate, with the gap widening as chaos increases:
+On the `nopb` arm the distilled variant scores above the original at all ten chaos rates, with the gap widening as chaos increases; individually, most of these differences are within sampling noise:
+
+**Table 9—qwen3.5 9 B vanilla vs community-distilled, `nopb` arm (HTTP, *N* = 200 per cell).**
 
 | Chaos rate | Vanilla nopb (%) | Distilled nopb (%) | Δ (pp) | 95 % CI on Δ (pp) |
 |---:|---:|---:|---:|---:|
@@ -143,11 +153,11 @@ The distilled variant is **uniformly above the original on the `nopb` arm** acro
 | 20 % | 53.0 | 59.5 | +6.5 | ± 9.7 (not individually sig.) |
 | 30 % | 36.5 | 49.5 | **+13.0** | ± 9.6 (sig.) |
 
-The strength of the distillation finding is **not the size of any single Δ**—most individual rates are within Wilson 95 % CIs at *N* = 200—but the **uniformity across rates**: distilled ≥ vanilla on `nopb` at 10/10 rates (sign test, *p* = 0.002, two-sided binomial). On the `pb` arm the distilled variant sits 0–8.5 pp above the original at every rate; the playbook saturates both lines near 100 % up to chaos = 10 %.
+Only the difference at 30 % chaos is individually significant (10 % is marginal), so the evidence is the consistency of the direction across rates rather than any single difference. A sign test over the ten rates (10/10 in the same direction, two-sided *p* = 0.002) supports that consistency, under the assumption that the ten rates are independent comparisons; because both variants share the seed schedule, a paired analysis per rate would be the stricter test. We therefore read this as suggestive, not conclusive. On the `pb` arm the distilled variant sits 0–8.5 pp above the original at every rate; the playbook saturates both lines near 100 % up to chaos = 10 %.
 
 This result inverts the direction of a preliminary internal observation made on an *N* = 5 distilled pilot (April 2026), which suggested the opposite—distilled appearing *more* fragile than vanilla. The pilot's apparent gap was within sampling noise; the *N* = 200 sweep settles it cleanly. Two empirical implications:
 
-1. **Community distillation preserves—and modestly improves—chaos resilience at the 9 B point in our roster.** The unguided distilled model is more robust to flaky tools than the unguided original at every chaos rate we tested. We do not interpret this as a general claim about distillation; it is one model pair, one task family. But it falsifies the conservative prior ("distillation can only lose") for this configuration.
+1. **Community distillation did not reduce chaos resilience at the 9 B point in our roster, and may modestly improve it.** The unguided distilled model scores above the unguided original at every chaos rate we tested, significantly only at the highest rate. We do not interpret this as a general claim about distillation; it is one model pair, one task family. But it falsifies the conservative prior ("distillation can only lose") for this configuration.
 2. **The playbook benefit does not depend on the distillation step.** Both variants saturate near 100 % at low chaos and stay above 86 % at chaos = 30 %; the playbook gain travels with the underlying capability bracket (§4.2) rather than with the training recipe.
 
 Caveat: we deliberately do *not* claim a mechanism. The distilled variant emits zero `reasoning_tokens` per turn (the teacher's reasoning traces were not directly transferred), so we cannot attribute the gain to inherited deliberation pattern. A targeted ablation—pair vanilla vs distilled with matched compute budgets and matched system-prompt shapes—would be needed to identify the mechanism. We flag this as item 4 in §6.3 (the targeted distillation ablation).
@@ -161,6 +171,8 @@ Historical context: the closest prior art is from the image-classification adver
 ![Fig 6—Cost of the playbook (tokens, wall time, LLM calls per run)](figures/fig7_cost_of_playbook.png)
 
 Numbers (per run, mean, at chaos = 10 % HTTP):
+
+**Table 10—Cost per run at 10 % chaos (HTTP), mean.**
 
 | Model | `nopb` tokens | `pb` tokens | Δ tokens (%) | `nopb` calls | `pb` calls | `nopb` time (s) | `pb` time (s) |
 |---|---:|---:|---:|---:|---:|---:|---:|
@@ -195,7 +207,7 @@ Four patterns are visible without reading any single curve:
 
 Combining the eight figures and the paired tests:
 
-1. **Across all functioning models the playbook helps and, under the transient faults we inject, never harms**, with a median Δ of **+24 pp** at chaos = 10 % (bootstrap 95 % CI over models: [14.0, 34.0]) and **+43.5 pp** at chaos = 30 % (bootstrap 95 % CI: [40.0, 55.0]) over the functioning roster (n = 9; the qwen3.5 0.8 B floor and the qwen3.5 2 B structural-rescue case are excluded, §5.3). In paired exact tests with Holm correction the effect is significant in every functioning-roster HTTP cell at failure rates of 5 % and above (Table 4).
+1. **Across all functioning models the playbook helps and, under the transient faults we inject, never harms**, with a median Δ of **+24 pp** at chaos = 10 % (bootstrap 95 % CI over models: [14.0, 34.0]) and **+43.5 pp** at chaos = 30 % (bootstrap 95 % CI: [40.0, 55.0]) over the functioning roster (n = 9; the qwen3.5 0.8 B floor and the qwen3.5 2 B structural-rescue case are excluded, §5.3). In paired exact tests with Holm correction the effect is significant in every functioning-roster HTTP cell at failure rates of 5 % and above (Table 5).
 2. **The marginal value of the playbook depends on capability and on the chaos rate.** At 30 % chaos it is largest in the mid-range (maximum at 14 B) and smaller for the frontier model, whose unguided baseline is already close to the playbook's ceiling; at 10 % chaos it is not monotonic in size. This is an observed pattern, not a formally tested law (§5.5 viii).
 3. **The playbook generalises across protocols** (HTTP/MCP/A2A) and across reasoning toggles (think/nothink), with **MCP under reasoning** as the one documented exception, where the `pb` arm sits about 9–15 pp below its HTTP/A2A counterparts at 30 % chaos (§4.5).
 4. **Capacity floor**: a 0.8 B model cannot use the playbook because it cannot follow the task. A 2 B model gains a +100 pp Δ at chaos = 0 % because the playbook supplies missing structural scaffolding.

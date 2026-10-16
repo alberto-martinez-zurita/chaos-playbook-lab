@@ -32,7 +32,7 @@ pip install -r requirements.txt          # or: poetry install
 # 1. Regenerate all paper figures (Figs 1–8; files fig2_* … fig9_*) and generated tables from the raw CSVs:
 python scripts/generate_paper_figures.py
 
-# 2. Check every number quoted in the paper against the CSVs, and run the paired tests (Table 4):
+# 2. Check every number quoted in the paper against the CSVs, and run the paired tests (Table 5):
 python scripts/check_paper_numbers.py
 python scripts/paired_analysis.py
 #    (historical) spot-checks written for paper v1.0; some quoted phrases no longer match v1.1:

@@ -25,7 +25,7 @@ A third strand adds model-side recovery behaviour: ReAct [9] interleaves reasoni
 We vary the same axes—total and active parameters, architecture, distilled vs original, think vs nothink—under chaos, and find a different picture:
 
 - The playbook's benefit is not monotonic in scale: at high chaos the mid-range models gain the most and the frontier model gains less, whereas capability on clean benchmarks usually grows with scale. A similar inverted-U has been reported for prompting strategies on reasoning tasks [40].
-- In our **distillation pair** (qwen3.5 9 B vs a community-distilled 9 B variant), the distilled model is above the original on the unguided arm at every chaos rate, with the gap widening from +1 pp at chaos = 0 % to +13 pp at chaos = 30 %.
+- In our **distillation pair** (qwen3.5 9 B vs a community-distilled 9 B variant), the distilled model scores above the original on the unguided arm at every chaos rate (+1 pp at chaos = 0 % to +13 pp at chaos = 30 %), although only the largest difference is individually significant.
 - The think/nothink toggle on GLM 4.5 has little effect on flat HTTP tools but lowers unguided success on protocols with typed errors (MCP, A2A).
 
 We treat these as empirical observations, not as theory.

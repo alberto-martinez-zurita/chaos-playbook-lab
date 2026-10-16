@@ -56,9 +56,9 @@ Only abort after exhausting all retries for a given step.
 
 The playbook lists exactly the status codes the rig can inject (cf. §3.2: 408, 429, 500, 502, 503, 504) and does *not* invent recovery semantics beyond what HTTP status conventions already imply. It is a forcing function: it asks the model to recognise standard signals and respond in a standard way.
 
-## 3.4 Sweep
+## 3.4 Failure-rate sweep
 
-For every `(model, protocol[, thinking])` cell we sweep ten failure rates:
+We call a *sweep* the series of experiments that runs one `(model, protocol[, thinking])` configuration at each of ten failure rates:
 
 ```
 0.00, 0.01, 0.02, 0.03, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30

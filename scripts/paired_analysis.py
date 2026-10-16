@@ -1,4 +1,4 @@
-"""Paired analysis of the playbook effect (paper v1.1, §3.7 and Table 4).
+"""Paired analysis of the playbook effect (paper v1.1, §3.7 and Table 5).
 
 Run i uses seed 2026 + i in both arms, so each (model, protocol, rate) cell yields matched pairs.
 For each cell: runs that succeed only with the playbook (b) and only without it (c), and the exact

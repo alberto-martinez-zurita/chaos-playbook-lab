@@ -26,9 +26,9 @@ pagetitle: "Mapping LLM-agent reliability under chaos: a cross-architecture stud
 
 # Abstract
 
-Large language model (LLM) agents are increasingly used as autonomous executors of multi-step business workflows, yet their reliability under *operational chaos*—transient tool failures such as timeouts, rate limits and server errors—remains poorly characterised. This matters beyond engineering: the EU AI Act requires high-risk AI systems to be resilient to "errors, faults or inconsistencies" arising from their interaction with other systems (Art. 15(4)), but prescribes no method to measure it. We use **chaos engineering as a scientific instrument**—controlled, seeded fault injection at the agent–tool boundary—and report a controlled study across **eleven open and frontier LLMs** (0.8 B to 355 B parameters; dense, Per-Layer-Embedding, hybrid Mamba2–Transformer and Mixture-of-Experts architectures), three agent transport protocols (HTTP, MCP, A2A) and ten injected failure rates *p* (the per-call probability that a tool call is replaced by an explicit, transient error) from 0 % to 30 %.
+Large language model (LLM) agents are increasingly used as autonomous executors of multi-step business workflows, yet their reliability under *operational chaos*—transient tool failures such as timeouts, rate limits and server errors—remains poorly characterised. This matters beyond engineering: the EU AI Act requires high-risk AI systems to be resilient to "errors, faults or inconsistencies" arising from their interaction with other systems (Art. 15(4)), but prescribes no method to measure it. We use **chaos engineering as a scientific instrument**—controlled, seeded fault injection at the agent–tool boundary—and report a controlled study across **eleven open and frontier LLMs** (0.8 B to 355 B parameters; dense, Per-Layer-Embedding, hybrid Mamba2–Transformer and Mixture-of-Experts architectures), three agent transport protocols (HTTP, the Model Context Protocol (MCP) and the Agent-to-Agent protocol (A2A)) and ten injected failure rates *p* (the per-call probability that a tool call is replaced by an explicit, transient error) from 0 % to 30 %.
 
-For each model we run a paired A/B comparison between an unguided agent (`nopb`) and the same model executing under a short structured **recovery playbook** (`pb`) that we designed for this study (69 words for HTTP), totalling 128,000 active agent runs. The primary outcome is the **success rate** (SR, the fraction of runs that complete the four-step workflow) and its difference Δ(pb−nopb) in percentage points; secondary outcomes are tokens, LLM calls and wall time per run. Three findings emerge. **(i)** The playbook closes most of the chaos-induced failure gap: over the **functioning roster** (n = 9 models, excluding a capacity-floor model and a structural-rescue case), the median Δ at 30 % chaos is **+43.5 percentage points** (bootstrap 95 % CI over models [40.0, 55.0]); in paired exact McNemar tests with Holm correction the effect is significant in every functioning-roster HTTP cell at failure rates of 5 % and above, and no model is harmed at any rate under the transient faults we inject. Much of the effect is explained by retry behaviour: without the playbook several models rarely retry a failed call, and the playbook induces them to do so. **(ii)** The benefit depends on capability and on the chaos rate: at 30 % chaos the mid-range models gain the most (+36.5 to +67 pp, largest at 14 B) and the frontier model gains less (+40 pp), while at 10 % chaos the gain is not monotonic in model size. We report this as an observed pattern, not a formally tested non-monotonicity. **(iii)** The cost is modest: 13 %–69 % more tokens per run (mean ≈ 42 %) and +0.57 LLM calls on average; wall time is model-dependent (−20 % to +43 %).
+For each model we run a paired A/B comparison between an unguided agent (`nopb`) and the same model executing under a short structured **recovery playbook** (`pb`) that we designed for this study (69 words for HTTP), totalling 128,000 active agent runs. The primary outcome is the **success rate** (SR, the fraction of runs that complete the four-step workflow) and its difference Δ(pb−nopb) in percentage points; secondary outcomes are tokens, LLM calls and wall time per run. Three findings emerge: **(i)** The playbook closes most of the chaos-induced failure gap: over the **functioning roster** (n = 9 models, excluding a capacity-floor model and a structural-rescue case), the median Δ at 30 % chaos is **+43.5 percentage points** (bootstrap 95 % confidence interval (CI) over models [40.0, 55.0]); in paired exact McNemar tests with Holm correction the effect is significant in every functioning-roster HTTP cell at failure rates of 5 % and above, and no model is harmed at any rate under the transient faults we inject. Much of the effect is explained by retry behaviour: without the playbook several models rarely retry a failed call, and the playbook induces them to do so. **(ii)** The benefit depends on capability and on the chaos rate: at 30 % chaos the mid-range models gain the most (+36.5 to +67 pp, largest at 14 B) and the frontier model gains less (+40 pp), while at 10 % chaos the gain is not monotonic in model size. We report this as an observed pattern, not a formally tested non-monotonicity. **(iii)** The cost is modest: 13 %–69 % more tokens per run (mean ≈ 42 %) and +0.57 LLM calls on average; wall time is model-dependent (−20 % to +43 %).
 
 We also document a *capacity floor* (qwen3.5 0.8 B fails the task at 0 % chaos in both arms) and a *structural-rescue artefact* (qwen3.5 2 B succeeds at 0 % chaos only with the playbook, which supplies missing output structure). The chaos rig, playbook, the 128,800-run dataset and the analysis scripts are released as open source.
 
@@ -52,7 +52,7 @@ The question also has a regulatory side. The EU AI Act [33] requires providers o
 
 ## 1.2 The instrument
 
-We build a transparent, seeded chaos rig (released as `chaos-engine`) that injects a controlled rate of faults into the path between the LLM agent and its tools. It re-architects an earlier prototype into a protocol-agnostic A/B rig (see Acknowledgements). The faults are intentionally simple and explicitly signalled—HTTP error codes (5xx, 408/504 timeouts, 429), typed MCP errors (`timeout`, `rate_limited`, `internal_error`) and typed A2A errors (`timeout`, `task_rejected`, `partial_failure`)—and the injection mechanism is the same for all protocols: each tool call is replaced by a fault with probability *p*, and the fault type is drawn uniformly from the rig's set. A single knob—the **failure rate** *p*—goes from 0 % to 30 % per tool call. Around the rig we run a fixed multi-step task and an A/B comparison between two agents:
+We build a transparent, seeded chaos rig (released as `chaos-engine`) that injects a controlled rate of faults into the path between the LLM agent and its tools. It re-architects an earlier prototype into a protocol-agnostic A/B rig (see Acknowledgements). The faults are intentionally simple and explicitly signalled—HTTP error codes (5xx, 408/504 timeouts, 429), typed errors of the Model Context Protocol (MCP: `timeout`, `rate_limited`, `internal_error`) and typed errors of the Agent-to-Agent protocol (A2A: `timeout`, `task_rejected`, `partial_failure`)—and the injection mechanism is the same for all protocols: each tool call is replaced by a fault with probability *p*, and the fault type is drawn uniformly from the rig's set. A single knob—the **failure rate** *p*—goes from 0 % to 30 % per tool call. Around the rig we run a fixed multi-step task and an A/B comparison between two agents:
 
 - **`nopb` (unguided)**: the model is told what tools exist and asked to complete the task. It receives no recovery instructions.
 - **`pb` (playbook)**: the model also receives a short structured **recovery playbook** that we designed for this study—a 69-word instruction block (HTTP version) stating, for each error type the rig can inject, whether and how to retry and when to give up.
@@ -109,7 +109,7 @@ A third strand adds model-side recovery behaviour: ReAct [9] interleaves reasoni
 We vary the same axes—total and active parameters, architecture, distilled vs original, think vs nothink—under chaos, and find a different picture:
 
 - The playbook's benefit is not monotonic in scale: at high chaos the mid-range models gain the most and the frontier model gains less, whereas capability on clean benchmarks usually grows with scale. A similar inverted-U has been reported for prompting strategies on reasoning tasks [40].
-- In our **distillation pair** (qwen3.5 9 B vs a community-distilled 9 B variant), the distilled model is above the original on the unguided arm at every chaos rate, with the gap widening from +1 pp at chaos = 0 % to +13 pp at chaos = 30 %.
+- In our **distillation pair** (qwen3.5 9 B vs a community-distilled 9 B variant), the distilled model scores above the original on the unguided arm at every chaos rate (+1 pp at chaos = 0 % to +13 pp at chaos = 30 %), although only the largest difference is individually significant.
 - The think/nothink toggle on GLM 4.5 has little effect on flat HTTP tools but lowers unguided success on protocols with typed errors (MCP, A2A).
 
 We treat these as empirical observations, not as theory.
@@ -181,9 +181,9 @@ Only abort after exhausting all retries for a given step.
 
 The playbook lists exactly the status codes the rig can inject (cf. §3.2: 408, 429, 500, 502, 503, 504) and does *not* invent recovery semantics beyond what HTTP status conventions already imply. It is a forcing function: it asks the model to recognise standard signals and respond in a standard way.
 
-## 3.4 Sweep
+## 3.4 Failure-rate sweep
 
-For every `(model, protocol[, thinking])` cell we sweep ten failure rates:
+We call a *sweep* the series of experiments that runs one `(model, protocol[, thinking])` configuration at each of ten failure rates:
 
 ```
 0.00, 0.01, 0.02, 0.03, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30
@@ -397,6 +397,8 @@ This section reports the empirical findings, illustrated by eight figures (Figs 
 
 ![Fig 1—Hare and tortoise (HTTP, chaos = 20 %)](figures/fig2_hare_tortoise.png)
 
+**Table 4—Success rates at 20 % chaos (HTTP).** SR in %, Δ in percentage points.
+
 | Model | `nopb` SR | `pb` SR | Δ (pp) |
 |---|---:|---:|---:|
 | qwen3.5 0.8 B | 0.0 | 0.0 | 0.0 |
@@ -413,9 +415,9 @@ This section reports the empirical findings, illustrated by eight figures (Figs 
 
 **Headline**: every active model above the capacity floor benefits from the playbook, and at 20 % chaos the `pb` arm lies between **89 % and 99 %** for the upper-roster models (qwen3.5 9 B and above): the playbook *flattens* the success-rate distribution at the top, regardless of where the model started. No model has a negative Δ at any rate (under the transient faults we inject; see §5.5 xi).
 
-The design is paired—run *i* uses the same seed and task instance in both arms—so the effect can be tested on matched pairs. Table 4 counts, for each functioning-roster model, the runs that succeed only with the playbook and only without it, and reports the exact McNemar test with Holm correction over the 81 functioning-roster HTTP cells with *p* > 0. The playbook effect is significant in 68 of the 81 cells; the 13 non-significant cells are all at failure rates of 1 %–3 %, where few calls fail and there is little to recover. At 10 % and 30 % chaos every model is significant (Holm-adjusted *p* < 10⁻⁴), and runs that succeed only *without* the playbook are rare (0–9 of 200; 0–1 of 600 for GLM 4.5).
+The design is paired—run *i* uses the same seed and task instance in both arms—so the effect can be tested on matched pairs. Table 5 counts, for each functioning-roster model, the runs that succeed only with the playbook and only without it, and reports the exact McNemar test with Holm correction over the 81 functioning-roster HTTP cells with *p* > 0. The playbook effect is significant in 68 of the 81 cells; the 13 non-significant cells are all at failure rates of 1 %–3 %, where few calls fail and there is little to recover. At 10 % and 30 % chaos every model is significant (Holm-adjusted *p* < 10⁻⁴), and runs that succeed only *without* the playbook are rare (0–9 of 200; 0–1 of 600 for GLM 4.5).
 
-**Table 4—Paired comparison (HTTP).** Runs that succeed only with the playbook / only without it, out of *N* = 200 pairs (GLM 4.5: 600).
+**Table 5—Paired comparison (HTTP).** Runs that succeed only with the playbook / only without it, out of *N* = 200 pairs (GLM 4.5: 600).
 
 | Model | 10 % chaos | 30 % chaos |
 |---|---:|---:|
@@ -430,7 +432,7 @@ The design is paired—run *i* uses the same seed and task instance in both arms
 | GLM 4.5 (think) | 87 / 1 | 240 / 0 |
 
 
-The qwen3.5 0.8 B row is the **capacity floor**: the model cannot complete the task even without chaos, and the playbook cannot rescue it. We discuss this in §5. The qwen3.5 2 B row is a **structural rescue** rather than a chaos rescue (its `nopb` baseline is 0 % at chaos = 0 %); it is shown here for completeness and revisited in §5.
+The qwen3.5 0.8 B row is the capacity floor and the qwen3.5 2 B row the structural-rescue case (§3.6, §5.3).
 
 ## 4.2 Where the playbook helps most
 
@@ -439,6 +441,8 @@ The qwen3.5 0.8 B row is the **capacity floor**: the model cannot complete the t
 ![Fig 2—Δ(pb − nopb) vs active parameters at chaos = 10 % and chaos = 30 %](figures/fig3_hump.png)
 
 The relation between Δ and model size **depends on the chaos rate**. At chaos = 30 % the largest gain is at 14 B (Ministral, +67 pp); the ~4 B–9 B models gain +36.5 to +55 pp, the ~2 B PLE model +41.5 pp and the frontier model +40 pp (32 B active). At chaos = 10 % there is no such pattern: the largest gain is the smallest functioning model (Gemma 4 E2B, ~2.3 B effective, +50.5 pp), whose `nopb` baseline is already weak, and the ~4 B models range from +13.5 to +31 pp. A quadratic fit of Δ on log(active parameters) over the functioning roster is concave at 30 % (peak near 10 B) and convex at 10 %, and neither curvature is statistically significant at n = 9 (§5.5 viii). Values at 10 % chaos (the qwen3.5 0.8 B floor and the qwen3.5 2 B structural-rescue case are omitted):
+
+**Table 6—Δ(pb − nopb) at 10 % chaos (HTTP), functioning roster.**
 
 | Active params (B) | Model | Δ at 10 % chaos |
 |---|---|---:|
@@ -460,6 +464,8 @@ Two observations.
 
 At chaos = 30 % the gap profile is:
 
+**Table 7—Δ(pb − nopb) at 30 % chaos (HTTP), functioning roster.**
+
 | Model | Δ at 30 % chaos |
 |---|---:|
 | qwen3.5 4 B | +36.5 |
@@ -479,6 +485,8 @@ The gap at chaos = 30 % is larger than at chaos = 10 % for every functioning mod
 
 ![Fig 3—Cross-model SR vs chaos rate, 4 capability brackets](figures/fig4_cross_model.png)
 
+**Table 8—Capability brackets of Fig 3.**
+
 | Panel | Bucket | Models |
 |---|---|---|
 | A | Sub-2B—capacity floor / structural rescue | qwen3.5 0.8 B, qwen3.5 2 B, Gemma 4 E2B |
@@ -490,7 +498,7 @@ Each panel plots success rate vs failure rate for both arms, with Wilson 95 % ba
 
 - **Panel A** (Sub-2B): qwen3.5 0.8 B is flat at zero in both arms (capacity floor). qwen3.5 2 B's `nopb` arm is at the floor at every rate (0 % to ~4 %); the `pb` arm starts at 100 % at chaos = 0 % and degrades to 17 % at chaos = 30 %. Gemma 4 E2B is the most informative member of this bucket—both arms function and the playbook gap widens with chaos, mirroring the larger models.
 - **Panel B** (~4 B class): the two non-reasoning models (qwen3.5 4 B dense, Gemma 4 E4B PLE) stay within 3 pp of each other on the `nopb` arm at every rate; the reasoning hybrid Mamba2–Transformer model (Nemotron 3 Nano 4 B) sits 12–26 pp below them. The `pb` arm is essentially saturated for qwen3.5 4 B and Gemma 4 E4B (≥ 94 % at chaos = 30 %) and slightly behind for Nemotron Nano 4 B (86.5 % at 30 %). Nemotron has the *lowest* `nopb` of the three at chaos = 0 % (85 %) and the *largest* `pb − nopb` gap at chaos = 30 % (+52.5 pp). We cannot disentangle two confounded effects in this panel: reasoning-by-default introducing self-induced drift (consistent with the §4.4 think/nothink evidence on GLM 4.5 under MCP/A2A) versus the hybrid Mamba2–Transformer architecture itself. Running Nemotron with its reasoning toggle off would separate them; we did not vary it in this campaign.
-- **Panel C** (9 B–26 B): all four models reach `pb` ≥ 86 % at chaos = 30 %. The MoE model (Gemma 4 26 B, ~4 B active) behaves like the dense 9 B–14 B models on both arms. The community-distilled qwen3.5 9 B is *uniformly above* the original on `nopb` across every chaos rate (gap +1 pp at chaos = 0 % widening to +13 pp at chaos = 30 %), and on `pb` it saturates at 100 % up to chaos = 10 % and stays 1–7 pp above the original at every higher rate. Distillation preserves—and at high chaos, modestly improves—chaos resilience at the 9 B point in our roster.
+- **Panel C** (9 B–26 B): all four models reach `pb` ≥ 86 % at chaos = 30 %. The MoE model (Gemma 4 26 B, ~4 B active) behaves like the dense 9 B–14 B models on both arms. The community-distilled qwen3.5 9 B scores above the original on `nopb` at every chaos rate (gap +1 pp at chaos = 0 % widening to +13 pp at chaos = 30 %, individually significant only at the highest rates; §4.6), and on `pb` it saturates at 100 % up to chaos = 10 % and stays 6–8.5 pp above the original at every higher rate.
 - **Panel D** (Frontier): GLM 4.5 (think mode, 32 B active of 355 B) maintains a `nopb` floor of 57.0 % at chaos = 30 %—among the highest in the HTTP roster, statistically indistinguishable from qwen3.5 4 B (57.5 %) within Wilson 95 % CIs (GLM at *N* = 600 has Wilson half-width ≈ 4.0 pp vs qwen3.5 4 B at *N* = 200 with ≈ 6.8 pp)—and reaches `pb` = 97.0 % there. The arms are visibly closer than for any other model in the roster, which is the saturation signature: the unguided model is already close to the playbook ceiling.
 
 ## 4.4 Thinking has no detectable effect on flat tools and hurts on structured-error protocols
@@ -522,7 +530,9 @@ The constructive interpretation has two parts. First, **the playbook brings most
 
 ![Fig 7—qwen3.5 9 B vanilla vs community-distilled (HTTP, N = 200)](figures/fig8_distillation.png)
 
-The distilled variant is **uniformly above the original on the `nopb` arm** across every chaos rate, with the gap widening as chaos increases:
+On the `nopb` arm the distilled variant scores above the original at all ten chaos rates, with the gap widening as chaos increases; individually, most of these differences are within sampling noise:
+
+**Table 9—qwen3.5 9 B vanilla vs community-distilled, `nopb` arm (HTTP, *N* = 200 per cell).**
 
 | Chaos rate | Vanilla nopb (%) | Distilled nopb (%) | Δ (pp) | 95 % CI on Δ (pp) |
 |---:|---:|---:|---:|---:|
@@ -532,11 +542,11 @@ The distilled variant is **uniformly above the original on the `nopb` arm** acro
 | 20 % | 53.0 | 59.5 | +6.5 | ± 9.7 (not individually sig.) |
 | 30 % | 36.5 | 49.5 | **+13.0** | ± 9.6 (sig.) |
 
-The strength of the distillation finding is **not the size of any single Δ**—most individual rates are within Wilson 95 % CIs at *N* = 200—but the **uniformity across rates**: distilled ≥ vanilla on `nopb` at 10/10 rates (sign test, *p* = 0.002, two-sided binomial). On the `pb` arm the distilled variant sits 0–8.5 pp above the original at every rate; the playbook saturates both lines near 100 % up to chaos = 10 %.
+Only the difference at 30 % chaos is individually significant (10 % is marginal), so the evidence is the consistency of the direction across rates rather than any single difference. A sign test over the ten rates (10/10 in the same direction, two-sided *p* = 0.002) supports that consistency, under the assumption that the ten rates are independent comparisons; because both variants share the seed schedule, a paired analysis per rate would be the stricter test. We therefore read this as suggestive, not conclusive. On the `pb` arm the distilled variant sits 0–8.5 pp above the original at every rate; the playbook saturates both lines near 100 % up to chaos = 10 %.
 
 This result inverts the direction of a preliminary internal observation made on an *N* = 5 distilled pilot (April 2026), which suggested the opposite—distilled appearing *more* fragile than vanilla. The pilot's apparent gap was within sampling noise; the *N* = 200 sweep settles it cleanly. Two empirical implications:
 
-1. **Community distillation preserves—and modestly improves—chaos resilience at the 9 B point in our roster.** The unguided distilled model is more robust to flaky tools than the unguided original at every chaos rate we tested. We do not interpret this as a general claim about distillation; it is one model pair, one task family. But it falsifies the conservative prior ("distillation can only lose") for this configuration.
+1. **Community distillation did not reduce chaos resilience at the 9 B point in our roster, and may modestly improve it.** The unguided distilled model scores above the unguided original at every chaos rate we tested, significantly only at the highest rate. We do not interpret this as a general claim about distillation; it is one model pair, one task family. But it falsifies the conservative prior ("distillation can only lose") for this configuration.
 2. **The playbook benefit does not depend on the distillation step.** Both variants saturate near 100 % at low chaos and stay above 86 % at chaos = 30 %; the playbook gain travels with the underlying capability bracket (§4.2) rather than with the training recipe.
 
 Caveat: we deliberately do *not* claim a mechanism. The distilled variant emits zero `reasoning_tokens` per turn (the teacher's reasoning traces were not directly transferred), so we cannot attribute the gain to inherited deliberation pattern. A targeted ablation—pair vanilla vs distilled with matched compute budgets and matched system-prompt shapes—would be needed to identify the mechanism. We flag this as item 4 in §6.3 (the targeted distillation ablation).
@@ -550,6 +560,8 @@ Historical context: the closest prior art is from the image-classification adver
 ![Fig 6—Cost of the playbook (tokens, wall time, LLM calls per run)](figures/fig7_cost_of_playbook.png)
 
 Numbers (per run, mean, at chaos = 10 % HTTP):
+
+**Table 10—Cost per run at 10 % chaos (HTTP), mean.**
 
 | Model | `nopb` tokens | `pb` tokens | Δ tokens (%) | `nopb` calls | `pb` calls | `nopb` time (s) | `pb` time (s) |
 |---|---:|---:|---:|---:|---:|---:|---:|
@@ -584,7 +596,7 @@ Four patterns are visible without reading any single curve:
 
 Combining the eight figures and the paired tests:
 
-1. **Across all functioning models the playbook helps and, under the transient faults we inject, never harms**, with a median Δ of **+24 pp** at chaos = 10 % (bootstrap 95 % CI over models: [14.0, 34.0]) and **+43.5 pp** at chaos = 30 % (bootstrap 95 % CI: [40.0, 55.0]) over the functioning roster (n = 9; the qwen3.5 0.8 B floor and the qwen3.5 2 B structural-rescue case are excluded, §5.3). In paired exact tests with Holm correction the effect is significant in every functioning-roster HTTP cell at failure rates of 5 % and above (Table 4).
+1. **Across all functioning models the playbook helps and, under the transient faults we inject, never harms**, with a median Δ of **+24 pp** at chaos = 10 % (bootstrap 95 % CI over models: [14.0, 34.0]) and **+43.5 pp** at chaos = 30 % (bootstrap 95 % CI: [40.0, 55.0]) over the functioning roster (n = 9; the qwen3.5 0.8 B floor and the qwen3.5 2 B structural-rescue case are excluded, §5.3). In paired exact tests with Holm correction the effect is significant in every functioning-roster HTTP cell at failure rates of 5 % and above (Table 5).
 2. **The marginal value of the playbook depends on capability and on the chaos rate.** At 30 % chaos it is largest in the mid-range (maximum at 14 B) and smaller for the frontier model, whose unguided baseline is already close to the playbook's ceiling; at 10 % chaos it is not monotonic in size. This is an observed pattern, not a formally tested law (§5.5 viii).
 3. **The playbook generalises across protocols** (HTTP/MCP/A2A) and across reasoning toggles (think/nothink), with **MCP under reasoning** as the one documented exception, where the `pb` arm sits about 9–15 pp below its HTTP/A2A counterparts at 30 % chaos (§4.5).
 4. **Capacity floor**: a 0.8 B model cannot use the playbook because it cannot follow the task. A 2 B model gains a +100 pp Δ at chaos = 0 % because the playbook supplies missing structural scaffolding.
@@ -631,7 +643,7 @@ We exclude `gpt_oss_20b` from comparative analysis because at chaos = 0.20 it en
 
 **(ii) Chaos schedule is uniform random.** Our chaos rate is a marginal probability over independent calls. Real production failures are bursty, correlated and sometimes systemic (one downstream service is degraded for the next 30 s). A burst-mode chaos rig would likely change the shape of the curves; we expect the playbook to help *more*, not less, but this should be measured.
 
-**(iii) Sample sizes by cell.** All local-roster cells are *N* = 200 per arm (qwen3.5 family, Gemma 4 family including the 26 B MoE, Nemotron Nano 4 B, Ministral 14 B); the cloud frontier model (GLM 4.5) is *N* = 600 per arm so that think × nothink × HTTP/MCP/A2A is well powered. The playbook effect is significant in paired exact tests with Holm correction in every functioning-roster HTTP cell at failure rates of 5 % and above (§4.1, Table 4); several secondary comparisons, such as the distillation pair at individual rates (§4.6) or GLM 4.5 vs qwen3.5 4 B, are within sampling noise and are reported as such. The released CSVs include the `seed` column for exact replication of the fault schedule.
+**(iii) Sample sizes by cell.** All local-roster cells are *N* = 200 per arm (qwen3.5 family, Gemma 4 family including the 26 B MoE, Nemotron Nano 4 B, Ministral 14 B); the cloud frontier model (GLM 4.5) is *N* = 600 per arm so that think × nothink × HTTP/MCP/A2A is well powered. The playbook effect is significant in paired exact tests with Holm correction in every functioning-roster HTTP cell at failure rates of 5 % and above (§4.1, Table 5); several secondary comparisons, such as the distillation pair at individual rates (§4.6) or GLM 4.5 vs qwen3.5 4 B, are within sampling noise and are reported as such. The released CSVs include the `seed` column for exact replication of the fault schedule.
 
 **(iv) One playbook per protocol.** We did not sweep playbook variants. The HTTP playbook is 69 words; we have not measured how much of the gap is attributable to the playbook *content* versus the act of giving the model *any* recovery instruction. A control arm with a deliberately bad playbook would tell us. We anticipated negative results would have to be reported here; positive—i.e. the content matters—would be a stronger contribution.
 
@@ -695,7 +707,7 @@ The experimental campaign behind this paper is closed: ten local-roster cells ar
 2. **A "schema-only" control arm** to disentangle structural rescue from chaos rescue at the small-model end (qwen3.5 2 B and below). Same model, same task, same prompt skeleton, plus an explicit JSON schema. Closes the §5.3 caveat numerically.
 3. **A "bad playbook" control arm** to measure how much of the gap is content-driven. The hypothesis is that a deliberately misleading playbook should hurt and a content-free recovery template should help less than the real one. If neither holds, the contribution narrative shifts toward "any recovery scaffolding works".
 4. **More reasoning-toggle pairs.** GLM 4.5 is a single data point. Running Nemotron 3 Nano 4 B with its reasoning toggle off, and adding further think/nothink pairs, would let us replicate Fig 4 across families and separate reasoning from architecture in the ~4 B class.
-5. **A targeted distillation ablation.** The community-distilled qwen3.5 9 B is uniformly above the original on `nopb` across every chaos rate in our sweep (§4.6), but the distilled variant emits zero `reasoning_tokens` per turn, so we cannot attribute the gain to inherited deliberation. A controlled pair with matched compute budgets and matched system-prompt shapes would identify the mechanism. Extending the small-model cells (0.8 B / 2 B) to MCP and A2A would also test whether the structural-rescue artefact (§5.3) is protocol-specific.
+5. **A targeted distillation ablation.** The community-distilled qwen3.5 9 B scores above the original on `nopb` at every chaos rate in our sweep, significantly only at 30 % (§4.6), but the distilled variant emits zero `reasoning_tokens` per turn, so we cannot attribute the gain to inherited deliberation. A controlled pair with matched compute budgets and matched system-prompt shapes would identify the mechanism. Extending the small-model cells (0.8 B / 2 B) to MCP and A2A would also test whether the structural-rescue artefact (§5.3) is protocol-specific.
 6. **Burst-mode chaos.** Add a Poisson-burst fault scheduler to the rig and re-sweep the active roster at a single chaos rate. Hypothesis: the playbook helps more under burstiness because it makes recovery deterministic rather than emergent.
 7. **A paired hardware-cost analysis** (joules per run, GPU-seconds per run) to complement the token/wall-time accounting in §4.7.
 8. **Public dashboard.** All paper figures should be served live from the released CSVs so a reader can reslice the data interactively. This is a project-side deliverable rather than a paper one.
