@@ -108,7 +108,7 @@ pytest tests/        # 230 tests
 
 ## License
 
-[Apache-2.0](LICENSE.md). Copyright 2026 Alberto Martínez Zurita.
+[Apache-2.0](LICENSE.md). Copyright 2025–2026 Alberto Martínez Zurita and Alessandro Russo. Parts of the code derive from the [Chaos Playbook Engine](https://github.com/alberto-martinez-zurita/chaos-playbook-engine) (CC BY-SA 4.0) and are relicensed here by their authors; see [LICENSE.md](LICENSE.md).
 
 ## Citation
 
