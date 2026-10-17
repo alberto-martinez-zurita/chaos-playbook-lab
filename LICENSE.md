@@ -1,6 +1,6 @@
 # Apache License, Version 2.0
 
-Copyright 2025–2026 Alberto Martínez Zurita and Alessandro Russo
+Copyright 2025–2026 Alberto Martínez Zurita
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
@@ -24,9 +24,9 @@ and assets) are derived from the **Chaos Playbook Engine**
 (<https://github.com/alberto-martinez-zurita/chaos-playbook-engine>), which is published
 under the Creative Commons Attribution-ShareAlike 4.0 International license (CC BY-SA 4.0).
 
-The copyright holders of that code, Alberto Martínez Zurita and Alessandro Russo, license
-the parts derived from it in this repository under the Apache License, Version 2.0, as
-stated above. The Chaos Playbook Engine itself remains available under CC BY-SA 4.0.
+Its author, Alberto Martínez Zurita, licenses the parts derived from it in this repository
+under the Apache License, Version 2.0, as stated above. The Chaos Playbook Engine itself
+remains available under CC BY-SA 4.0.
 
 ## Why Apache-2.0 for this artifact
 
