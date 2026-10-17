@@ -170,7 +170,100 @@ chk('§6.4', 'functioning nopb@30 range 14.5–57.5 %', '14.5-57.5', f'{min(n30)
 chk('§6.4', 'functioning pb@30 range 56–97 %', '56-97', f'{round(p30[0])}-{round(p30[-1])}')
 chk('§6.4', 'functioning pb@30 without the smallest model 86–97 %', '86-97', f'{math.floor(p30[1])}-{round(p30[-1])}')
 mid = [sr(*HTTP[k], .3, 'pb') for k in ['qwen3.5 4 B', 'Gemma 4 E4B', 'Nemotron Nano 4 B', 'Gemma 4 26 B (MoE)', 'qwen3.5 9 B', 'qwen3.5 9 B (distilled)', 'Ministral 14 B']]
-chk('§5.6', 'mid-range pb@30 between 86 and 96 %', True, 86 <= min(mid) and max(mid) <= 96)
+chk('§5.6', 'qwen3.5 4 B … Gemma 4 26 B pb@30 range 86.5–95.5 %', '86.5-95.5', f'{min(mid)}-{max(mid)}')
+
+# ---------- row-level checks (v1.1 external review) ----------
+def rows_of(m, v, r):
+    f = glob.glob(os.path.join(args.root, m, '*', v, f'rate_{r:.2f}.csv'))[0]
+    with open(f, encoding='utf-8') as fh: return list(csv.DictReader(fh))
+def arm_rows(rs, a): return [x for x in rs if ('-nopb' in x['agent_type']) == (a == 'nopb')]
+def pct(xs): return round(100 * sum(x['outcome'] == 'success' for x in xs) / len(xs), 1)
+def mcnemar_p(b, c):
+    n, k = b + c, min(b, c)
+    return min(1.0, 2 * sum(math.comb(n, i) for i in range(k + 1)) / 2 ** n) if n else 1.0
+
+# §4.6: distilled − vanilla nopb gap individually significant (normal-approximation CI excludes 0) only at 10 % and 30 %
+sig = [r for r in RATES if abs(sr('qwen35_9b_distilled', 'http', r, 'nopb') - sr('qwen35_9b', 'http', r, 'nopb')) >
+       diff_ci(C('qwen35_9b', 'http', r, 'nopb'), C('qwen35_9b_distilled', 'http', r, 'nopb'))]
+chk('§4.6', 'distillation nopb gap individually significant only at 10 % and 30 %', [.1, .3], sig)
+
+# §4.4: GLM 4.5 pb@30 think vs nothink, and non-overlapping Wilson CIs on HTTP
+for v, t_think, t_nothink in [('http', 97.0, 91.3), ('a2a', 99.5, 98.8)]:
+    chk('§4.4', f'GLM {v} pb@30 think / nothink', (t_think, t_nothink),
+        (round(sr('glm45', f'{v}_think', .3, 'pb'), 1), round(sr('glm45', f'{v}_nothink', .3, 'pb'), 1)))
+a_, b_ = C('glm45', 'http_think', .3, 'pb'), C('glm45', 'http_nothink', .3, 'pb')
+chk('§4.4', 'GLM HTTP pb@30 think vs nothink outside Wilson 95 % CIs', True,
+    100 * a_['s'] / a_['n'] - wilson_hw(a_) > 100 * b_['s'] / b_['n'] + wilson_hw(b_))
+
+# §3.7: GLM 4.5 nothink HTTP paired picture
+glm_nt = []
+for r in RATES[1:]:
+    rs = rows_of('glm45', 'http_nothink', r)
+    N = {x['seed']: x['outcome'] == 'success' for x in arm_rows(rs, 'nopb')}; P = {x['seed']: x['outcome'] == 'success' for x in arm_rows(rs, 'pb')}
+    ks = N.keys() & P.keys(); glm_nt.append((r, sum(P[k] and not N[k] for k in ks), sum(N[k] and not P[k] for k in ks)))
+chk('§3.7', 'GLM nothink HTTP: no run succeeds only without the playbook', 0, sum(c for _, _, c in glm_nt), 0)
+chk('§3.7', 'GLM nothink HTTP: every cell from 2 % significant under Bonferroni ×81', True,
+    all(81 * mcnemar_p(b, c) < .05 for r, b, c in glm_nt if r >= .02))
+
+# §5.5 (vii): seed batches
+def by_base(m, v, r, a):
+    g = {}
+    for x in arm_rows(rows_of(m, v, r), a): g.setdefault((int(x['seed']) - 2026) // 1000 * 1000 + 2026, []).append(x)
+    return g
+g = by_base('glm45', 'a2a_think', .3, 'nopb')
+chk('§5.5 vii', 'A2A think nopb@30 by seed base (SR, N)', ((61.0, 100), (49.6, 500)), ((pct(g[2026]), len(g[2026])), (pct(g[5026]), len(g[5026]))))
+p1, p2 = pct(g[2026]) / 100, pct(g[5026]) / 100
+z = (p1 - p2) / math.sqrt(p1 * (1 - p1) / len(g[2026]) + p2 * (1 - p2) / len(g[5026]))
+chk('§5.5 vii', 'that difference in binomial SEs ≈ 2.1', 2.1, round(z, 1), 0.051)
+chk('§5.5 vii', 'two-sided p ≈ 0.03', 0.03, round(math.erfc(z / math.sqrt(2)), 2), 0.006)
+g = by_base('glm45', 'a2a_nothink', .3, 'nopb')
+chk('§5.5 vii', 'A2A nothink nopb@30: 65 % (base 2026, N = 100) and 65 % (base 3026, N = 500)', ((65, 100), (65, 500)),
+    ((round(pct(g[2026])), len(g[2026])), (round(pct(g[3026])), len(g[3026]))))
+g = by_base('glm45', 'mcp_think', .1, 'nopb')
+chk('§5.5 vii', 'MCP think nopb@10 across three bases: 72, 74, 71 %', [72, 74, 71], [round(pct(g[b])) for b in sorted(g)])
+
+# §5.5 (xii): turn-budget exhaustion in the cross-protocol cells at 30 %
+XP = [('ministral_14b', ['http_think', 'mcp_think', 'a2a_think']), ('gemma4_26b', ['http', 'mcp', 'a2a']),
+      ('glm45', ['http_think', 'mcp_think', 'a2a_think', 'http_nothink', 'mcp_nothink', 'a2a_nothink'])]
+exh = {}
+for m, vs in XP:
+    for v in vs:
+        bud = 15 if v.startswith('http') else 12; rs = rows_of(m, v, .3)
+        for a in ('nopb', 'pb'):
+            A = arm_rows(rs, a)
+            exh[(m, v, a)] = round(100 * sum(x['outcome'] != 'success' and int(x['llm_calls']) >= bud for x in A) / len(A), 1)
+nz = {k: x for k, x in exh.items() if k[2] == 'nopb' and x > 0}
+chk('§5.5 xii', 'nopb budget exhaustion: only GLM A2A nothink, 0.7 %', {('glm45', 'a2a_nothink', 'nopb'): 0.7}, nz)
+chk('§5.5 xii', 'pb budget exhaustion MCP/A2A at most 1.2 %', 1.2, max(x for k, x in exh.items() if k[2] == 'pb' and not k[1].startswith('http')), 0.05)
+hp = [x for k, x in exh.items() if k[2] == 'pb' and k[1].startswith('http')]
+chk('§5.5 xii', 'pb budget exhaustion HTTP 2.0–8.7 %', '2.0-8.7', f'{min(hp)}-{max(hp)}')
+
+# §5.5 (xii): runs with at least one call blocked by the HTTP circuit breaker (from the traces)
+CB = [HTTP[k] for k in FUNC] + [('glm45', 'http_nothink')]
+blocked = {}
+for m, v in CB:
+    ids = set()
+    with open(glob.glob(os.path.join(args.root, m, '*', v, 'trace.jsonl'))[0], encoding='utf-8') as fh:
+        for line in fh:
+            if 'Circuit Breaker Open' in line:
+                mm = re.search(r'"experiment_id":\s*"([^"]+)"', line)
+                if mm: ids.add(mm.group(1))
+    blocked[(m, v)] = ids
+for r, tn, tp in [(.1, 0.0, 0.1), (.2, 0.5, 3.5), (.3, 1.4, 8.9)]:
+    tot = {'nopb': [0, 0, 0], 'pb': [0, 0, 0]}
+    for m, v in CB:
+        rs = rows_of(m, v, r)
+        for a in ('nopb', 'pb'):
+            A = arm_rows(rs, a); B = [x for x in A if x['experiment_id'] in blocked[(m, v)]]
+            tot[a][0] += len(A); tot[a][1] += len(B); tot[a][2] += sum(x['outcome'] == 'success' for x in B)
+    chk('§5.5 xii', f'runs with a blocked call @{r} (nopb, pb) %', (tn, tp),
+        (round(100 * tot['nopb'][1] / tot['nopb'][0], 1), round(100 * tot['pb'][1] / tot['pb'][0], 1)))
+    if r >= .2:
+        chk('§5.5 xii', f'pb success of blocked runs @{r} within 34–40 %', True, 34 <= round(100 * tot['pb'][2] / tot['pb'][1]) <= 40)
+
+# §4.7: GLM 4.5 nothink wall time −7 %
+a_, b_ = C('glm45', 'http_nothink', .1, 'nopb'), C('glm45', 'http_nothink', .1, 'pb')
+chk('§1.3 / §4.7', 'GLM nothink wall time change @10 (%)', -7, round(100 * ((b_['dur'] / b_['n']) / (a_['dur'] / a_['n']) - 1)), 0)
 
 
 # ---------- §5.5 (xi): retry-propensity reading ----------
