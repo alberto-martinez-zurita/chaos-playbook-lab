@@ -19,8 +19,8 @@ Per-model model identifier, runtime, protocols swept, and sample size. Quantisat
 
 ¹ Full LM Studio identifier: `flipradio_qwen_3.5_9b_deepseek_v4_flash_distillation` (community distillation of qwen3.5 9 B with DeepSeek-V4-Flash as teacher; abbreviated in the table for readability).
 
-**Sampling parameters (all cells)**: `temperature = 0.2`; `seed = 2026` (recorded per row).
+**Sampling parameters (all cells)**: `temperature = 0.2`; per-run seed 2026 + 1000·*k* + *j* (§3.2), used by the chaos proxy and passed to the model API as its sampling seed; recorded per row.
 
 **Local hardware**: LM Studio served from a Windows 11 / Intel Core i5-12400F (12 threads) / 128 GB RAM / NVIDIA RTX 3060 (~4 GB visible VRAM) workstation. Wall-time numbers in §4.7 should be read as comparisons within this study, not as absolute deployment estimates.
 
-**Cloud cell (GLM 4.5)**: served via z.ai API, `glm-4.5` endpoint, same `temperature = 0.2` and `seed = 2026` parameters. Reasoning toggled via the API's `thinking_mode` parameter.
+**Cloud cell (GLM 4.5)**: served via z.ai API, `glm-4.5` endpoint, same `temperature = 0.2` and per-run seed. Reasoning toggled via the API's `thinking_mode` parameter.

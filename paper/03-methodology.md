@@ -27,13 +27,13 @@ A small chaos proxy sits between the agent and the tool endpoints. Each tool cal
 
 The released engine defines a broader catalog—six MCP-typed and six A2A-typed faults (including permanent classes such as `tool_not_found`, `invalid_params`, `context_overflow`, `agent_not_found` and `authentication_error`) plus a payload-corruption library (drop a required field, swap a field's type, truncate the payload, return an empty body)—but this campaign deliberately injects only the transient subset above. Permanent faults would contaminate the A/B comparison with unrecoverable cells, and silently corrupted payloads test detection rather than recovery; we flag silent-corruption chaos as future work (§6.2).
 
-The proxy's random number generator is seeded per run with seed = 2026 + 1000·*k* + *j*, where *j* is the run index and *k* the position of the failure rate in the list of rates of a given launch of the runner. Both arms of a pair are launched together, so they share the seed and start from the same fault schedule; the seed is recorded in every CSV row. Most cells were launched one rate at a time (*k* = 0, seeds 2026 + *j*); some GLM 4.5 and Gemma 4 26 B MCP/A2A runs were collected in launches covering several rates, which gave them seed offsets of 1000·*k* (3026 + *j*, 5026 + *j*, …), and in a few of those cells the two arms were not launched together, so they are not paired run by run for every index. The paired tests of §3.7 therefore use only the HTTP cells, which are fully paired, and §5.5 (vii) uses the different offsets as a seed-robustness check. For a given seed, failure rate and sequence of tool calls, the fault sequence is reproducible. Two caveats apply. First, the *model's* output is not deterministic (sampling at temperature 0.2, §3.8, and runtime-dependent numerics), so re-running a cell on another machine reproduces the fault schedule but not necessarily every trajectory. Second, a retry is a new tool call that consumes a new random draw, so once the two arms take different actions their fault sequences diverge (§3.8). The three rigs are emulated in-process: no network transport and no official protocol SDK is involved. Three protocol-specific implementations of the rig exist:
+The proxy's random number generator is seeded per run with seed = 2026 + 1000·*k* + *j*, where *j* is the run index and *k* the position of the failure rate in the list of rates of a given launch of the runner. Both arms of a pair are launched together, so they share the seed and start from the same fault schedule; the seed is recorded in every CSV row and the same per-run seed is passed to the model API as its sampling seed. Most cells were launched one rate at a time (*k* = 0, seeds 2026 + *j*); some GLM 4.5 and Gemma 4 26 B MCP/A2A runs were collected in launches covering several rates, which gave them seed offsets of 1000·*k* (3026 + *j*, 5026 + *j*, …), and in a few of those cells the two arms were not launched together, so they are not paired run by run for every index. The paired tests of §3.7 therefore use only the HTTP cells, which are fully paired, and §5.5 (vii) uses the different offsets as a seed-robustness check. For a given seed, failure rate and sequence of tool calls, the fault sequence is reproducible. Two caveats apply. First, the *model's* output is not deterministic (sampling at temperature 0.2, §3.8, and runtime-dependent numerics), so re-running a cell on another machine reproduces the fault schedule but not necessarily every trajectory. Second, a retry is a new tool call that consumes a new random draw, so once the two arms take different actions their fault sequences diverge (§3.8). The three rigs are emulated in-process: no network transport and no official protocol SDK is involved. Three protocol-specific implementations of the rig exist:
 
 - **HTTP**: REST-style calls (method, endpoint, parameters) answered by a mock Petstore inside the proxy, with HTTP status codes. In the HTTP rig the proxy is additionally wrapped by a **circuit breaker** that opens after three consecutive failed calls and, for the next 30 seconds of wall-clock time, answers every call with `503 Circuit Breaker Open`, then lets one probe call through; its state is reset at the start of each run. It is not present in the MCP and A2A rigs (see §5.5 xii).
 - **MCP** (Model Context Protocol [31]): an emulated MCP tool interface—a tool catalogue with JSON input schemas and MCP-style results—with faults returned as the MCP-typed errors above.
 - **A2A** (Agent-to-Agent [32]): each step is phrased as a task delegated to an emulated remote agent, with A2A-style task messages, and faults are returned as the A2A-typed errors above.
 
-All three rigs share the same injection mechanism—a seeded Bernoulli draw per tool call—the same seed schedule, and the same transient-and-explicit fault design, so cross-protocol comparisons (Fig 5) compare like with like: in every rig the agent faces a visible, retryable error at the same schedule points. The fault *vocabularies* are intrinsic to each rig (you cannot inject a 504 timeout in A2A or a `task_rejected` in HTTP) and are documented as part of each rig's catalog rather than equated across protocols.
+All three rigs share the same injection mechanism—a seeded Bernoulli draw per tool call—the same seed schedule, and the same transient-and-explicit fault design, so cross-protocol comparisons (Fig 5) share the fault mechanism: in every rig the agent faces a visible, retryable error at the same schedule points. The rigs still differ in error vocabulary, in the HTTP-only circuit breaker and in the turn budget (§5.5 xii). The fault *vocabularies* are intrinsic to each rig (you cannot inject a 504 timeout in A2A or a `task_rejected` in HTTP) and are documented as part of each rig's catalog rather than equated across protocols.
 
 **Playbook–rig coverage note.** The HTTP playbook in §3.3 lists exactly the six status codes the HTTP rig can inject—408, 429, 500, 502, 503, 504—each present in the rig's fault catalog (`assets/knowledge_base/http_error_codes.json` in the released code). The MCP and A2A playbooks likewise cover exactly the typed faults their rigs inject (§3.2). Rig and playbook are therefore fully aligned on the recoverable fault set; no abort-only ("400/401/403"-style) rules appear in either, by design—the experiments inject only recoverable faults so that A/B differences attributable to the playbook reflect *recovery behaviour*, not *fail-fast routing*. See threats to validity (§5.5 iv) for the implication of having a single playbook content.
 
@@ -56,6 +56,28 @@ Only abort after exhausting all retries for a given step.
 
 The playbook lists exactly the status codes the rig can inject (cf. §3.2: 408, 429, 500, 502, 503, 504) and does *not* invent recovery semantics beyond what HTTP status conventions already imply. It is a forcing function: it asks the model to recognise standard signals and respond in a standard way.
 
+The MCP and A2A playbooks (`assets/prompts/mcp_playbook_guidance.txt` and `assets/prompts/a2a_playbook_guidance.txt`) read:
+
+```
+Recovery playbook — when a tool call fails, apply these strategies:
+  - timeout → retry same tool call with linear backoff (max 3 retries, 2s delay)
+  - rate_limited → wait 5s then retry (max 3 retries)
+  - internal_error → retry with exponential backoff (max 3, 1s base)
+All errors are transient — always retry before giving up.
+Always retry the exact same tool call that failed.
+Only abort after exhausting all retries for a given step.
+```
+
+```
+Recovery playbook — when a task delegation fails, apply these strategies:
+  - timeout → retry with linear backoff (max 3 retries, 2s delay)
+  - task_rejected → retry with exponential backoff (max 3, 1s base)
+  - partial_failure → retry with linear backoff (max 3, 2s delay)
+All errors are transient — always retry before giving up.
+Always retry the exact same task delegation that failed.
+Only abort after exhausting all retries for a given step.
+```
+
 ## 3.4 Failure-rate sweep
 
 We call a *sweep* the series of experiments that runs one `(model, protocol[, thinking])` configuration at each of ten failure rates:
@@ -64,7 +86,7 @@ We call a *sweep* the series of experiments that runs one `(model, protocol[, th
 0.00, 0.01, 0.02, 0.03, 0.05, 0.10, 0.15, 0.20, 0.25, 0.30
 ```
 
-At each rate we run *N* paired runs per arm (the same task instances, the same seed per run index). All local-roster cells are *N* = 200 (ten models: the five qwen3.5 models, Gemma 4 E2B and E4B, Nemotron 3 Nano 4 B, Ministral 14 B across HTTP/MCP/A2A and Gemma 4 26 B across HTTP/MCP/A2A); the cloud frontier model (GLM 4.5) is *N* = 600 per arm, three times the local *N*, so that its six think/nothink × protocol cells are well powered. Total sample: **128,000 active runs**. Per-cell counts:
+At each rate we run *N* paired runs per arm (the same task instance, the same seed per run index). All local-roster cells are *N* = 200 (ten models: the five qwen3.5 models, Gemma 4 E2B and E4B, Nemotron 3 Nano 4 B, Ministral 14 B across HTTP/MCP/A2A and Gemma 4 26 B across HTTP/MCP/A2A); the cloud frontier model (GLM 4.5) is *N* = 600 per arm, three times the local *N*, so that its six think/nothink × protocol cells are well powered. Total sample: **128,000 active runs**. Per-cell counts:
 
 <!-- include: tables/table_runs_summary.md -->
 
@@ -113,7 +135,7 @@ We report:
 
 - **Success rate (SR)**: fraction of runs that complete the four steps in order with non-error responses (the oracle of §3.1). CIs are Wilson 95 % [35].
 - **Δ (pb − nopb)**: difference in success rate, in percentage points, between the two arms at a fixed rate. Reported CIs on Δ use the normal approximation for the difference of two proportions (`diff_ci_95` in `scripts/audit_paper_v2.py`); this treats the arms as independent and is therefore conservative for our paired design, and it can be inaccurate near 0 % or 100 %, where score-based intervals are preferable [36].
-- **Paired significance**: because run *i* uses the same seed and task instance in both arms, each cell yields 200 (or 600) matched pairs. We test Δ ≠ 0 with the exact McNemar test on the discordant pairs (runs that succeed in only one arm) and control the family-wise error rate with the Holm procedure over the 81 functioning-roster HTTP cells with *p* > 0 (`scripts/paired_analysis.py`).
+- **Paired significance**: because run *i* uses the same seed and task instance in both arms, each cell yields 200 (or 600) matched pairs. We test Δ ≠ 0 with the exact McNemar test on the discordant pairs (runs that succeed in only one arm) and control the family-wise error rate with the Holm procedure over the 81 functioning-roster HTTP cells with *p* > 0 (`scripts/paired_analysis.py`). GLM 4.5 enters this family in think mode; its nothink HTTP cells give the same picture (no run succeeds only without the playbook, and every cell from 2 % upwards is significant even under a Bonferroni bound over 81 tests).
 - **Tokens / run**: prompt + completion tokens per run, mean. The playbook prompt itself is amortised across the run, so the per-run number captures both the larger system prompt and any extra retry turns.
 - **Wall time / run**: end-to-end seconds per run, mean. Includes any retry latency the playbook introduces.
 - **LLM calls / run**: number of model invocations per run, mean. Useful as a proxy for retry behaviour.
@@ -127,7 +149,7 @@ To make the cross-model comparison clean:
 
 - Same seed per run index in both arms (seed 2026 + 1000·*k* + *j*, §3.2), hence the same initial fault schedule.
 - Same per-request sampling parameters (temperature 0.2). Decoding is therefore not deterministic: a retried call can return a different model action, and the retried tool call draws a new fault decision.
-- Same task instances (identical product / inventory queries across arms).
+- Same task instance: every run of every cell uses one fixed task (product `SKU-1234`), so run-to-run variation comes only from the fault schedule and from model sampling; variance across task instances is not measured.
 - Same prompt skeleton and identical playbook text per protocol; only the playbook ON/OFF flag differs between arms.
 - Same trace plumbing—every run emits an identical schema row.
 

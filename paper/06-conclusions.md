@@ -10,7 +10,7 @@ Three findings stand:
 2. **The benefit depends on capability and on the chaos rate.** A 0.8 B model is at the capacity floor; at 30 % chaos the mid-range models gain the most and the frontier model gains less, as its unguided baseline approaches the playbook's ceiling; at 10 % chaos the gain is not monotonic in size. This pattern is observed, not formally tested.
 3. **The cost is bounded and predictable**: about +42 % tokens on average and less than one extra LLM call per run (≈ +0.57), with model-dependent wall time (−20 % to +43 %). There is no model in the roster where the playbook lowers the success rate under the transient faults we inject.
 
-We also documented two qwen caveats (a capacity floor at qwen3.5 0.8 B and a structural-rescue artefact at qwen3.5 2 B) and showed that the playbook generalises across HTTP / MCP / A2A.
+We also documented two qwen caveats (a capacity floor at qwen3.5 0.8 B and a structural-rescue artefact at qwen3.5 2 B) and showed that the playbook generalises across HTTP / MCP / A2A on the three models with full coverage, except MCP under reasoning.
 
 ## 6.2 What we did not show
 
