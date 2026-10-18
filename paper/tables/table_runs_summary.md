@@ -65,7 +65,7 @@ _Models marked with `*` are excluded from main comparative figures (Table 3)._
 |---|---:|---:|
 | moe | 84,800 | 65.8% |
 | dense | 32,000 | 24.8% |
-| matformer | 8,000 | 6.2% |
+| ple | 8,000 | 6.2% |
 | hybrid_mamba2_transformer | 4,000 | 3.1% |
 | **Total** | **128,800** | 100.0% |
 

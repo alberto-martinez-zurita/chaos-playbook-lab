@@ -3,13 +3,13 @@
 *"Mapping LLM-agent reliability under chaos: a cross-architecture study of structured recovery playbooks"*
 Alberto Martínez Zurita · Alessandro Russo — Chaos Playbook Lab, Working Paper 1.
 
-**Status: campaign closed, v1.0 released (2 July 2026).** First version 19 May 2026. Target venue: ISSRE 2027.
+**Status: campaign closed. v1.1 (October 2026): text revision after internal review—claims re-checked against the CSVs (`scripts/check_paper_numbers.py`), paired McNemar/Holm analysis added (`scripts/paired_analysis.py`, Table 5), architecture labels of Gemma 4 E2B/E4B and Qwen3.5 corrected, references re-verified. No run or data changed.** v1.0: 2 July 2026; first version 19 May 2026. Target venue: ISSRE 2027.
 
 ## Read it
 
 | Artifact | File |
 |---|---|
-| PDF (33 pp.) | [`mapping-llm-agent-reliability-under-chaos.pdf`](mapping-llm-agent-reliability-under-chaos.pdf) |
+| PDF (36 pp.) | [`mapping-llm-agent-reliability-under-chaos.pdf`](mapping-llm-agent-reliability-under-chaos.pdf) |
 | Self-contained HTML | [`mapping-llm-agent-reliability-under-chaos.html`](mapping-llm-agent-reliability-under-chaos.html) |
 | Combined Markdown (build intermediate) | [`paper.combined.md`](paper.combined.md) |
 
@@ -24,7 +24,7 @@ Alberto Martínez Zurita · Alessandro Russo — Chaos Playbook Lab, Working Pap
 | 4 | [04-results.md](04-results.md) |
 | 5 | [05-discussion.md](05-discussion.md) |
 | 6 | [06-conclusions.md](06-conclusions.md) (incl. Acknowledgements) |
-| 7 | [07-references.md](07-references.md) (44 entries) |
+| 7 | [07-references.md](07-references.md) (46 entries) |
 
 ## Final sample sizes
 
@@ -48,14 +48,14 @@ All figures live in [`figures/`](figures/) as paired SVG + PNG, regenerated from
 
 | ID | File | What it shows |
 |---|---|---|
-| 2 | `fig2_hare_tortoise` | Per-model SR (pb vs nopb) vs mean run duration at chaos = 20 %; arrows are the playbook lift. |
-| 3 | `fig3_hump` | Δ(pb − nopb) vs active parameters at chaos = 10 % **and** 30 % (two panels). The hump: 4 B–14 B benefits most, 0.8 B is a capacity floor, the frontier saturates. |
-| 4 | `fig4_cross_model` | 2×2 grid by capability bucket (Sub-2B / 4B / 9–26B / Frontier). Each panel: SR vs chaos rate, both arms. |
-| 5 | `fig5_thinking` | GLM 4.5 think vs nothink across HTTP / MCP / A2A. |
-| 6 | `fig6_cross_protocol` | The three multi-protocol models (Ministral 14 B, Gemma 4 26 B, GLM 4.5) across HTTP / MCP / A2A. |
-| 7 | `fig7_cost_of_playbook` | Operational cost at chaos = 10 %: tokens, wall time and LLM calls per run, nopb vs pb. |
-| 8 | `fig8_distillation` | qwen3.5 9 B vanilla vs community-distilled under identical HTTP sweeps. |
-| 9 | `fig9_heatmap` | Δ(pb − nopb) heatmap across (model × chaos rate), full HTTP sweep. |
+| 1 | `fig2_hare_tortoise` | Per-model SR (pb vs nopb) vs mean run duration at chaos = 20 %; arrows are the playbook lift. |
+| 2 | `fig3_hump` | Δ(pb − nopb) vs active parameters at chaos = 10 % **and** 30 % (two panels). At 30 % the mid-range gains most and the frontier less; at 10 % the gain is not monotonic in size. |
+| 3 | `fig4_cross_model` | 2×2 grid by capability bucket (Sub-2B / 4B / 9–26B / Frontier). Each panel: SR vs chaos rate, both arms. |
+| 4 | `fig5_thinking` | GLM 4.5 think vs nothink across HTTP / MCP / A2A. |
+| 5 | `fig6_cross_protocol` | The three multi-protocol models (Ministral 14 B, Gemma 4 26 B, GLM 4.5) across HTTP / MCP / A2A. |
+| 6 | `fig7_cost_of_playbook` | Operational cost at chaos = 10 %: tokens, wall time and LLM calls per run, nopb vs pb. |
+| 7 | `fig8_distillation` | qwen3.5 9 B vanilla vs community-distilled under identical HTTP sweeps. |
+| 8 | `fig9_heatmap` | Δ(pb − nopb) heatmap across (model × chaos rate), full HTTP sweep. |
 
 ## Tables
 
@@ -85,7 +85,9 @@ Each row is one run with: `experiment_id`, `agent_type`, `outcome`, `duration_ms
 ```bash
 python scripts/generate_paper_figures.py                  # all figures + generated tables
 python scripts/generate_paper_figures.py --figure 6,7     # subset
-python scripts/audit_paper.py                             # verify headline stats vs prose
+python scripts/check_paper_numbers.py                     # check every number quoted in the text (v1.1)
+python scripts/paired_analysis.py                         # paired McNemar + Holm (Table 5)
+python scripts/audit_paper.py                             # historical (v1.0) spot-checks
 python scripts/audit_paper_v2.py
 python scripts/build_paper_pdf.py                         # combined.md -> HTML -> PDF (needs pandoc + Chrome)
 ```

@@ -4,8 +4,8 @@
 |---|---|---|---|---|---|---|
 | qwen35_0_8b | dense | 0.8B | 0.8B | False | alibaba | local |
 | qwen35_2b | dense | 2B | 2B | False | alibaba | local |
-| gemma4_e2b | matformer | 5.4B | ~2B | False | google | local |
-| gemma4_e4b | matformer | 7.5B | ~4B | False | google | local |
+| gemma4_e2b | ple | 5B | ~2.3B | False | google | local |
+| gemma4_e4b | ple | 8B | ~4.5B | False | google | local |
 | qwen35_4b | dense | 4B | 4B | False | alibaba | local |
 | nemotron_nano_4b | hybrid_mamba2_transformer | 4B | 4B | True | nvidia | local |
 | qwen35_9b | dense | 9B | 9B | False | alibaba | local |
