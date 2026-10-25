@@ -12,13 +12,13 @@ pagetitle: "Mapping LLM-agent reliability under chaos: a cross-architecture stud
 
 <hr />
 
-<div class="sidestamp">Chaos Playbook Lab &middot; Working Paper 1 &middot; v1.1 &middot; October 2026</div>
+<div class="sidestamp">Chaos Playbook Lab &middot; Working Paper 1 &middot; October 2026</div>
 
 <p class="author">Alberto Martínez Zurita &middot; Alessandro Russo</p>
 
 <p class="affil">Chaos Playbook Lab</p>
 
-<p class="date">First version: 19 May 2026 &nbsp;·&nbsp; This version: October 2026 (v1.1)</p>
+<p class="date">October 2026</p>
 
 <p class="availability">Code, dataset and figures: <a href="https://github.com/alberto-martinez-zurita/chaos-playbook-lab">github.com/alberto-martinez-zurita/chaos-playbook-lab</a></p>
 
