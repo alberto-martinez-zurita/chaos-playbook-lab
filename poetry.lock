@@ -13,6 +13,23 @@ files = [
 ]
 
 [[package]]
+name = "adjusttext"
+version = "1.4.0"
+description = "Iteratively adjust text position in matplotlib plots to minimize overlaps"
+optional = false
+python-versions = "*"
+groups = ["main"]
+files = [
+    {file = "adjusttext-1.4.0-py3-none-any.whl", hash = "sha256:6febd6484c0d45c39a22f44b2c1f4a8cd01ef58fada565cab4b629c771df79b5"},
+    {file = "adjusttext-1.4.0.tar.gz", hash = "sha256:1f73860ced8cccce3f85ee6989ca133c2579b67a7453f63dbeb38f39bf123154"},
+]
+
+[package.dependencies]
+matplotlib = "*"
+numpy = "*"
+scipy = "*"
+
+[[package]]
 name = "aiohappyeyeballs"
 version = "2.6.1"
 description = "Happy Eyeballs for asyncio"
@@ -7008,4 +7025,4 @@ gui = ["pyautogui"]
 [metadata]
 lock-version = "2.1"
 python-versions = "^3.11"
-content-hash = "040ca45d1adc9fb2dcb7c24c3a81ef73e2826fb2c48482d9edbd51a78af2cbe2"
+content-hash = "89c93e929fa943570bc2338e7e9f3ea6c479f286918b95d709288ca0994f78d2"
