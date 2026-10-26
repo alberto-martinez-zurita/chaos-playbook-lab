@@ -6,8 +6,6 @@
 
 <hr />
 
-<div class="sidestamp">Chaos Playbook Lab &middot; Working Paper 1 &middot; October 2026</div>
-
 <p class="author">Alberto Martínez Zurita &middot; Alessandro Russo</p>
 
 <p class="affil">Chaos Playbook Lab</p>
