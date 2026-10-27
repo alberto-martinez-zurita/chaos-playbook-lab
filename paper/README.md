@@ -1,7 +1,7 @@
 # The paper
 
 *"Mapping LLM-agent reliability under chaos: a cross-architecture study of structured recovery playbooks"*
-Alberto Martínez Zurita · Alessandro Russo — Chaos Playbook Lab, Working Paper 1.
+Alberto Martínez Zurita · Alessandro Russo — Chaos Playbook Lab, Working Paper 1. DOI: [10.5281/zenodo.23663893](https://doi.org/10.5281/zenodo.23663893) (Zenodo).
 
 **Status: campaign closed. v1.1 (October 2026): text revision after internal review—claims re-checked against the CSVs (`scripts/check_paper_numbers.py`), paired McNemar/Holm analysis added (`scripts/paired_analysis.py`, Table 5), architecture labels of Gemma 4 E2B/E4B and Qwen3.5 corrected, references re-verified. No run or data changed.** v1.0: 2 July 2026; first version 19 May 2026. Target venue: ISSRE 2027.
 
@@ -9,7 +9,7 @@ Alberto Martínez Zurita · Alessandro Russo — Chaos Playbook Lab, Working Pap
 
 | Artifact | File |
 |---|---|
-| PDF (36 pp.) | [`mapping-llm-agent-reliability-under-chaos.pdf`](mapping-llm-agent-reliability-under-chaos.pdf) |
+| PDF (37 pp.) | [`mapping-llm-agent-reliability-under-chaos.pdf`](mapping-llm-agent-reliability-under-chaos.pdf) |
 | Self-contained HTML | [`mapping-llm-agent-reliability-under-chaos.html`](mapping-llm-agent-reliability-under-chaos.html) |
 | Combined Markdown (build intermediate) | [`paper.combined.md`](paper.combined.md) |
 

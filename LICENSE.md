@@ -45,7 +45,7 @@ If you use this artifact, please cite the paper:
 
 > Alberto Martínez Zurita and Alessandro Russo. *Mapping LLM-agent reliability under chaos:
 > a cross-architecture study of structured recovery playbooks.* Chaos Playbook Lab, Working
-> Paper 1, v1.1, October 2026. arXiv identifier to be added on submission.
+> Paper 1, October 2026. Zenodo. https://doi.org/10.5281/zenodo.23663893
 
 The full Apache 2.0 license text is available at:
 https://www.apache.org/licenses/LICENSE-2.0.txt

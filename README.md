@@ -1,6 +1,6 @@
 # Chaos Playbook Lab
 
-> **Reproducibility package** for the paper *"Mapping LLM-agent reliability under chaos: a cross-architecture study of structured recovery playbooks"* (Working Paper 1, 2026). Paper, dataset, chaos rig and every script needed to regenerate every figure and table — in one repository.
+> **Reproducibility package** for the paper *"Mapping LLM-agent reliability under chaos: a cross-architecture study of structured recovery playbooks"* (Working Paper 1, 2026; DOI [10.5281/zenodo.23663893](https://doi.org/10.5281/zenodo.23663893)). Paper, dataset, chaos rig and every script needed to regenerate every figure and table — in one repository.
 >
 > An earlier prototype of this rig — the [Chaos Playbook Engine](https://github.com/alberto-martinez-zurita/chaos-playbook-engine) — won **1st place, Enterprise Agents track**, at the Google × Kaggle *AI Agents Intensive* capstone (December 2025).
 
@@ -19,6 +19,7 @@ We treat **chaos engineering as a scientific instrument**: a deterministic, seed
 | Sections (Markdown sources) | [`paper/00-abstract.md`](paper/00-abstract.md) … [`paper/07-references.md`](paper/07-references.md) |
 | Single-file HTML (self-contained) | `paper/mapping-llm-agent-reliability-under-chaos.html` |
 | PDF | [`paper/mapping-llm-agent-reliability-under-chaos.pdf`](paper/mapping-llm-agent-reliability-under-chaos.pdf) |
+| Archived preprint (DOI) | [10.5281/zenodo.23663893](https://doi.org/10.5281/zenodo.23663893) (Zenodo) |
 | Figures (SVG + PNG) | `paper/figures/` |
 | Tables (generated Markdown) | `paper/tables/` |
 
@@ -120,6 +121,10 @@ pytest tests/        # 230 tests
   year   = {2026},
   type   = {Working Paper},
   number = {1},
-  institution = {Chaos Playbook Lab}
+  month  = oct,
+  institution = {Chaos Playbook Lab},
+  publisher = {Zenodo},
+  doi    = {10.5281/zenodo.23663893},
+  url    = {https://doi.org/10.5281/zenodo.23663893}
 }
 ```

@@ -1,0 +1,30 @@
+cff-version: 1.2.0
+message: "If you use this artifact, please cite the paper."
+title: "Chaos Playbook Lab: reproducibility package"
+authors:
+  - family-names: "Martínez Zurita"
+    given-names: "Alberto"
+    orcid: "https://orcid.org/0009-0002-5834-8838"
+  - family-names: "Russo"
+    given-names: "Alessandro"
+license: Apache-2.0
+repository-code: "https://github.com/alberto-martinez-zurita/chaos-playbook-lab"
+preferred-citation:
+  type: report
+  title: "Mapping LLM-agent reliability under chaos: a cross-architecture study of structured recovery playbooks"
+  authors:
+    - family-names: "Martínez Zurita"
+      given-names: "Alberto"
+      orcid: "https://orcid.org/0009-0002-5834-8838"
+    - family-names: "Russo"
+      given-names: "Alessandro"
+  institution:
+    name: "Chaos Playbook Lab"
+  collection-title: "Chaos Playbook Lab Working Papers"
+  number: "1"
+  year: 2026
+  month: 10
+  publisher:
+    name: "Zenodo"
+  doi: "10.5281/zenodo.23663893"
+  url: "https://doi.org/10.5281/zenodo.23663893"
